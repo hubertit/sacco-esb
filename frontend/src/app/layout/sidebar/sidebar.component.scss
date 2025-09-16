@@ -159,7 +159,7 @@
 
   &.active {
     > .nav-link {
-      background: rgba(white, 0.1);
+      background: rgba(black, 0.2);
     }
   }
 }
@@ -235,12 +235,12 @@
 
     &:hover {
       color: white;
-      background: rgba(white, 0.05);
+      background: rgba(black, 0.15);
     }
 
     &.active {
       color: white;
-      background: rgba(white, 0.05);
+      background: rgba(black, 0.15);
     }
   }
 }
@@ -264,7 +264,7 @@
 
     &:hover {
       color: white;
-      background: rgba(white, 0.1);
+      background: rgba(black, 0.2);
     }
 
     i {
