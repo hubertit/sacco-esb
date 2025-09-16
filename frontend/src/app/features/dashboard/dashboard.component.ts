@@ -170,7 +170,7 @@ export interface ChartOptions {
         </div>
 
         <!-- Transaction Amount Analysis -->
-        <div class="chart-card amount-chart">
+        <div class="chart-card amount-chart amount-chart-quarter">
           <div class="card-header">
             <h3>Transaction Amount Analysis</h3>
             <div class="card-actions">
@@ -456,6 +456,11 @@ export interface ChartOptions {
         padding: 1rem;
         min-height: 280px;
       }
+
+      .amount-chart-quarter {
+        flex: 0 0 25%;
+        max-width: 25%;
+      }
     }
 
     @media (max-width: 768px) {
@@ -554,7 +559,7 @@ export class DashboardComponent implements OnInit {
     plotOptions: {
       pie: {
         donut: {
-          size: '25%',
+          size: '70%',
           labels: {
             show: true,
             total: {
