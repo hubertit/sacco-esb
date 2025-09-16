@@ -1,16 +1,6 @@
-import { Component, Input, Output, EventEmitter, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import 'datatables.net';
-import 'datatables.net-bs5';
-import 'datatables.net-buttons';
-import 'datatables.net-buttons-bs5';
-import 'datatables.net-buttons/js/buttons.html5.js';
-import 'datatables.net-buttons/js/buttons.print.js';
-import 'datatables.net-responsive';
-import 'datatables.net-responsive-bs5';
-
-declare var $: any;
 
 export interface TableColumn {
   key: string;
@@ -26,21 +16,104 @@ export interface TableColumn {
   imports: [CommonModule, FormsModule],
   template: `
     <div class="data-table-wrapper">
-      <table [id]="tableId" class="table table-striped dt-responsive nowrap" style="width:100%">
-        <thead>
-          <tr>
-            <th *ngFor="let col of columns">{{ col.title }}</th>
-            <th *ngIf="showActions" class="no-sort">Actions</th>
-          </tr>
-        </thead>
-      </table>
+      <!-- Table Header Actions -->
+      <div class="data-table-header" *ngIf="showHeader">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div class="d-flex align-items-center gap-2">
+            <div class="search-box" *ngIf="showSearch">
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Search..."
+                [(ngModel)]="searchTerm"
+                (ngModelChange)="onSearch.emit($event)">
+            </div>
+            <ng-content select="[table-actions-left]"></ng-content>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <ng-content select="[table-actions-right]"></ng-content>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Table -->
+      <div class="table-responsive">
+        <table class="table" [class.table-hover]="hover" [class.table-striped]="striped">
+          <thead>
+            <tr>
+              <th *ngFor="let col of columns" 
+                  [class.sortable]="col.sortable"
+                  (click)="col.sortable && sort(col.key)">
+                {{ col.title }}
+                <i *ngIf="col.sortable" class="sort-icon"
+                   [class.asc]="sortColumn === col.key && sortDirection === 'asc'"
+                   [class.desc]="sortColumn === col.key && sortDirection === 'desc'">
+                </i>
+              </th>
+              <th *ngIf="showActions" class="actions-column">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of data">
+              <td *ngFor="let col of columns">
+                <ng-container [ngSwitch]="col.type">
+                  <ng-container *ngSwitchCase="'date'">
+                    {{ item[col.key] | date:'medium' }}
+                  </ng-container>
+                  <ng-container *ngSwitchCase="'boolean'">
+                    <span class="badge" [class.badge-success]="item[col.key]" [class.badge-danger]="!item[col.key]">
+                      {{ item[col.key] ? 'Yes' : 'No' }}
+                    </span>
+                  </ng-container>
+                  <ng-container *ngSwitchCase="'custom'">
+                    <ng-container *ngTemplateOutlet="col.template; context: { $implicit: item }">
+                    </ng-container>
+                  </ng-container>
+                  <ng-container *ngSwitchDefault>
+                    {{ item[col.key] }}
+                  </ng-container>
+                </ng-container>
+              </td>
+              <td *ngIf="showActions" class="actions-column">
+                <ng-content select="[row-actions]" [ngTemplateOutlet]="rowActions" [ngTemplateOutletContext]="{ $implicit: item }">
+                </ng-content>
+              </td>
+            </tr>
+            <tr *ngIf="!data?.length">
+              <td [attr.colspan]="columns.length + (showActions ? 1 : 0)" class="text-center py-4">
+                {{ noDataMessage }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="data-table-footer d-flex justify-content-between align-items-center mt-3" *ngIf="showPagination">
+        <div class="page-size">
+          <select class="form-select" [(ngModel)]="pageSize" (ngModelChange)="onPageSizeChange.emit($event)">
+            <option *ngFor="let size of pageSizes" [value]="size">{{ size }} per page</option>
+          </select>
+        </div>
+        <nav aria-label="Table navigation" *ngIf="totalPages > 1">
+          <ul class="pagination mb-0">
+            <li class="page-item" [class.disabled]="currentPage === 1">
+              <a class="page-link" href="javascript:void(0)" (click)="onPageChange.emit(currentPage - 1)">Previous</a>
+            </li>
+            <li class="page-item" *ngFor="let page of getPages()" [class.active]="page === currentPage">
+              <a class="page-link" href="javascript:void(0)" (click)="onPageChange.emit(page)">{{ page }}</a>
+            </li>
+            <li class="page-item" [class.disabled]="currentPage === totalPages">
+              <a class="page-link" href="javascript:void(0)" (click)="onPageChange.emit(currentPage + 1)">Next</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
     </div>
   `,
   styleUrls: ['./data-table.component.scss']
 })
-export class DataTableComponent implements AfterViewInit, OnDestroy {
-  private dataTable: any;
-  @Input() tableId = 'dataTable';
+export class DataTableComponent {
   @Input() columns: TableColumn[] = [];
   @Input() data: any[] = [];
   @Input() showHeader = true;
@@ -74,65 +147,19 @@ export class DataTableComponent implements AfterViewInit, OnDestroy {
     this.onSort.emit({ column: this.sortColumn, direction: this.sortDirection });
   }
 
-  ngAfterViewInit(): void {
-    this.initializeDataTable();
-  }
+  getPages(): number[] {
+    const pages: number[] = [];
+    const maxPages = 5;
+    let startPage = Math.max(1, this.currentPage - Math.floor(maxPages / 2));
+    let endPage = Math.min(this.totalPages, startPage + maxPages - 1);
 
-  ngOnDestroy(): void {
-    if (this.dataTable) {
-      this.dataTable.destroy();
+    if (endPage - startPage + 1 < maxPages) {
+      startPage = Math.max(1, endPage - maxPages + 1);
     }
-  }
 
-  private initializeDataTable(): void {
-    const tableId = '#' + (this.tableId || 'dataTable');
-    this.dataTable = $(tableId).DataTable({
-      data: this.data,
-      columns: this.columns.map(col => ({
-        data: col.key,
-        title: col.title,
-        orderable: col.sortable,
-        render: (data: any, type: string, row: any) => {
-          if (type === 'display') {
-            switch (col.type) {
-              case 'date':
-                return new Date(data).toLocaleString();
-              case 'boolean':
-                return `<span class="badge ${data ? 'badge-success' : 'badge-danger'}">${data ? 'Yes' : 'No'}</span>`;
-              case 'status':
-                return `<span class="badge ${data === 'active' ? 'badge-success' : 'badge-danger'}">${data}</span>`;
-              default:
-                return data;
-            }
-          }
-          return data;
-        }
-      })),
-      responsive: true,
-      dom: 'Bfrtip',
-      buttons: [
-        'copy', 'csv', 'excel', 'pdf', 'print'
-      ],
-      language: {
-        search: 'Search:',
-        lengthMenu: 'Show _MENU_ entries',
-        info: 'Showing _START_ to _END_ of _TOTAL_ entries',
-        infoEmpty: 'Showing 0 to 0 of 0 entries',
-        infoFiltered: '(filtered from _MAX_ total entries)',
-        paginate: {
-          first: 'First',
-          last: 'Last',
-          next: 'Next',
-          previous: 'Previous'
-        }
-      }
-    });
-
-    // Handle row actions
-    $(tableId).on('click', '[data-action]', (event: any) => {
-      const action = $(event.currentTarget).data('action');
-      const rowData = this.dataTable.row($(event.currentTarget).closest('tr')).data();
-      this.onAction.emit({ action, row: rowData });
-    });
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    return pages;
   }
 }
