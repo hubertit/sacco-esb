@@ -454,7 +454,7 @@ export interface ChartOptions {
 
       .card-body {
         padding: 1rem;
-        min-height: 350px;
+        min-height: 280px;
       }
     }
 
