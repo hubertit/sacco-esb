@@ -18,37 +18,37 @@ export class NavigationService {
     {
       title: 'Dashboard',
       icon: 'grid',
-      path: '/dashboard'
+      path: 'dashboard'
     },
     {
       title: 'Entities',
       icon: 'database',
-      path: '/entities'
+      path: 'entities'
     },
     {
       title: 'Users',
       icon: 'users',
-      path: '/users'
+      path: 'users'
     },
     {
       title: 'Roles',
       icon: 'shield',
-      path: '/roles'
+      path: 'roles'
     },
     {
       title: 'Logs',
       icon: 'file-text',
-      path: '/logs'
+      path: 'logs'
     },
     {
       title: 'Audit',
       icon: 'activity',
-      path: '/audit'
+      path: 'audit'
     },
     {
       title: 'CBSEPR Mapping',
       icon: 'git-merge',
-      path: '/cbsepr-mapping'
+      path: 'cbsepr-mapping'
     }
   ];
 
