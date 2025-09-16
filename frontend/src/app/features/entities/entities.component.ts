@@ -27,17 +27,36 @@ interface Entity {
           <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
               <h4 class="card-title mb-0">Entities</h4>
-              <button class="btn btn-primary btn-sm d-flex align-items-center gap-2" (click)="openAddEntityModal()">
-                <app-feather-icon name="plus" size="14px"></app-feather-icon>
-                Add New Entity
-              </button>
+              <div class="dropdown">
+                <button class="btn btn-primary btn-sm d-flex align-items-center gap-2" type="button" id="addEntityDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                  <app-feather-icon name="plus" size="14px"></app-feather-icon>
+                  Add Entity
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="addEntityDropdown">
+                  <li>
+                    <a class="dropdown-item d-flex align-items-center gap-2" (click)="openAddEntityModal('Financial')">
+                      <app-feather-icon name="briefcase" size="14px"></app-feather-icon>
+                      Add Financial Institution
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item d-flex align-items-center gap-2" (click)="openAddEntityModal('Payment')">
+                      <app-feather-icon name="credit-card" size="14px"></app-feather-icon>
+                      Add Payment Service
+                    </a>
+                  </li>
+                </ul>
+              </div>
             </div>
             <div class="card-body">
               <app-data-table
-                tableId="entitiesTable"
                 [columns]="columns"
                 [data]="entities"
-                (table-action)="handleTableAction($event)"
+                [striped]="true"
+                (onSort)="handleSort($event)"
+                (onSearch)="handleSearch($event)"
+                (onPageChange)="handlePageChange($event)"
+                (onPageSizeChange)="handlePageSizeChange($event)"
               ></app-data-table>
             </div>
           </div>
@@ -132,22 +151,29 @@ export class EntitiesComponent implements OnInit, AfterViewInit {
     // DataTable initialization is handled by the DataTableComponent
   }
 
-  openAddEntityModal() {
+  openAddEntityModal(type: 'Financial' | 'Payment') {
     // TODO: Implement add entity modal
-    console.log('Open add entity modal');
+    console.log('Open add entity modal for type:', type);
   }
 
-  handleTableAction(event: any) {
-    const { action, row } = event.detail;
-    
-    switch (action) {
-      case 'edit':
-        this.editEntity(row);
-        break;
-      case 'delete':
-        this.deleteEntity(row);
-        break;
-    }
+  handleSort(event: { column: string; direction: 'asc' | 'desc' }) {
+    // TODO: Implement sorting
+    console.log('Sort:', event);
+  }
+
+  handleSearch(term: string) {
+    // TODO: Implement search
+    console.log('Search term:', term);
+  }
+
+  handlePageChange(page: number) {
+    // TODO: Implement pagination
+    console.log('Page:', page);
+  }
+
+  handlePageSizeChange(size: number) {
+    // TODO: Implement page size change
+    console.log('Page size:', size);
   }
 
   editEntity(entity: Entity) {
