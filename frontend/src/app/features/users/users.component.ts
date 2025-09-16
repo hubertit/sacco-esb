@@ -18,10 +18,26 @@ import { UserService, User } from '../../core/services/user.service';
           <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
               <h4 class="card-title mb-0">Users</h4>
-              <button class="btn btn-primary btn-sm d-flex align-items-center gap-2" (click)="openAddUserModal()">
-                <app-feather-icon name="user-plus" size="14px"></app-feather-icon>
-                Add New User
-              </button>
+              <div class="dropdown">
+                <button class="btn btn-primary btn-sm d-flex align-items-center gap-2" type="button" id="addUserDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                  <app-feather-icon name="plus" size="14px"></app-feather-icon>
+                  Add User
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="addUserDropdown">
+                  <li>
+                    <a class="dropdown-item d-flex align-items-center gap-2" (click)="openAddUserModal('Human')">
+                      <app-feather-icon name="user" size="14px"></app-feather-icon>
+                      Add Human User
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item d-flex align-items-center gap-2" (click)="openAddUserModal('Application')">
+                      <app-feather-icon name="box" size="14px"></app-feather-icon>
+                      Add Application
+                    </a>
+                  </li>
+                </ul>
+              </div>
             </div>
             <div class="card-body">
               <app-data-table
@@ -87,6 +103,7 @@ export class UsersComponent implements OnInit {
   columns: TableColumn[] = [
     { key: 'id', title: 'ID', type: 'text', sortable: true },
     { key: 'name', title: 'Name', type: 'text', sortable: true },
+    { key: 'type', title: 'Type', type: 'text', sortable: true },
     { key: 'email', title: 'Email', type: 'text', sortable: true },
     { key: 'role', title: 'Role', type: 'text', sortable: true },
     { key: 'status', title: 'Status', type: 'status', sortable: true },
@@ -108,9 +125,9 @@ export class UsersComponent implements OnInit {
     });
   }
 
-  openAddUserModal() {
+  openAddUserModal(type: UserType) {
     // TODO: Implement add user modal
-    console.log('Open add user modal');
+    console.log('Open add user modal for type:', type);
   }
 
   handleSort(event: { column: string; direction: 'asc' | 'desc' }) {

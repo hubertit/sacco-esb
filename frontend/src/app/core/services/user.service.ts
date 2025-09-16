@@ -3,14 +3,21 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { delay } from 'rxjs/operators';
 
+export type UserType = 'Human' | 'Application';
+
 export interface User {
   id: number;
   name: string;
   email: string;
+  type: UserType;
   role: string;
   status: 'active' | 'inactive';
   lastLogin: string;
   createdAt: string;
+  // Additional fields based on type
+  apiKey?: string;        // For Application users
+  phoneNumber?: string;   // For Human users
+  department?: string;    // For Human users
 }
 
 @Injectable({
@@ -22,28 +29,47 @@ export class UserService {
       id: 1,
       name: 'John Doe',
       email: 'john.doe@example.com',
+      type: 'Human',
       role: 'Admin',
       status: 'active',
       lastLogin: '2024-03-16T10:30:00',
-      createdAt: '2024-01-15'
+      createdAt: '2024-01-15',
+      phoneNumber: '+250789123456',
+      department: 'IT'
     },
     {
       id: 2,
       name: 'Jane Smith',
       email: 'jane.smith@example.com',
+      type: 'Human',
       role: 'Manager',
       status: 'active',
       lastLogin: '2024-03-15T16:45:00',
-      createdAt: '2024-01-20'
+      createdAt: '2024-01-20',
+      phoneNumber: '+250789123457',
+      department: 'Operations'
     },
     {
       id: 3,
-      name: 'Bob Wilson',
-      email: 'bob.wilson@example.com',
-      role: 'User',
-      status: 'inactive',
+      name: 'Payment Gateway',
+      email: 'payment.gateway@system.com',
+      type: 'Application',
+      role: 'System',
+      status: 'active',
       lastLogin: '2024-03-10T09:15:00',
-      createdAt: '2024-02-01'
+      createdAt: '2024-02-01',
+      apiKey: 'pk_test_51NcezpLkdIwcKRf...'
+    },
+    {
+      id: 4,
+      name: 'Notification Service',
+      email: 'notifications@system.com',
+      type: 'Application',
+      role: 'System',
+      status: 'active',
+      lastLogin: '2024-03-16T08:30:00',
+      createdAt: '2024-02-15',
+      apiKey: 'sk_live_51NcezpLkdIwcKRf...'
     }
   ];
 
