@@ -47,35 +47,35 @@ export interface ChartOptions {
     <div class="dashboard-container">
       <!-- Stats Cards -->
       <div class="stats-grid">
-        <!-- Pull Transactions -->
-        <div class="stat-card pull">
+        <!-- MTN MOMO Transactions -->
+        <div class="stat-card mtn">
           <div class="stat-icon">
-            <app-feather-icon name="download" size="28px"></app-feather-icon>
+            <app-feather-icon name="smartphone" size="28px"></app-feather-icon>
           </div>
           <div class="stat-details">
-            <div class="stat-title">Pull Transactions</div>
+            <div class="stat-title">MTN MOMO</div>
             <div class="stat-numbers">
-              <div class="main-stat">1</div>
+              <div class="main-stat">2.5M</div>
               <div class="sub-stats">
-                <span class="success">1 Success</span>
-                <span class="failed">0 Failed</span>
+                <span class="success">99.8% Success</span>
+                <span class="volume">150/min</span>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Push Transactions -->
-        <div class="stat-card push">
+        <!-- Airtel Money -->
+        <div class="stat-card airtel">
           <div class="stat-icon">
-            <app-feather-icon name="upload" size="28px"></app-feather-icon>
+            <app-feather-icon name="credit-card" size="28px"></app-feather-icon>
           </div>
           <div class="stat-details">
-            <div class="stat-title">Push Transactions</div>
+            <div class="stat-title">Airtel Money</div>
             <div class="stat-numbers">
-              <div class="main-stat">11</div>
+              <div class="main-stat">1.8M</div>
               <div class="sub-stats">
-                <span class="success">11 Success</span>
-                <span class="failed">0 Failed</span>
+                <span class="success">99.5% Success</span>
+                <span class="volume">120/min</span>
               </div>
             </div>
           </div>
@@ -87,29 +87,29 @@ export interface ChartOptions {
             <app-feather-icon name="refresh-cw" size="28px"></app-feather-icon>
           </div>
           <div class="stat-details">
-            <div class="stat-title">Internal Transactions</div>
+            <div class="stat-title">Internal Transfers</div>
             <div class="stat-numbers">
-              <div class="main-stat">12</div>
+              <div class="main-stat">5.2M</div>
               <div class="sub-stats">
-                <span class="success">2 Success</span>
-                <span class="failed">10 Failed</span>
+                <span class="success">99.9% Success</span>
+                <span class="volume">280/min</span>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Customers -->
-        <div class="stat-card customers">
+        <!-- Transaction Value -->
+        <div class="stat-card value">
           <div class="stat-icon">
-            <app-feather-icon name="users" size="28px"></app-feather-icon>
+            <app-feather-icon name="dollar-sign" size="28px"></app-feather-icon>
           </div>
           <div class="stat-details">
-            <div class="stat-title">Customers</div>
+            <div class="stat-title">Total Value (24h)</div>
             <div class="stat-numbers">
-              <div class="main-stat">9</div>
+              <div class="main-stat">298.5M</div>
               <div class="sub-stats">
-                <span class="active">9 Active</span>
-                <span class="inactive">0 Inactive</span>
+                <span class="deposits">185.2M In</span>
+                <span class="withdrawals">113.3M Out</span>
               </div>
             </div>
           </div>
@@ -159,10 +159,10 @@ export interface ChartOptions {
 
       <!-- Charts Section -->
       <div class="charts-grid">
-        <!-- Transaction Distribution -->
-        <div class="chart-card transactions-chart">
+        <!-- Transaction Volume Trends -->
+        <div class="chart-card volume-chart">
           <div class="card-header">
-            <h3>Transactions Distribution</h3>
+            <h3>Transaction Volume Trends</h3>
             <div class="card-actions">
               <button class="btn-refresh" (click)="refreshCharts()">
                 <app-feather-icon name="refresh-cw" size="16px"></app-feather-icon>
@@ -170,23 +170,24 @@ export interface ChartOptions {
             </div>
           </div>
           <div class="card-body">
-            <div id="transactionDistributionChart">
+            <div id="volumeTrendsChart">
               <apx-chart
-                [series]="distributionChartOptions.series"
-                [chart]="distributionChartOptions.chart"
-                [labels]="distributionChartOptions.labels || []"
-                [legend]="distributionChartOptions.legend"
-                [colors]="distributionChartOptions.colors"
-                [dataLabels]="distributionChartOptions.dataLabels"
+                [series]="volumeChartOptions.series"
+                [chart]="volumeChartOptions.chart"
+                [xaxis]="volumeChartOptions.xaxis"
+                [yaxis]="volumeChartOptions.yaxis"
+                [legend]="volumeChartOptions.legend"
+                [colors]="volumeChartOptions.colors"
+                [dataLabels]="volumeChartOptions.dataLabels"
               ></apx-chart>
             </div>
           </div>
         </div>
 
-        <!-- Transaction Performance -->
-        <div class="chart-card performance-chart">
+        <!-- Success Rate Trends -->
+        <div class="chart-card success-rate-chart">
           <div class="card-header">
-            <h3>Transaction Performance</h3>
+            <h3>Success Rate by Provider</h3>
             <div class="card-actions">
               <button class="btn-refresh" (click)="refreshCharts()">
                 <app-feather-icon name="refresh-cw" size="16px"></app-feather-icon>
@@ -194,24 +195,49 @@ export interface ChartOptions {
             </div>
           </div>
           <div class="card-body">
-            <div id="transactionPerformanceChart">
+            <div id="successRateChart">
               <apx-chart
-                [series]="performanceChartOptions.series"
-                [chart]="performanceChartOptions.chart"
-                [xaxis]="performanceChartOptions.xaxis"
-                [yaxis]="performanceChartOptions.yaxis"
-                [legend]="performanceChartOptions.legend"
-                [colors]="performanceChartOptions.colors"
-                [dataLabels]="performanceChartOptions.dataLabels"
+                [series]="successRateChartOptions.series"
+                [chart]="successRateChartOptions.chart"
+                [xaxis]="successRateChartOptions.xaxis"
+                [yaxis]="successRateChartOptions.yaxis"
+                [legend]="successRateChartOptions.legend"
+                [colors]="successRateChartOptions.colors"
+                [dataLabels]="successRateChartOptions.dataLabels"
               ></apx-chart>
             </div>
           </div>
         </div>
 
-        <!-- Error Distribution -->
+        <!-- Transaction Amount Analysis -->
+        <div class="chart-card amount-chart">
+          <div class="card-header">
+            <h3>Transaction Amount Analysis</h3>
+            <div class="card-actions">
+              <button class="btn-refresh" (click)="refreshCharts()">
+                <app-feather-icon name="refresh-cw" size="16px"></app-feather-icon>
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div id="amountAnalysisChart">
+              <apx-chart
+                [series]="amountChartOptions.series"
+                [chart]="amountChartOptions.chart"
+                [xaxis]="amountChartOptions.xaxis"
+                [yaxis]="amountChartOptions.yaxis"
+                [legend]="amountChartOptions.legend"
+                [colors]="amountChartOptions.colors"
+                [dataLabels]="amountChartOptions.dataLabels"
+              ></apx-chart>
+            </div>
+          </div>
+        </div>
+
+        <!-- Error Analysis -->
         <div class="chart-card error-chart">
           <div class="card-header">
-            <h3>Error Distribution</h3>
+            <h3>Error Analysis</h3>
             <div class="card-actions">
               <button class="btn-refresh" (click)="refreshCharts()">
                 <app-feather-icon name="refresh-cw" size="16px"></app-feather-icon>
@@ -219,11 +245,13 @@ export interface ChartOptions {
             </div>
           </div>
           <div class="card-body">
-            <div id="errorDistributionChart">
+            <div id="errorAnalysisChart">
               <apx-chart
                 [series]="errorChartOptions.series"
                 [chart]="errorChartOptions.chart"
                 [xaxis]="errorChartOptions.xaxis"
+                [yaxis]="errorChartOptions.yaxis"
+                [legend]="errorChartOptions.legend"
                 [colors]="errorChartOptions.colors"
                 [dataLabels]="errorChartOptions.dataLabels"
               ></apx-chart>
@@ -231,10 +259,10 @@ export interface ChartOptions {
           </div>
         </div>
 
-        <!-- Latency Trends -->
-        <div class="chart-card latency-chart">
+        <!-- Transaction Types -->
+        <div class="chart-card transaction-types-chart">
           <div class="card-header">
-            <h3>Latency Trends</h3>
+            <h3>Transaction Types by Provider</h3>
             <div class="card-actions">
               <button class="btn-refresh" (click)="refreshCharts()">
                 <app-feather-icon name="refresh-cw" size="16px"></app-feather-icon>
@@ -242,22 +270,24 @@ export interface ChartOptions {
             </div>
           </div>
           <div class="card-body">
-            <div id="latencyTrendsChart">
+            <div id="transactionTypesChart">
               <apx-chart
-                [series]="latencyChartOptions.series"
-                [chart]="latencyChartOptions.chart"
-                [xaxis]="latencyChartOptions.xaxis"
-                [colors]="latencyChartOptions.colors"
-                [dataLabels]="latencyChartOptions.dataLabels"
+                [series]="transactionTypesChartOptions.series"
+                [chart]="transactionTypesChartOptions.chart"
+                [xaxis]="transactionTypesChartOptions.xaxis"
+                [yaxis]="transactionTypesChartOptions.yaxis"
+                [legend]="transactionTypesChartOptions.legend"
+                [colors]="transactionTypesChartOptions.colors"
+                [dataLabels]="transactionTypesChartOptions.dataLabels"
               ></apx-chart>
             </div>
           </div>
         </div>
 
-        <!-- Service Metrics (shows when service is selected) -->
-        <div class="chart-card service-metrics-chart" *ngIf="selectedService">
+        <!-- Transaction Value Trends -->
+        <div class="chart-card value-trends-chart">
           <div class="card-header">
-            <h3>Service Metrics</h3>
+            <h3>Transaction Value Trends</h3>
             <div class="card-actions">
               <button class="btn-refresh" (click)="refreshCharts()">
                 <app-feather-icon name="refresh-cw" size="16px"></app-feather-icon>
@@ -265,13 +295,15 @@ export interface ChartOptions {
             </div>
           </div>
           <div class="card-body">
-            <div id="serviceMetricsChart">
+            <div id="valueTrendsChart">
               <apx-chart
-                [series]="serviceMetricsChartOptions.series"
-                [chart]="serviceMetricsChartOptions.chart"
-                [xaxis]="serviceMetricsChartOptions.xaxis"
-                [colors]="serviceMetricsChartOptions.colors"
-                [dataLabels]="serviceMetricsChartOptions.dataLabels"
+                [series]="valueTrendsChartOptions.series"
+                [chart]="valueTrendsChartOptions.chart"
+                [xaxis]="valueTrendsChartOptions.xaxis"
+                [yaxis]="valueTrendsChartOptions.yaxis"
+                [legend]="valueTrendsChartOptions.legend"
+                [colors]="valueTrendsChartOptions.colors"
+                [dataLabels]="valueTrendsChartOptions.dataLabels"
               ></apx-chart>
             </div>
           </div>
@@ -444,24 +476,24 @@ export interface ChartOptions {
         }
       }
 
-      &.pull .stat-icon {
+      &.mtn .stat-icon {
+        background: rgba(255, 199, 0, 0.1);
+        color: #ffc700;
+      }
+
+      &.airtel .stat-icon {
+        background: rgba(255, 0, 0, 0.1);
+        color: #ff0000;
+      }
+
+      &.internal .stat-icon {
         background: rgba(52, 152, 219, 0.1);
         color: #3498db;
       }
 
-      &.push .stat-icon {
+      &.health .stat-icon {
         background: rgba(46, 204, 113, 0.1);
         color: #2ecc71;
-      }
-
-      &.internal .stat-icon {
-        background: rgba(155, 89, 182, 0.1);
-        color: #9b59b6;
-      }
-
-      &.customers .stat-icon {
-        background: rgba(231, 76, 60, 0.1);
-        color: #e74c3c;
       }
 
       .stat-details {
@@ -481,10 +513,10 @@ export interface ChartOptions {
             margin-bottom: 4px;
           }
 
-          .pull & .main-stat { color: #3498db; }
-          .push & .main-stat { color: #2ecc71; }
-          .internal & .main-stat { color: #9b59b6; }
-          .customers & .main-stat { color: #e74c3c; }
+          .mtn & .main-stat { color: #ffc700; }
+          .airtel & .main-stat { color: #ff0000; }
+          .internal & .main-stat { color: #3498db; }
+          .health & .main-stat { color: #2ecc71; }
 
           .sub-stats {
             display: flex;
@@ -606,79 +638,202 @@ export class DashboardComponent implements OnInit {
   services: ServiceMetrics[] = [];
   selectedService: string = '';
   
-  public distributionChartOptions: ChartOptions = {
+  public volumeChartOptions: Partial<ChartOptions> = {
     series: [],
-    chart: { type: 'donut', height: 300 },
-    xaxis: { type: 'category', categories: [] },
+    chart: {
+      type: 'area',
+      height: 350,
+      stacked: true,
+      toolbar: { show: false }
+    },
+    xaxis: {
+      type: 'datetime',
+      labels: {
+        style: { colors: '#64748b' }
+      }
+    },
+    yaxis: {
+      title: { text: 'Transactions per Hour' },
+      labels: {
+        style: { colors: '#64748b' },
+        formatter: (val) => Math.round(val).toString()
+      }
+    },
     dataLabels: { enabled: false },
-    stroke: { width: 1 },
-    yaxis: { labels: { style: { colors: [] } } },
-    title: { text: '' },
-    labels: [],
-    legend: { position: 'bottom', horizontalAlign: 'center' },
-    fill: { opacity: 1 },
-    tooltip: { enabled: true },
-    colors: []
+    stroke: { curve: 'smooth', width: 2 },
+    fill: { type: 'gradient', gradient: { opacityFrom: 0.6, opacityTo: 0.1 } },
+    legend: { position: 'top', horizontalAlign: 'right' },
+    colors: ['#ffc700', '#ff0000', '#3498db'],
+    tooltip: { x: { format: 'dd MMM HH:mm' } }
   };
 
-  public performanceChartOptions: ChartOptions = {
+  public successRateChartOptions: Partial<ChartOptions> = {
     series: [],
-    chart: { type: 'bar', height: 300 },
-    xaxis: { type: 'category', categories: [] },
+    chart: {
+      type: 'line',
+      height: 350,
+      toolbar: { show: false }
+    },
+    xaxis: {
+      type: 'datetime',
+      labels: { style: { colors: '#64748b' } }
+    },
+    yaxis: {
+      title: { text: 'Success Rate (%)' },
+      labels: {
+        style: { colors: '#64748b' },
+        formatter: (val) => val.toFixed(2) + '%'
+      },
+      min: 90,
+      max: 100
+    },
     dataLabels: { enabled: false },
-    stroke: { width: 1 },
-    yaxis: { labels: { style: { colors: [] } } },
-    title: { text: '' },
-    labels: [],
-    legend: { position: 'bottom', horizontalAlign: 'center' },
-    fill: { opacity: 1 },
-    tooltip: { enabled: true },
-    colors: []
+    stroke: { curve: 'smooth', width: 3 },
+    legend: { position: 'top', horizontalAlign: 'right' },
+    colors: ['#ffc700', '#ff0000', '#3498db'],
+    tooltip: { x: { format: 'dd MMM HH:mm' } }
   };
 
-  public latencyChartOptions: ChartOptions = {
+  public amountChartOptions: Partial<ChartOptions> = {
     series: [],
-    chart: { type: 'line', height: 300 },
-    xaxis: { type: 'category', categories: [] },
+    chart: {
+      type: 'bar',
+      height: 350,
+      toolbar: { show: false }
+    },
+    xaxis: {
+      type: 'category',
+      labels: { style: { colors: '#64748b' } }
+    },
+    yaxis: {
+      title: { text: 'Amount (RWF)' },
+      labels: {
+        style: { colors: '#64748b' },
+        formatter: (val) => {
+          if (val >= 1000000) return (val / 1000000).toFixed(1) + 'M';
+          if (val >= 1000) return (val / 1000).toFixed(1) + 'K';
+          return val.toString();
+        }
+      }
+    },
     dataLabels: { enabled: false },
-    stroke: { width: 1 },
-    yaxis: { labels: { style: { colors: [] } } },
-    title: { text: '' },
-    labels: [],
-    legend: { position: 'bottom', horizontalAlign: 'center' },
-    fill: { opacity: 1 },
-    tooltip: { enabled: true },
-    colors: []
+    plotOptions: {
+      bar: {
+        borderRadius: 4,
+        columnWidth: '60%'
+      }
+    },
+    legend: { position: 'top', horizontalAlign: 'right' },
+    colors: ['#ffc700', '#ff0000', '#3498db']
   };
 
-  public errorChartOptions: ChartOptions = {
+  public errorChartOptions: Partial<ChartOptions> = {
     series: [],
-    chart: { type: 'bar', height: 300 },
-    xaxis: { type: 'category', categories: [] },
-    dataLabels: { enabled: false },
-    stroke: { width: 1 },
-    yaxis: { labels: { style: { colors: [] } } },
-    title: { text: '' },
-    labels: [],
-    legend: { position: 'bottom', horizontalAlign: 'center' },
-    fill: { opacity: 1 },
-    tooltip: { enabled: true },
-    colors: []
+    chart: {
+      type: 'bar',
+      height: 350,
+      toolbar: { show: false }
+    },
+    xaxis: {
+      type: 'category',
+      labels: { style: { colors: '#64748b' } }
+    },
+    yaxis: {
+      title: { text: 'Error Count' },
+      labels: { style: { colors: '#64748b' } }
+    },
+    plotOptions: {
+      bar: {
+        borderRadius: 4,
+        distributed: true,
+        horizontal: true
+      }
+    },
+    dataLabels: {
+      enabled: true,
+      formatter: (val) => val.toString(),
+      style: { colors: ['#fff'] }
+    },
+    legend: { show: false },
+    colors: ['#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16', '#22c55e']
   };
 
-  public serviceMetricsChartOptions: ChartOptions = {
+  public transactionTypesChartOptions: Partial<ChartOptions> = {
     series: [],
-    chart: { type: 'line', height: 300 },
-    xaxis: { type: 'category', categories: [] },
+    chart: {
+      type: 'bar',
+      height: 350,
+      stacked: true,
+      toolbar: { show: false }
+    },
+    xaxis: {
+      type: 'category',
+      categories: ['MTN MOMO', 'Airtel Money', 'Internal'],
+      labels: { style: { colors: '#64748b' } }
+    },
+    yaxis: {
+      title: { text: 'Transaction Count' },
+      labels: {
+        style: { colors: '#64748b' },
+        formatter: (val) => {
+          if (val >= 1000) return (val / 1000).toFixed(1) + 'K';
+          return val.toString();
+        }
+      }
+    },
     dataLabels: { enabled: false },
-    stroke: { width: 1 },
-    yaxis: { labels: { style: { colors: [] } } },
-    title: { text: '' },
-    labels: [],
-    legend: { position: 'bottom', horizontalAlign: 'center' },
-    fill: { opacity: 1 },
-    tooltip: { enabled: true },
-    colors: []
+    legend: { position: 'top', horizontalAlign: 'right' },
+    colors: ['#2ecc71', '#e74c3c', '#3498db'],
+    tooltip: {
+      y: {
+        formatter: (val) => val.toString()
+      }
+    },
+    plotOptions: {
+      bar: {
+        borderRadius: 4,
+        columnWidth: '60%'
+      }
+    }
+  };
+
+  public valueTrendsChartOptions: Partial<ChartOptions> = {
+    series: [],
+    chart: {
+      type: 'area',
+      height: 350,
+      toolbar: { show: false }
+    },
+    xaxis: {
+      type: 'datetime',
+      labels: { style: { colors: '#64748b' } }
+    },
+    yaxis: {
+      title: { text: 'Transaction Value (RWF)' },
+      labels: {
+        style: { colors: '#64748b' },
+        formatter: (val) => {
+          if (val >= 1000000) return (val / 1000000).toFixed(1) + 'M';
+          if (val >= 1000) return (val / 1000).toFixed(1) + 'K';
+          return val.toString();
+        }
+      }
+    },
+    dataLabels: { enabled: false },
+    stroke: { curve: 'smooth', width: 2 },
+    fill: { type: 'gradient', gradient: { opacityFrom: 0.6, opacityTo: 0.1 } },
+    legend: { position: 'top', horizontalAlign: 'right' },
+    colors: ['#ffc700', '#ff0000', '#3498db'],
+    tooltip: {
+      x: { format: 'dd MMM HH:mm' },
+      y: {
+        formatter: (val) => {
+          if (val >= 1000000) return (val / 1000000).toFixed(1) + 'M RWF';
+          if (val >= 1000) return (val / 1000).toFixed(1) + 'K RWF';
+          return val.toString() + ' RWF';
+        }
+      }
+    }
   };
 
   constructor(
@@ -1010,30 +1165,39 @@ export class DashboardComponent implements OnInit {
   }
 
   private loadChartData() {
-    // Load services
-    this.chartService.getServices().subscribe(services => {
-      this.services = services;
-    });
-
-    // Load chart data
-    this.chartService.getTransactionDistribution().subscribe(data => {
-      this.distributionChartOptions = {
-        ...this.distributionChartOptions,
-        series: data.series,
-        labels: data.labels || [],
-        colors: data.colors || []
-      };
-    });
-
-    this.chartService.getTransactionPerformance().subscribe(data => {
-      this.performanceChartOptions = {
-        ...this.performanceChartOptions,
+    // Load transaction volume data
+    this.chartService.getTransactionVolume().subscribe(data => {
+      this.volumeChartOptions = {
+        ...this.volumeChartOptions,
         series: data.series,
         colors: data.colors || []
       };
     });
 
-    this.chartService.getErrorDistribution().subscribe(data => {
+    // Load success rate data
+    this.chartService.getSuccessRate().subscribe(data => {
+      this.successRateChartOptions = {
+        ...this.successRateChartOptions,
+        series: data.series,
+        colors: data.colors || []
+      };
+    });
+
+    // Load amount analysis data
+    this.chartService.getAmountAnalysis().subscribe(data => {
+      this.amountChartOptions = {
+        ...this.amountChartOptions,
+        series: data.series,
+        xaxis: {
+          ...this.amountChartOptions.xaxis,
+          categories: data.categories || []
+        },
+        colors: data.colors || []
+      };
+    });
+
+    // Load error analysis data
+    this.chartService.getErrorAnalysis().subscribe(data => {
       this.errorChartOptions = {
         ...this.errorChartOptions,
         series: data.series,
@@ -1045,41 +1209,25 @@ export class DashboardComponent implements OnInit {
       };
     });
 
-    this.chartService.getLatencyTrends().subscribe(data => {
-      this.latencyChartOptions = {
-        ...this.latencyChartOptions,
+    // Load transaction types data
+    this.chartService.getTransactionTypes().subscribe(data => {
+      this.transactionTypesChartOptions = {
+        ...this.transactionTypesChartOptions,
         series: data.series,
-        xaxis: {
-          ...this.latencyChartOptions.xaxis,
-          categories: data.categories || []
-        },
         colors: data.colors || []
       };
     });
 
-    if (this.selectedService) {
-      this.loadServiceMetrics();
-    }
-  }
-
-  selectService(serviceId: string) {
-    this.selectedService = serviceId;
-    this.loadServiceMetrics();
-  }
-
-  private loadServiceMetrics() {
-    this.chartService.getServiceMetrics(this.selectedService).subscribe(data => {
-      this.serviceMetricsChartOptions = {
-        ...this.serviceMetricsChartOptions,
+    // Load value trends data
+    this.chartService.getValueTrends().subscribe(data => {
+      this.valueTrendsChartOptions = {
+        ...this.valueTrendsChartOptions,
         series: data.series,
-        xaxis: {
-          ...this.serviceMetricsChartOptions.xaxis,
-          categories: data.categories || []
-        },
         colors: data.colors || []
       };
     });
   }
+
 
   refreshCharts() {
     this.loadChartData();
