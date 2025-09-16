@@ -6,7 +6,7 @@ export interface TableColumn {
   key: string;
   title: string;
   sortable?: boolean;
-  type?: 'text' | 'date' | 'number' | 'boolean' | 'custom';
+  type?: 'text' | 'date' | 'number' | 'boolean' | 'custom' | 'status';
   template?: any;
 }
 

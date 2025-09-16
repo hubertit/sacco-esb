@@ -21,7 +21,7 @@ import {
   ChartComponent
 } from 'ng-apexcharts';
 
-export type ChartOptions = {
+export interface ChartOptions {
   plotOptions?: ApexPlotOptions;
   markers?: any;
   grid?: any;
@@ -30,14 +30,14 @@ export type ChartOptions = {
   xaxis: ApexXAxis;
   dataLabels: ApexDataLabels;
   stroke: ApexStroke;
-  yaxis: ApexYAxis;
+  yaxis: ApexYAxis | ApexYAxis[];
   title: ApexTitleSubtitle;
-  labels: string[];
+  labels?: string[];
   legend: ApexLegend;
   fill: ApexFill;
   tooltip: ApexTooltip;
   colors: string[];
-};
+}
 
 @Component({
   selector: 'app-dashboard',
@@ -174,7 +174,7 @@ export type ChartOptions = {
               <apx-chart
                 [series]="distributionChartOptions.series"
                 [chart]="distributionChartOptions.chart"
-                [labels]="distributionChartOptions.labels"
+                [labels]="distributionChartOptions.labels || []"
                 [legend]="distributionChartOptions.legend"
                 [colors]="distributionChartOptions.colors"
                 [dataLabels]="distributionChartOptions.dataLabels"
@@ -629,12 +629,95 @@ export class DashboardComponent implements OnInit {
   services: ServiceMetrics[] = [];
   selectedService: string = '';
   
-  public distributionChartOptions!: Partial<ChartOptions>;
-  public performanceChartOptions!: Partial<ChartOptions>;
-  public latencyChartOptions!: Partial<ChartOptions>;
-  public errorChartOptions!: Partial<ChartOptions>;
-  public serviceMetricsChartOptions!: Partial<ChartOptions>;
-  public systemHealthChartOptions!: Partial<ChartOptions>;
+  public distributionChartOptions: ChartOptions = {
+    series: [],
+    chart: { type: 'donut', height: 300 },
+    xaxis: { type: 'category', categories: [] },
+    dataLabels: { enabled: false },
+    stroke: { width: 1 },
+    yaxis: { labels: { style: { colors: [] } } },
+    title: { text: '' },
+    labels: [],
+    legend: { position: 'bottom', horizontalAlign: 'center' },
+    fill: { opacity: 1 },
+    tooltip: { enabled: true },
+    colors: []
+  };
+
+  public performanceChartOptions: ChartOptions = {
+    series: [],
+    chart: { type: 'bar', height: 300 },
+    xaxis: { type: 'category', categories: [] },
+    dataLabels: { enabled: false },
+    stroke: { width: 1 },
+    yaxis: { labels: { style: { colors: [] } } },
+    title: { text: '' },
+    labels: [],
+    legend: { position: 'bottom', horizontalAlign: 'center' },
+    fill: { opacity: 1 },
+    tooltip: { enabled: true },
+    colors: []
+  };
+
+  public latencyChartOptions: ChartOptions = {
+    series: [],
+    chart: { type: 'line', height: 300 },
+    xaxis: { type: 'category', categories: [] },
+    dataLabels: { enabled: false },
+    stroke: { width: 1 },
+    yaxis: { labels: { style: { colors: [] } } },
+    title: { text: '' },
+    labels: [],
+    legend: { position: 'bottom', horizontalAlign: 'center' },
+    fill: { opacity: 1 },
+    tooltip: { enabled: true },
+    colors: []
+  };
+
+  public errorChartOptions: ChartOptions = {
+    series: [],
+    chart: { type: 'bar', height: 300 },
+    xaxis: { type: 'category', categories: [] },
+    dataLabels: { enabled: false },
+    stroke: { width: 1 },
+    yaxis: { labels: { style: { colors: [] } } },
+    title: { text: '' },
+    labels: [],
+    legend: { position: 'bottom', horizontalAlign: 'center' },
+    fill: { opacity: 1 },
+    tooltip: { enabled: true },
+    colors: []
+  };
+
+  public systemHealthChartOptions: ChartOptions = {
+    series: [],
+    chart: { type: 'area', height: 300 },
+    xaxis: { type: 'category', categories: [] },
+    dataLabels: { enabled: false },
+    stroke: { width: 1 },
+    yaxis: { labels: { style: { colors: [] } } },
+    title: { text: '' },
+    labels: [],
+    legend: { position: 'bottom', horizontalAlign: 'center' },
+    fill: { opacity: 1 },
+    tooltip: { enabled: true },
+    colors: []
+  };
+
+  public serviceMetricsChartOptions: ChartOptions = {
+    series: [],
+    chart: { type: 'line', height: 300 },
+    xaxis: { type: 'category', categories: [] },
+    dataLabels: { enabled: false },
+    stroke: { width: 1 },
+    yaxis: { labels: { style: { colors: [] } } },
+    title: { text: '' },
+    labels: [],
+    legend: { position: 'bottom', horizontalAlign: 'center' },
+    fill: { opacity: 1 },
+    tooltip: { enabled: true },
+    colors: []
+  };
 
   constructor(
     private authService: AuthService,
@@ -667,7 +750,30 @@ export class DashboardComponent implements OnInit {
       },
       series: [],
       labels: [],
-      colors: []
+      colors: [],
+      xaxis: {
+        type: 'category',
+        categories: []
+      },
+      stroke: {
+        width: 1
+      },
+      yaxis: {
+        labels: {
+          style: {
+            colors: []
+          }
+        }
+      },
+      title: {
+        text: ''
+      },
+      fill: {
+        opacity: 1
+      },
+      tooltip: {
+        enabled: true
+      }
     };
 
     // Initialize Performance Chart
@@ -681,6 +787,7 @@ export class DashboardComponent implements OnInit {
         }
       },
       xaxis: {
+        type: 'category',
         categories: ['Internal', 'Push', 'Pull'],
         labels: {
           style: {
@@ -703,7 +810,20 @@ export class DashboardComponent implements OnInit {
         enabled: false
       },
       colors: [],
-      series: []
+      series: [],
+      stroke: {
+        width: 1
+      },
+      fill: {
+        opacity: 1
+      },
+      tooltip: {
+        enabled: true
+      },
+      title: {
+        text: ''
+      },
+      labels: []
     };
 
     // Initialize Error Distribution Chart
@@ -734,6 +854,7 @@ export class DashboardComponent implements OnInit {
         offsetX: 30
       },
       xaxis: {
+        type: 'category',
         categories: [],
         labels: {
           style: {
@@ -748,7 +869,24 @@ export class DashboardComponent implements OnInit {
           }
         }
       },
-      colors: ['#e74c3c']
+      colors: ['#e74c3c'],
+      stroke: {
+        width: 1
+      },
+      fill: {
+        opacity: 1
+      },
+      tooltip: {
+        enabled: true
+      },
+      title: {
+        text: ''
+      },
+      legend: {
+        position: 'bottom',
+        horizontalAlign: 'center'
+      },
+      labels: []
     };
 
     // Initialize Latency Chart
@@ -793,6 +931,7 @@ export class DashboardComponent implements OnInit {
         }
       },
       xaxis: {
+        type: 'category',
         categories: [],
         labels: {
           style: {
@@ -814,7 +953,17 @@ export class DashboardComponent implements OnInit {
         position: 'top',
         horizontalAlign: 'right'
       },
-      colors: ['#e67e22', '#3498db']
+      colors: ['#e67e22', '#3498db'],
+      fill: {
+        opacity: 1
+      },
+      tooltip: {
+        enabled: true
+      },
+      title: {
+        text: ''
+      },
+      labels: []
     };
 
     // Initialize System Health Chart
@@ -837,7 +986,8 @@ export class DashboardComponent implements OnInit {
         gradient: {
           opacityFrom: 0.6,
           opacityTo: 0.1
-        }
+        },
+        opacity: 1
       },
       dataLabels: {
         enabled: false
@@ -853,6 +1003,7 @@ export class DashboardComponent implements OnInit {
         }
       },
       xaxis: {
+        type: 'category',
         categories: [],
         labels: {
           style: {
@@ -875,7 +1026,14 @@ export class DashboardComponent implements OnInit {
         position: 'top',
         horizontalAlign: 'right'
       },
-      colors: ['#3498db', '#2ecc71', '#9b59b6']
+      colors: ['#3498db', '#2ecc71', '#9b59b6'],
+      tooltip: {
+        enabled: true
+      },
+      title: {
+        text: ''
+      },
+      labels: []
     };
 
     // Initialize Service Metrics Chart
@@ -920,6 +1078,7 @@ export class DashboardComponent implements OnInit {
         }
       },
       xaxis: {
+        type: 'category',
         categories: [],
         labels: {
           style: {
@@ -944,7 +1103,17 @@ export class DashboardComponent implements OnInit {
         position: 'top',
         horizontalAlign: 'right'
       },
-      colors: ['#3498db', '#2ecc71']
+      colors: ['#3498db', '#2ecc71'],
+      fill: {
+        opacity: 1
+      },
+      tooltip: {
+        enabled: true
+      },
+      title: {
+        text: ''
+      },
+      labels: []
     };
   }
 
@@ -956,32 +1125,56 @@ export class DashboardComponent implements OnInit {
 
     // Load chart data
     this.chartService.getTransactionDistribution().subscribe(data => {
-      this.distributionChartOptions.series = data.series;
-      this.distributionChartOptions.labels = data.labels;
-      this.distributionChartOptions.colors = data.colors;
+      this.distributionChartOptions = {
+        ...this.distributionChartOptions,
+        series: data.series,
+        labels: data.labels || [],
+        colors: data.colors || []
+      };
     });
 
     this.chartService.getTransactionPerformance().subscribe(data => {
-      this.performanceChartOptions.series = data.series;
-      this.performanceChartOptions.colors = data.colors;
+      this.performanceChartOptions = {
+        ...this.performanceChartOptions,
+        series: data.series,
+        colors: data.colors || []
+      };
     });
 
     this.chartService.getErrorDistribution().subscribe(data => {
-      this.errorChartOptions.series = data.series;
-      this.errorChartOptions.xaxis = { categories: data.categories };
-      this.errorChartOptions.colors = data.colors;
+      this.errorChartOptions = {
+        ...this.errorChartOptions,
+        series: data.series,
+        xaxis: {
+          ...this.errorChartOptions.xaxis,
+          categories: data.categories || []
+        },
+        colors: data.colors || []
+      };
     });
 
     this.chartService.getLatencyTrends().subscribe(data => {
-      this.latencyChartOptions.series = data.series;
-      this.latencyChartOptions.xaxis = { categories: data.categories };
-      this.latencyChartOptions.colors = data.colors;
+      this.latencyChartOptions = {
+        ...this.latencyChartOptions,
+        series: data.series,
+        xaxis: {
+          ...this.latencyChartOptions.xaxis,
+          categories: data.categories || []
+        },
+        colors: data.colors || []
+      };
     });
 
     this.chartService.getSystemHealth().subscribe(data => {
-      this.systemHealthChartOptions.series = data.series;
-      this.systemHealthChartOptions.xaxis = { categories: data.categories };
-      this.systemHealthChartOptions.colors = data.colors;
+      this.systemHealthChartOptions = {
+        ...this.systemHealthChartOptions,
+        series: data.series,
+        xaxis: {
+          ...this.systemHealthChartOptions.xaxis,
+          categories: data.categories || []
+        },
+        colors: data.colors || []
+      };
     });
 
     if (this.selectedService) {
@@ -996,9 +1189,15 @@ export class DashboardComponent implements OnInit {
 
   private loadServiceMetrics() {
     this.chartService.getServiceMetrics(this.selectedService).subscribe(data => {
-      this.serviceMetricsChartOptions.series = data.series;
-      this.serviceMetricsChartOptions.xaxis = { categories: data.categories };
-      this.serviceMetricsChartOptions.colors = data.colors;
+      this.serviceMetricsChartOptions = {
+        ...this.serviceMetricsChartOptions,
+        series: data.series,
+        xaxis: {
+          ...this.serviceMetricsChartOptions.xaxis,
+          categories: data.categories || []
+        },
+        colors: data.colors || []
+      };
     });
   }
 

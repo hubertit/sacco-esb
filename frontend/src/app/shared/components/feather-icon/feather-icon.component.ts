@@ -1,13 +1,13 @@
-import { Component, Input, AfterViewInit, ElementRef } from '@angular/core';
+import { Component, Input, OnInit, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-declare const feather: any;
+import { IconService } from '../../../core/services/icon.service';
+import { SafeHtml } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-feather-icon',
   standalone: true,
   imports: [CommonModule],
-  template: `<i [attr.data-feather]="name"></i>`,
+  template: `<span [innerHTML]="iconHtml"></span>`,
   styles: [`
     :host {
       display: inline-flex;
@@ -20,27 +20,35 @@ declare const feather: any;
       vertical-align: middle;
     }
     
-    i {
+    span {
+      display: inline-flex;
+      width: 100%;
+      height: 100%;
+    }
+
+    :host ::ng-deep svg {
       width: 100%;
       height: 100%;
     }
   `]
 })
-export class FeatherIconComponent implements AfterViewInit {
+export class FeatherIconComponent implements OnInit {
   @Input() name!: string;
   @Input() size?: string;
 
-  constructor(private elementRef: ElementRef) {}
+  iconHtml: SafeHtml = '';
 
-  ngAfterViewInit() {
+  constructor(
+    private elementRef: ElementRef,
+    private iconService: IconService
+  ) {}
+
+  async ngOnInit() {
     if (this.size) {
       const element = this.elementRef.nativeElement;
       element.style.fontSize = this.size;
     }
-    // Replace the icon
-    feather.replace({
-      width: '100%',
-      height: '100%'
-    });
+
+    this.iconHtml = await this.iconService.loadIcon(this.name);
   }
 }
