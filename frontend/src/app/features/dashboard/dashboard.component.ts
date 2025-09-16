@@ -254,29 +254,6 @@ export interface ChartOptions {
           </div>
         </div>
 
-        <!-- System Health -->
-        <div class="chart-card system-health-chart">
-          <div class="card-header">
-            <h3>System Health</h3>
-            <div class="card-actions">
-              <button class="btn-refresh" (click)="refreshCharts()">
-                <app-feather-icon name="refresh-cw" size="16px"></app-feather-icon>
-              </button>
-            </div>
-          </div>
-          <div class="card-body">
-            <div id="systemHealthChart">
-              <apx-chart
-                [series]="systemHealthChartOptions.series"
-                [chart]="systemHealthChartOptions.chart"
-                [xaxis]="systemHealthChartOptions.xaxis"
-                [colors]="systemHealthChartOptions.colors"
-                [dataLabels]="systemHealthChartOptions.dataLabels"
-              ></apx-chart>
-            </div>
-          </div>
-        </div>
-
         <!-- Service Metrics (shows when service is selected) -->
         <div class="chart-card service-metrics-chart" *ngIf="selectedService">
           <div class="card-header">
@@ -308,6 +285,7 @@ export interface ChartOptions {
       display: flex;
       flex-direction: column;
       gap: 16px;
+      min-height: 100%;
     }
 
     .section-title {
@@ -318,7 +296,8 @@ export interface ChartOptions {
     }
 
     .service-health-section {
-      margin-bottom: 24px;
+      margin-bottom: 16px;
+      width: 100%;
     }
 
     .service-cards {
@@ -546,14 +525,15 @@ export interface ChartOptions {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 16px;
-      margin-top: 24px;
+      margin-top: 16px;
+      width: 100%;
 
       @media (max-width: 1200px) {
         grid-template-columns: 1fr;
       }
 
-      .chart-card {
-        min-height: 400px;
+    .chart-card {
+      height: auto;
       }
     }
 
@@ -596,11 +576,8 @@ export interface ChartOptions {
       }
 
       .card-body {
-        min-height: 300px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #94a3b8;
+        padding: 1rem;
+        min-height: 350px;
       }
     }
 
@@ -689,21 +666,6 @@ export class DashboardComponent implements OnInit {
     colors: []
   };
 
-  public systemHealthChartOptions: ChartOptions = {
-    series: [],
-    chart: { type: 'area', height: 300 },
-    xaxis: { type: 'category', categories: [] },
-    dataLabels: { enabled: false },
-    stroke: { width: 1 },
-    yaxis: { labels: { style: { colors: [] } } },
-    title: { text: '' },
-    labels: [],
-    legend: { position: 'bottom', horizontalAlign: 'center' },
-    fill: { opacity: 1 },
-    tooltip: { enabled: true },
-    colors: []
-  };
-
   public serviceMetricsChartOptions: ChartOptions = {
     series: [],
     chart: { type: 'line', height: 300 },
@@ -739,7 +701,7 @@ export class DashboardComponent implements OnInit {
     this.distributionChartOptions = {
       chart: {
         type: 'donut',
-        height: 300
+        height: 350
       },
       legend: {
         position: 'bottom',
@@ -780,7 +742,7 @@ export class DashboardComponent implements OnInit {
     this.performanceChartOptions = {
       chart: {
         type: 'bar',
-        height: 300,
+        height: 350,
         stacked: true,
         toolbar: {
           show: false
@@ -966,76 +928,6 @@ export class DashboardComponent implements OnInit {
       labels: []
     };
 
-    // Initialize System Health Chart
-    this.systemHealthChartOptions = {
-      series: [],
-      chart: {
-        type: 'area',
-        height: 350,
-        stacked: true,
-        toolbar: {
-          show: false
-        }
-      },
-      stroke: {
-        curve: 'smooth',
-        width: 2
-      },
-      fill: {
-        type: 'gradient',
-        gradient: {
-          opacityFrom: 0.6,
-          opacityTo: 0.1
-        },
-        opacity: 1
-      },
-      dataLabels: {
-        enabled: false
-      },
-      grid: {
-        borderColor: '#e5e7eb',
-        strokeDashArray: 4,
-        padding: {
-          top: 0,
-          right: 0,
-          bottom: 0,
-          left: 0
-        }
-      },
-      xaxis: {
-        type: 'category',
-        categories: [],
-        labels: {
-          style: {
-            colors: '#64748b'
-          }
-        }
-      },
-      yaxis: {
-        labels: {
-          style: {
-            colors: '#64748b'
-          },
-          formatter: function(val) {
-            return val.toFixed(0) + '%';
-          }
-        },
-        max: 100
-      },
-      legend: {
-        position: 'top',
-        horizontalAlign: 'right'
-      },
-      colors: ['#3498db', '#2ecc71', '#9b59b6'],
-      tooltip: {
-        enabled: true
-      },
-      title: {
-        text: ''
-      },
-      labels: []
-    };
-
     // Initialize Service Metrics Chart
     this.serviceMetricsChartOptions = {
       series: [],
@@ -1159,18 +1051,6 @@ export class DashboardComponent implements OnInit {
         series: data.series,
         xaxis: {
           ...this.latencyChartOptions.xaxis,
-          categories: data.categories || []
-        },
-        colors: data.colors || []
-      };
-    });
-
-    this.chartService.getSystemHealth().subscribe(data => {
-      this.systemHealthChartOptions = {
-        ...this.systemHealthChartOptions,
-        series: data.series,
-        xaxis: {
-          ...this.systemHealthChartOptions.xaxis,
           categories: data.categories || []
         },
         colors: data.colors || []
