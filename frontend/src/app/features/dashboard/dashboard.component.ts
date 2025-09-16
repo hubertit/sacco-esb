@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
-import { ChartService, ServiceMetrics } from '../../core/services/chart.service';
+import { ChartService } from '../../core/services/chart.service';
 import { FeatherIconComponent } from '../../shared/components/feather-icon/feather-icon.component';
 import { NgApexchartsModule } from 'ng-apexcharts';
 import {
@@ -116,46 +116,6 @@ export interface ChartOptions {
         </div>
       </div>
 
-      <!-- Service Health Section -->
-      <div class="service-health-section">
-        <h2 class="section-title">Service Health</h2>
-        <div class="service-cards">
-          <div *ngFor="let service of services" 
-               class="service-card" 
-               [class.selected]="selectedService === service.id"
-               [class.status-healthy]="service.status === 'healthy'"
-               [class.status-warning]="service.status === 'warning'"
-               [class.status-error]="service.status === 'error'"
-               (click)="selectService(service.id)">
-            <div class="service-header">
-              <h3>{{ service.name }}</h3>
-              <span class="status-badge">{{ service.status }}</span>
-            </div>
-            <div class="service-metrics">
-              <div class="metric">
-                <span class="label">Uptime</span>
-                <span class="value">{{ service.uptime }}</span>
-              </div>
-              <div class="metric">
-                <span class="label">Response Time</span>
-                <span class="value">{{ service.responseTime }}ms</span>
-              </div>
-              <div class="metric">
-                <span class="label">Success Rate</span>
-                <span class="value">{{ service.successRate }}%</span>
-              </div>
-              <div class="metric">
-                <span class="label">Requests/min</span>
-                <span class="value">{{ service.requestsPerMinute }}</span>
-              </div>
-            </div>
-            <div class="service-footer" *ngIf="service.lastIncident">
-              <app-feather-icon name="alert-triangle" size="14px"></app-feather-icon>
-              <span>Last incident: {{ service.lastIncident }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
 
       <!-- Charts Section -->
       <div class="charts-grid">
@@ -320,121 +280,6 @@ export interface ChartOptions {
       min-height: 100%;
     }
 
-    .section-title {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: #1e293b;
-      margin: 0 0 16px 0;
-    }
-
-    .service-health-section {
-      margin-bottom: 16px;
-      width: 100%;
-    }
-
-    .service-cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 16px;
-    }
-
-    .service-card {
-      background: white;
-      border-radius: 4px;
-      border: 1px solid #e5e7eb;
-      padding: 16px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-
-      &:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-      }
-
-      &.selected {
-        border-color: #3498db;
-        box-shadow: 0 0 0 1px #3498db;
-      }
-
-      &.status-healthy { border-left: 4px solid #1b2e4b; }
-      &.status-warning { border-left: 4px solid #5c7299; }
-      &.status-error { border-left: 4px solid #94a3b8; }
-
-      .service-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 16px;
-
-        h3 {
-          font-size: 1rem;
-          font-weight: 600;
-          color: #1e293b;
-          margin: 0;
-        }
-
-        .status-badge {
-          padding: 4px 8px;
-          border-radius: 4px;
-          font-size: 0.75rem;
-          font-weight: 500;
-          text-transform: capitalize;
-
-          .status-healthy & {
-            background: rgba(27, 46, 75, 0.1);
-            color: #1b2e4b;
-          }
-
-          .status-warning & {
-            background: rgba(92, 114, 153, 0.1);
-            color: #5c7299;
-          }
-
-          .status-error & {
-            background: rgba(148, 163, 184, 0.1);
-            color: #94a3b8;
-          }
-        }
-      }
-
-      .service-metrics {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-
-        .metric {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-
-          .label {
-            font-size: 0.75rem;
-            color: #64748b;
-          }
-
-          .value {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #1e293b;
-          }
-        }
-      }
-
-      .service-footer {
-        margin-top: 16px;
-        padding-top: 12px;
-        border-top: 1px solid #e5e7eb;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        color: #f1c40f;
-        font-size: 0.75rem;
-
-        app-feather-icon {
-          color: inherit;
-        }
-      }
-    }
 
     .stats-grid {
       display: grid;
@@ -635,8 +480,6 @@ export class DashboardComponent implements OnInit {
   userName: string;
   userRole: string;
   
-  services: ServiceMetrics[] = [];
-  selectedService: string = '';
   
   public volumeChartOptions: any = {
     series: [],
@@ -900,9 +743,6 @@ export class DashboardComponent implements OnInit {
     };
   }
 
-  selectService(serviceId: string) {
-    // Service selection is no longer needed
-  }
 
   private loadChartData() {
     // Load transaction volume data
