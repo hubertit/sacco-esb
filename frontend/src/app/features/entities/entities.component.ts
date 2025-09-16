@@ -48,7 +48,7 @@ interface Entity {
   styles: [`
     :host {
       display: block;
-      padding: 24px;
+      padding: 12px;
     }
 
     .card {
@@ -71,7 +71,7 @@ interface Entity {
     }
 
     .card-body {
-      padding: 1.5rem;
+      padding: 1rem;
     }
 
     .btn-primary {

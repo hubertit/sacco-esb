@@ -59,7 +59,7 @@ import { UserService, User, UserType } from '../../core/services/user.service';
   styles: [`
     :host {
       display: block;
-      padding: 24px;
+      padding: 12px;
     }
 
     .card {
@@ -82,7 +82,7 @@ import { UserService, User, UserType } from '../../core/services/user.service';
     }
 
     .card-body {
-      padding: 1.5rem;
+      padding: 1rem;
     }
 
     .btn-primary {
