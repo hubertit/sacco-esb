@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, throwError } from 'rxjs';
-import { delay } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 export interface User {
   id: number;
@@ -12,21 +11,21 @@ export interface User {
 const MOCK_USERS = [
   {
     id: 1,
-    email: 'admin@sacco.com',
+    email: 'admin@sacco.rw',
     password: 'admin123',
     name: 'Admin User',
     role: 'ADMIN'
   },
   {
     id: 2,
-    email: 'user@sacco.com',
+    email: 'user@sacco.rw',
     password: 'user123',
     name: 'Regular User',
     role: 'USER'
   },
   {
     id: 3,
-    email: 'manager@sacco.com',
+    email: 'manager@sacco.rw',
     password: 'manager123',
     name: 'Manager User',
     role: 'MANAGER'
@@ -87,5 +86,9 @@ export class AuthService {
 
   getToken(): string | null {
     return localStorage.getItem('sacco.token');
+  }
+
+  getUserRole(): string {
+    return this.currentUser?.role || '';
   }
 }
