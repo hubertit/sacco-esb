@@ -98,13 +98,35 @@ import { UserService, User, UserType } from '../../core/services/user.service';
         color: white;
       }
     }
+
+    :host ::ng-deep {
+      .badge {
+        padding: 0.35em 0.65em;
+        font-size: 0.75em;
+        font-weight: 500;
+        border-radius: 0.25rem;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+      }
+
+      .badge-primary {
+        color: #fff;
+        background-color: #1b2e4b;
+      }
+
+      .badge-info {
+        color: #fff;
+        background-color: #3498db;
+      }
+    }
   `]
 })
 export class UsersComponent implements OnInit {
   columns: TableColumn[] = [
     { key: 'id', title: 'ID', type: 'text', sortable: true },
     { key: 'name', title: 'Name', type: 'text', sortable: true },
-    { key: 'type', title: 'Type', type: 'text', sortable: true },
+    { key: 'type', title: 'Type', type: 'custom', sortable: true, template: this.userTypeBadgeTemplate },
     { key: 'email', title: 'Email', type: 'text', sortable: true },
     { key: 'role', title: 'Role', type: 'text', sortable: true },
     { key: 'status', title: 'Status', type: 'status', sortable: true },
@@ -113,6 +135,12 @@ export class UsersComponent implements OnInit {
   ];
 
   users: User[] = [];
+
+  userTypeBadgeTemplate = (item: User) => `
+    <span class="badge ${item.type === 'Human' ? 'badge-primary' : 'badge-info'}">
+      ${item.type}
+    </span>
+  `;
 
   constructor(private userService: UserService) {}
 
