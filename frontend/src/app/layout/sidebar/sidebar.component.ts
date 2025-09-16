@@ -4,6 +4,7 @@ import { RouterModule, Router } from '@angular/router';
 import { NavigationService, MenuItem } from '../../core/services/navigation.service';
 import { FeatherIconComponent } from '../../shared/components/feather-icon/feather-icon.component';
 import { InactivityService } from '../../core/services/inactivity.service';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -15,6 +16,16 @@ import { InactivityService } from '../../core/services/inactivity.service';
         <div class="logo-container">
           <img src="assets/img/icon.png" alt="Logo" class="logo">
           <span class="logo-text" *ngIf="!isCollapsed">SACCO ESB</span>
+        </div>
+      </div>
+
+      <div class="user-info" *ngIf="!isCollapsed">
+        <div class="user-avatar">
+          <img [src]="userAvatar" [alt]="userName">
+        </div>
+        <div class="user-details text-center">
+          <h5 class="user-name">{{ userName }}</h5>
+          <span class="user-role">{{ userRole }}</span>
         </div>
       </div>
 
@@ -69,13 +80,25 @@ export class SidebarComponent {
   @Output() toggleCollapse = new EventEmitter<void>();
   
   menuItems: MenuItem[];
+  userName: string = '';
+  userRole: string = '';
+  userAvatar: string = '/assets/img/user.png';
 
   constructor(
     private navigationService: NavigationService,
     private router: Router,
-    private inactivityService: InactivityService
+    private inactivityService: InactivityService,
+    private authService: AuthService
   ) {
     this.menuItems = this.navigationService.getMenuItems();
+    const user = this.authService.getCurrentUser();
+    if (user) {
+      this.userName = user.name;
+      this.userRole = user.role;
+      if (user.avatar) {
+        this.userAvatar = user.avatar;
+      }
+    }
   }
 
   onToggleCollapse(): void {
