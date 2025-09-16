@@ -70,14 +70,88 @@ export class UserService {
       lastLogin: '2024-03-16T08:30:00',
       createdAt: '2024-02-15',
       apiKey: 'sk_live_51NcezpLkdIwcKRf...'
+    },
+    {
+      id: 5,
+      name: 'Sarah Johnson',
+      email: 'sarah.j@example.com',
+      type: 'Human',
+      role: 'Support',
+      status: 'active',
+      lastLogin: '2024-03-16T11:20:00',
+      createdAt: '2024-02-20',
+      phoneNumber: '+250789123458',
+      department: 'Customer Support'
+    },
+    {
+      id: 6,
+      name: 'Michael Chen',
+      email: 'm.chen@example.com',
+      type: 'Human',
+      role: 'Developer',
+      status: 'active',
+      lastLogin: '2024-03-16T09:15:00',
+      createdAt: '2024-02-25',
+      phoneNumber: '+250789123459',
+      department: 'Engineering'
+    },
+    {
+      id: 7,
+      name: 'Analytics Service',
+      email: 'analytics@system.com',
+      type: 'Application',
+      role: 'System',
+      status: 'active',
+      lastLogin: '2024-03-16T00:00:00',
+      createdAt: '2024-03-01',
+      apiKey: 'ak_test_51NcezpLkdIwcKRf...'
+    },
+    {
+      id: 8,
+      name: 'Emma Wilson',
+      email: 'e.wilson@example.com',
+      type: 'Human',
+      role: 'Analyst',
+      status: 'inactive',
+      lastLogin: '2024-03-10T14:30:00',
+      createdAt: '2024-03-05',
+      phoneNumber: '+250789123460',
+      department: 'Analytics'
+    },
+    {
+      id: 9,
+      name: 'Reporting Service',
+      email: 'reports@system.com',
+      type: 'Application',
+      role: 'System',
+      status: 'inactive',
+      lastLogin: '2024-03-15T23:59:59',
+      createdAt: '2024-03-10',
+      apiKey: 'rk_test_51NcezpLkdIwcKRf...'
+    },
+    {
+      id: 10,
+      name: 'David Brown',
+      email: 'd.brown@example.com',
+      type: 'Human',
+      role: 'Manager',
+      status: 'active',
+      lastLogin: '2024-03-16T12:00:00',
+      createdAt: '2024-03-15',
+      phoneNumber: '+250789123461',
+      department: 'Sales'
     }
   ];
 
   constructor(private http: HttpClient) {}
 
+  getMockUsers(): User[] {
+    return this.mockUsers;
+  }
+
   getUsers(): Observable<User[]> {
     // TODO: Replace with actual API call
-    return of(this.mockUsers).pipe(delay(500));
+    return of(this.mockUsers).pipe(delay(100));
   }
 
   getUserById(id: number): Observable<User | undefined> {

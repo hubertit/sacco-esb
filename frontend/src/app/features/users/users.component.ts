@@ -13,9 +13,7 @@ import { UserService, User, UserType } from '../../core/services/user.service';
   standalone: true,
   imports: [CommonModule, RouterModule, HttpClientModule, FeatherIconComponent, DataTableComponent],
   template: `
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-12">
+    <div class="dashboard-container">
           <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
               <h4 class="card-title mb-0">Users</h4>
@@ -52,8 +50,6 @@ import { UserService, User, UserType } from '../../core/services/user.service';
               ></app-data-table>
             </div>
           </div>
-        </div>
-      </div>
     </div>
   `,
   styles: [`
@@ -145,13 +141,8 @@ export class UsersComponent implements OnInit {
   constructor(private userService: UserService) {}
 
   ngOnInit() {
-    this.loadUsers();
-  }
-
-  private loadUsers() {
-    this.userService.getUsers().subscribe(users => {
-      this.users = users;
-    });
+    // Data is loaded directly like in entities component
+    this.users = this.userService.getMockUsers();
   }
 
   openAddUserModal(type: UserType) {

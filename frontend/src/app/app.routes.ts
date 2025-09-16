@@ -4,6 +4,7 @@ import { MainLayoutComponent } from './layout/main-layout/main-layout.component'
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { EntitiesComponent } from './features/entities/entities.component';
 import { UsersComponent } from './features/users/users.component';
+import { RolesComponent } from './features/roles/roles.component';
 import { AuthGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
@@ -27,6 +28,10 @@ export const routes: Routes = [
       {
         path: 'users',
         component: UsersComponent
+      },
+      {
+        path: 'roles',
+        component: RolesComponent
       },
       {
         path: '',

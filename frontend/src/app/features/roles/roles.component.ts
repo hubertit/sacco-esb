@@ -1,46 +1,38 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
-import { TableColumn } from '../../shared/components/data-table/data-table.component';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { HttpClientModule } from '@angular/common/http';
 import { FeatherIconComponent } from '../../shared/components/feather-icon/feather-icon.component';
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
+import { TableColumn } from '../../shared/components/data-table/data-table.component';
 
-declare var $: any;
-
-interface Entity {
-  id: number;
-  name: string;
-  type: string;
-  status: 'active' | 'inactive';
-  createdAt: string;
-  updatedAt: string;
-}
+import { RoleService, Role } from '../../core/services/role.service';
 
 @Component({
-  selector: 'app-entities',
+  selector: 'app-roles',
   standalone: true,
-  imports: [CommonModule, RouterModule, FeatherIconComponent, DataTableComponent],
+  imports: [CommonModule, RouterModule, HttpClientModule, FeatherIconComponent, DataTableComponent],
   template: `
     <div class="dashboard-container">
           <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-              <h4 class="card-title mb-0">Entities</h4>
+              <h4 class="card-title mb-0">Roles</h4>
               <div class="dropdown">
-                <button class="btn btn-primary btn-sm d-flex align-items-center gap-2" type="button" id="addEntityDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <button class="btn btn-primary btn-sm d-flex align-items-center gap-2" type="button" id="addRoleDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                   <app-feather-icon name="plus" size="14px"></app-feather-icon>
-                  Add Entity
+                  Add Role
                 </button>
-                <ul class="dropdown-menu" aria-labelledby="addEntityDropdown">
+                <ul class="dropdown-menu" aria-labelledby="addRoleDropdown">
                   <li>
-                    <a class="dropdown-item d-flex align-items-center gap-2" (click)="openAddEntityModal('Financial')">
-                      <app-feather-icon name="briefcase" size="14px"></app-feather-icon>
-                      Add Financial Institution
+                    <a class="dropdown-item d-flex align-items-center gap-2" (click)="openAddRoleModal('System')">
+                      <app-feather-icon name="shield" size="14px"></app-feather-icon>
+                      Add System Role
                     </a>
                   </li>
                   <li>
-                    <a class="dropdown-item d-flex align-items-center gap-2" (click)="openAddEntityModal('Payment')">
-                      <app-feather-icon name="credit-card" size="14px"></app-feather-icon>
-                      Add Payment Service
+                    <a class="dropdown-item d-flex align-items-center gap-2" (click)="openAddRoleModal('Custom')">
+                      <app-feather-icon name="users" size="14px"></app-feather-icon>
+                      Add Custom Role
                     </a>
                   </li>
                 </ul>
@@ -49,7 +41,7 @@ interface Entity {
             <div class="card-body">
               <app-data-table
                 [columns]="columns"
-                [data]="entities"
+                [data]="roles"
                 [striped]="true"
                 (onSort)="handleSort($event)"
                 (onSearch)="handleSearch($event)"
@@ -61,11 +53,9 @@ interface Entity {
     </div>
   `,
   styles: [`
-    .dashboard-container {
+    :host {
+      display: block;
       padding: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
     }
 
     .card {
@@ -104,54 +94,64 @@ interface Entity {
         color: white;
       }
     }
+
+    :host ::ng-deep {
+      .badge {
+        padding: 0.35em 0.65em;
+        font-size: 0.75em;
+        font-weight: 500;
+        border-radius: 0.25rem;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+      }
+
+      .badge-primary {
+        color: #fff;
+        background-color: #1b2e4b;
+      }
+
+      .badge-info {
+        color: #fff;
+        background-color: #3498db;
+      }
+    }
   `]
 })
-export class EntitiesComponent implements OnInit, AfterViewInit {
+export class RolesComponent implements OnInit {
+  permissionCountTemplate = (item: Role) => `
+    <span class="badge badge-info">
+      ${item.permissions.length} permissions
+    </span>
+  `;
+
   columns: TableColumn[] = [
     { key: 'id', title: 'ID', type: 'text', sortable: true },
     { key: 'name', title: 'Name', type: 'text', sortable: true },
-    { key: 'type', title: 'Type', type: 'text', sortable: true },
+    { key: 'description', title: 'Description', type: 'text', sortable: true },
+    { key: 'permissions', title: 'Permissions', type: 'custom', sortable: true, template: this.permissionCountTemplate },
     { key: 'status', title: 'Status', type: 'status', sortable: true },
     { key: 'createdAt', title: 'Created At', type: 'date', sortable: true },
     { key: 'updatedAt', title: 'Updated At', type: 'date', sortable: true }
   ];
 
-  entities: Entity[] = [
-    {
-      id: 1,
-      name: 'Bank A',
-      type: 'Financial Institution',
-      status: 'active',
-      createdAt: '2024-03-15',
-      updatedAt: '2024-03-15'
-    },
-    {
-      id: 2,
-      name: 'SACCO B',
-      type: 'Cooperative',
-      status: 'active',
-      createdAt: '2024-03-14',
-      updatedAt: '2024-03-15'
-    },
-    {
-      id: 3,
-      name: 'Payment Provider C',
-      type: 'Payment Service',
-      status: 'inactive',
-      createdAt: '2024-03-13',
-      updatedAt: '2024-03-14'
-    }
-  ];
+  roles: Role[] = [];
 
-  ngOnInit() {}
+  constructor(private roleService: RoleService) {}
 
-  ngAfterViewInit() {
-    // DataTable initialization is handled by the DataTableComponent
+  ngOnInit() {
+    this.loadRoles();
   }
 
-  openAddEntityModal(type: 'Financial' | 'Payment') {
-    // TODO: Implement add entity modal
-    console.log('Open add entity modal for type:', type);
+  private loadRoles() {
+    this.roleService.getRoles().subscribe(roles => {
+      this.roles = roles;
+    });
+  }
+
+  openAddRoleModal(type: 'System' | 'Custom') {
+    // TODO: Implement add role modal
+    console.log('Open add role modal for type:', type);
   }
 
   handleSort(event: { column: string; direction: 'asc' | 'desc' }) {
@@ -172,15 +172,5 @@ export class EntitiesComponent implements OnInit, AfterViewInit {
   handlePageSizeChange(size: number) {
     // TODO: Implement page size change
     console.log('Page size:', size);
-  }
-
-  editEntity(entity: Entity) {
-    // TODO: Implement edit entity
-    console.log('Edit entity:', entity);
-  }
-
-  deleteEntity(entity: Entity) {
-    // TODO: Implement delete entity
-    console.log('Delete entity:', entity);
   }
 }
