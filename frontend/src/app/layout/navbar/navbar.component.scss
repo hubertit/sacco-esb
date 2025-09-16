@@ -1,0 +1,138 @@
+@import '../../../styles/variables';
+
+.navbar {
+  height: $header-height;
+  background: white;
+  box-shadow: $box-shadow;
+  padding: 0 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: $zindex-fixed;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  .brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: $primary;
+    font-size: 1.25rem;
+    font-weight: $font-weight-bold;
+
+    img {
+      height: 32px;
+      width: auto;
+    }
+  }
+
+  .sidebar-toggle {
+    width: 24px;
+    height: 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    padding: 0;
+
+    span, &::before, &::after {
+      content: '';
+      display: block;
+      height: 2px;
+      width: 100%;
+      background: $gray-600;
+      position: absolute;
+      left: 0;
+      transition: $transition-base;
+    }
+
+    span { top: 50%; transform: translateY(-50%); }
+    &::before { top: 5px; }
+    &::after { bottom: 5px; }
+
+    &:hover {
+      span, &::before, &::after {
+        background: $primary;
+      }
+    }
+  }
+}
+
+.navbar-menu {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-end {
+  margin-left: auto;
+}
+
+.user-menu {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: $border-radius;
+  transition: $transition-base;
+
+  &:hover {
+    background: $gray-100;
+  }
+
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .user-info {
+    display: flex;
+    flex-direction: column;
+
+    .user-name {
+      font-weight: $font-weight-bold;
+      color: $gray-900;
+      font-size: 0.875rem;
+    }
+
+    .user-role {
+      color: $gray-600;
+      font-size: 0.75rem;
+    }
+  }
+}
+
+.user-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border-radius: $border-radius;
+  box-shadow: $box-shadow;
+  min-width: 160px;
+  margin-top: 0.5rem;
+  overflow: hidden;
+
+  a {
+    display: block;
+    padding: 0.75rem 1rem;
+    color: $gray-700;
+    transition: $transition-base;
+
+    &:hover {
+      background: $gray-100;
+      color: $primary;
+    }
+  }
+}
