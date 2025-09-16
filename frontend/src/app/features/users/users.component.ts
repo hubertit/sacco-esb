@@ -13,92 +13,46 @@ import { UserService, User, UserType } from '../../core/services/user.service';
   standalone: true,
   imports: [CommonModule, RouterModule, HttpClientModule, FeatherIconComponent, DataTableComponent],
   template: `
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-12">
-          <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <h4 class="card-title mb-0">Users</h4>
-              <div class="dropdown">
-                <button class="btn btn-primary btn-sm d-flex align-items-center gap-2" type="button" id="addUserDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                  <app-feather-icon name="plus" size="14px"></app-feather-icon>
-                  Add User
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="addUserDropdown">
-                  <li>
-                    <a class="dropdown-item d-flex align-items-center gap-2" (click)="openAddUserModal('Human')">
-                      <app-feather-icon name="user" size="14px"></app-feather-icon>
-                      Add Human User
-                    </a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item d-flex align-items-center gap-2" (click)="openAddUserModal('Application')">
-                      <app-feather-icon name="box" size="14px"></app-feather-icon>
-                      Add Application
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            </div>
-            <div class="card-body">
-              <app-data-table
-                [columns]="columns"
-                [data]="users"
-                [striped]="true"
-                (onSort)="handleSort($event)"
-                (onSearch)="handleSearch($event)"
-                (onPageChange)="handlePageChange($event)"
-                (onPageSizeChange)="handlePageSizeChange($event)"
-              ></app-data-table>
-            </div>
+    <div class="page-container">
+      <div class="page-header">
+        <h4 class="page-title">Users</h4>
+        <div class="page-actions">
+          <div class="dropdown">
+            <button class="btn btn-primary btn-sm d-flex align-items-center gap-2" type="button" id="addUserDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+              <app-feather-icon name="plus" size="14px"></app-feather-icon>
+              Add User
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="addUserDropdown">
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2" (click)="openAddUserModal('Human')">
+                  <app-feather-icon name="user" size="14px"></app-feather-icon>
+                  Add Human User
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2" (click)="openAddUserModal('Application')">
+                  <app-feather-icon name="box" size="14px"></app-feather-icon>
+                  Add Application
+                </a>
+              </li>
+            </ul>
           </div>
         </div>
+      </div>
+      <div class="page-content">
+        <app-data-table
+          [columns]="columns"
+          [data]="users"
+          [striped]="true"
+          (onSort)="handleSort($event)"
+          (onSearch)="handleSearch($event)"
+          (onPageChange)="handlePageChange($event)"
+          (onPageSizeChange)="handlePageSizeChange($event)"
+        ></app-data-table>
       </div>
     </div>
   `,
   styles: [`
-    :host {
-      display: block;
-      padding: 24px;
-    }
-
-    .card {
-      background: white;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    }
-
-    .card-header {
-      padding: 1rem 1.5rem;
-      border-bottom: 1px solid #e5e7eb;
-      background-color: #fff;
-    }
-
-    .card-title {
-      color: #1e293b;
-      font-size: 1.25rem;
-      font-weight: 600;
-    }
-
-    .card-body {
-      padding: 1.5rem;
-    }
-
-    .btn-primary {
-      background-color: #1b2e4b;
-      border-color: #1b2e4b;
-
-      &:hover {
-        background-color: #3498db;
-        border-color: #3498db;
-      }
-
-      app-feather-icon {
-        color: white;
-      }
-    }
-
     :host ::ng-deep {
       .badge {
         padding: 0.35em 0.65em;
