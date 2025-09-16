@@ -504,7 +504,7 @@ export class DashboardComponent implements OnInit {
       title: { text: 'Transactions per Hour' },
       labels: {
         style: { colors: '#64748b' },
-        formatter: (val) => Math.round(val).toString()
+        formatter: (val) => val.toFixed(2)
       }
     },
     dataLabels: { enabled: false },
@@ -530,7 +530,7 @@ export class DashboardComponent implements OnInit {
       title: { text: 'Success Rate (%)' },
       labels: { 
         style: { colors: '#64748b' },
-        formatter: (val) => Math.round(val) + '%'
+        formatter: (val) => val.toFixed(2) + '%'
       },
       min: 90,
       max: 100
@@ -554,7 +554,7 @@ export class DashboardComponent implements OnInit {
     colors: ['#ffc700', '#ff0000', '#3498db'],
     dataLabels: { 
       enabled: true,
-      formatter: (val) => val + '%'
+      formatter: (val) => val.toFixed(2) + '%'
     },
     plotOptions: {
       pie: {
@@ -601,7 +601,7 @@ export class DashboardComponent implements OnInit {
     },
     dataLabels: {
       enabled: true,
-      formatter: (val) => val.toString(),
+      formatter: (val) => val.toFixed(2),
       style: { colors: ['#fff'] }
     },
     legend: { show: false },
@@ -626,8 +626,8 @@ export class DashboardComponent implements OnInit {
       labels: {
         style: { colors: '#64748b' },
         formatter: (val) => {
-          if (val >= 1000) return (val / 1000).toFixed(1) + 'K';
-          return val.toString();
+          if (val >= 1000) return (val / 1000).toFixed(2) + 'K';
+          return val.toFixed(2);
         }
       }
     },
@@ -636,7 +636,7 @@ export class DashboardComponent implements OnInit {
     colors: ['#2ecc71', '#e74c3c', '#3498db'],
     tooltip: {
       y: {
-        formatter: (val) => val.toString()
+        formatter: (val) => val.toFixed(2)
       }
     },
     plotOptions: {
@@ -663,9 +663,9 @@ export class DashboardComponent implements OnInit {
       labels: {
         style: { colors: '#64748b' },
         formatter: (val) => {
-          if (val >= 1000000) return (val / 1000000).toFixed(1) + 'M';
-          if (val >= 1000) return (val / 1000).toFixed(1) + 'K';
-          return val.toString();
+          if (val >= 1000000) return (val / 1000000).toFixed(2) + 'M';
+          if (val >= 1000) return (val / 1000).toFixed(2) + 'K';
+          return val.toFixed(2);
         }
       }
     },
@@ -678,9 +678,9 @@ export class DashboardComponent implements OnInit {
       x: { format: 'dd MMM HH:mm' },
       y: {
         formatter: (val) => {
-          if (val >= 1000000) return (val / 1000000).toFixed(1) + 'M RWF';
-          if (val >= 1000) return (val / 1000).toFixed(1) + 'K RWF';
-          return val.toString() + ' RWF';
+          if (val >= 1000000) return (val / 1000000).toFixed(2) + 'M RWF';
+          if (val >= 1000) return (val / 1000).toFixed(2) + 'K RWF';
+          return val.toFixed(2) + ' RWF';
         }
       }
     }
