@@ -523,9 +523,9 @@ export class DashboardComponent implements OnInit {
     },
     yaxis: {
       title: { text: 'Success Rate (%)' },
-      labels: {
+      labels: { 
         style: { colors: '#64748b' },
-        formatter: (val) => val.toFixed(2) + '%'
+        formatter: (val) => Math.round(val) + '%'
       },
       min: 90,
       max: 100
