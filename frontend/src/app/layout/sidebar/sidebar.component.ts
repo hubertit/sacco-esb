@@ -40,7 +40,7 @@ import { FeatherIconComponent } from '../../shared/components/feather-icon/feath
 
             <!-- Single Menu Item -->
             <div class="nav-item" *ngIf="!item.children">
-              <a class="nav-link" [routerLink]="item.path" routerLinkActive="active">
+              <a class="nav-link" [routerLink]="[item.path]" routerLinkActive="active">
                 <app-feather-icon [name]="item.icon" size="18px"></app-feather-icon>
                 <span class="nav-text" *ngIf="!isCollapsed">{{ item.title }}</span>
               </a>

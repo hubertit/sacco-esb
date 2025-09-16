@@ -142,12 +142,6 @@ export class UsersComponent implements OnInit {
 
   users: User[] = [];
 
-  userTypeBadgeTemplate = (item: User) => `
-    <span class="badge ${item.type === 'Human' ? 'badge-primary' : 'badge-info'}">
-      ${item.type}
-    </span>
-  `;
-
   constructor(private userService: UserService) {}
 
   ngOnInit() {
