@@ -123,6 +123,12 @@ import { UserService, User, UserType } from '../../core/services/user.service';
   `]
 })
 export class UsersComponent implements OnInit {
+  userTypeBadgeTemplate = (item: User) => `
+    <span class="badge ${item.type === 'Human' ? 'badge-primary' : 'badge-info'}">
+      ${item.type}
+    </span>
+  `;
+
   columns: TableColumn[] = [
     { key: 'id', title: 'ID', type: 'text', sortable: true },
     { key: 'name', title: 'Name', type: 'text', sortable: true },
