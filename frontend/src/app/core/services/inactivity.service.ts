@@ -8,7 +8,7 @@ import { takeUntil, debounceTime } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class InactivityService {
-  private readonly TIMEOUT = 30000; // 30 seconds
+  private readonly TIMEOUT = 300000; // 5 minutes
   private timeoutId: any;
   private unsubscribe$ = new Subject<void>();
   private userActivity: Subscription | null = null;
