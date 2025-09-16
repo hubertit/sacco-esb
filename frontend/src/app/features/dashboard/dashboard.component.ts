@@ -170,7 +170,7 @@ export interface ChartOptions {
         </div>
 
         <!-- Transaction Amount Analysis -->
-        <div class="chart-card amount-chart">
+        <div class="chart-card amount-chart amount-chart-quarter">
           <div class="card-header">
             <h3>Transaction Amount Analysis</h3>
             <div class="card-actions">
@@ -184,11 +184,11 @@ export interface ChartOptions {
               <apx-chart
                 [series]="amountChartOptions.series"
                 [chart]="amountChartOptions.chart"
-                [xaxis]="amountChartOptions.xaxis"
-                [yaxis]="amountChartOptions.yaxis"
+                [labels]="amountChartOptions.labels"
                 [legend]="amountChartOptions.legend"
                 [colors]="amountChartOptions.colors"
                 [dataLabels]="amountChartOptions.dataLabels"
+                [plotOptions]="amountChartOptions.plotOptions"
               ></apx-chart>
             </div>
           </div>
@@ -455,6 +455,11 @@ export interface ChartOptions {
       .card-body {
         padding: 1rem;
         min-height: 280px;
+      }
+
+      .amount-chart-quarter {
+        flex: 0 0 25%;
+        max-width: 25%;
       }
     }
 
