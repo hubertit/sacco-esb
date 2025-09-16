@@ -1,8 +1,9 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { NavigationService, MenuItem } from '../../core/services/navigation.service';
 import { FeatherIconComponent } from '../../shared/components/feather-icon/feather-icon.component';
+import { InactivityService } from '../../core/services/inactivity.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -50,6 +51,10 @@ import { FeatherIconComponent } from '../../shared/components/feather-icon/feath
       </div>
 
       <div class="sidebar-footer">
+        <div class="footer-item" (click)="lockScreen()">
+          <app-feather-icon name="lock" size="18px"></app-feather-icon>
+          <span *ngIf="!isCollapsed">Lock Screen</span>
+        </div>
         <div class="footer-item" (click)="onToggleCollapse()">
           <app-feather-icon [name]="isCollapsed ? 'chevron-right' : 'chevron-left'" size="18px"></app-feather-icon>
           <span *ngIf="!isCollapsed">Collapse Menu</span>
@@ -65,7 +70,11 @@ export class SidebarComponent {
   
   menuItems: MenuItem[];
 
-  constructor(private navigationService: NavigationService) {
+  constructor(
+    private navigationService: NavigationService,
+    private router: Router,
+    private inactivityService: InactivityService
+  ) {
     this.menuItems = this.navigationService.getMenuItems();
   }
 
@@ -90,5 +99,9 @@ export class SidebarComponent {
     return item.children.some(child => 
       window.location.pathname.startsWith(child.path || '')
     );
+  }
+
+  lockScreen(): void {
+    this.router.navigate(['/lock']);
   }
 }

@@ -6,6 +6,7 @@ export interface User {
   name: string;
   email: string;
   role: string;
+  avatar?: string;
 }
 
 const MOCK_USERS = [
@@ -14,21 +15,24 @@ const MOCK_USERS = [
     email: 'admin@sacco.rw',
     password: 'admin123',
     name: 'Admin User',
-    role: 'ADMIN'
+    role: 'ADMIN',
+    avatar: '/assets/img/user.png'
   },
   {
     id: 2,
     email: 'user@sacco.rw',
     password: 'user123',
     name: 'Regular User',
-    role: 'USER'
+    role: 'USER',
+    avatar: '/assets/img/user.png'
   },
   {
     id: 3,
     email: 'manager@sacco.rw',
     password: 'manager123',
     name: 'Manager User',
-    role: 'MANAGER'
+    role: 'MANAGER',
+    avatar: '/assets/img/user.png'
   }
 ];
 
@@ -90,5 +94,15 @@ export class AuthService {
 
   getUserRole(): string {
     return this.currentUser?.role || '';
+  }
+
+  validatePassword(password: string): Observable<boolean> {
+    return new Observable(observer => {
+      setTimeout(() => {
+        const user = MOCK_USERS.find(u => u.id === this.currentUser?.id && u.password === password);
+        observer.next(!!user);
+        observer.complete();
+      }, 500);
+    });
   }
 }

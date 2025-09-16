@@ -55,13 +55,13 @@
       display: none;
     }
 
-    i {
+    app-feather-icon {
       position: absolute;
       left: 1rem;
       top: 50%;
       transform: translateY(-50%);
       color: $gray-500;
-      font-size: 0.875rem;
+      display: flex;
     }
 
     input {
@@ -240,18 +240,18 @@
         font-size: 0.875rem;
         transition: all 0.2s ease;
 
-        i {
-          font-size: 1rem;
+        app-feather-icon {
           color: $gray-500;
-          width: 20px;
-          display: inline-block;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
         &:hover {
           background: rgba($primary, 0.05);
           color: $primary;
 
-          i {
+          app-feather-icon {
             color: $primary;
           }
         }
