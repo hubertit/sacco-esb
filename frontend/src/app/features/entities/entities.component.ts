@@ -96,7 +96,28 @@ export class EntitiesComponent implements OnInit, AfterViewInit {
     { key: 'type', title: 'Type', type: 'text', sortable: true },
     { key: 'status', title: 'Status', type: 'status', sortable: true },
     { key: 'createdAt', title: 'Created At', type: 'date', sortable: true },
-    { key: 'updatedAt', title: 'Updated At', type: 'date', sortable: true }
+    { key: 'updatedAt', title: 'Updated At', type: 'date', sortable: true },
+    {
+      key: 'actions',
+      title: 'Actions',
+      type: 'custom',
+      sortable: false,
+      render: (data: any, type: string, row: any) => {
+        if (type === 'display') {
+          return `
+            <div class="d-flex gap-2">
+              <button class="btn btn-sm btn-info" data-action="edit">
+                <i class="fas fa-edit"></i> Edit
+              </button>
+              <button class="btn btn-sm btn-danger" data-action="delete">
+                <i class="fas fa-trash"></i> Delete
+              </button>
+            </div>
+          `;
+        }
+        return data;
+      }
+    }
   ];
 
   entities: Entity[] = [
