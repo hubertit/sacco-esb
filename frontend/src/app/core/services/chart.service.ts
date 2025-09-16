@@ -137,26 +137,121 @@ export class ChartService {
     });
   }
 
-  getSystemHealth(): Observable<ChartData> {
-    const hours = Array.from({length: 12}, (_, i) => `${11-i}h ago`).reverse();
-    
+  getTransactionVolume(): Observable<ChartData> {
+    const hours = Array.from({length: 24}, (_, i) => `${23-i}h ago`).reverse();
     return of({
       series: [
         {
-          name: 'CPU Usage',
-          data: Array.from({length: 12}, () => Math.floor(Math.random() * 30 + 40))
+          name: 'MTN MOMO',
+          data: Array.from({length: 24}, () => Math.floor(Math.random() * 100 + 100))
         },
         {
-          name: 'Memory Usage',
-          data: Array.from({length: 12}, () => Math.floor(Math.random() * 20 + 60))
+          name: 'Airtel Money',
+          data: Array.from({length: 24}, () => Math.floor(Math.random() * 80 + 80))
         },
         {
-          name: 'Disk I/O',
-          data: Array.from({length: 12}, () => Math.floor(Math.random() * 40 + 30))
+          name: 'Internal',
+          data: Array.from({length: 24}, () => Math.floor(Math.random() * 150 + 200))
         }
       ],
       categories: hours,
-      colors: ['#1b2e4b', '#3498db', '#5c7299']
+      colors: ['#ffc700', '#ff0000', '#3498db']
+    });
+  }
+
+  getSuccessRate(): Observable<ChartData> {
+    const hours = Array.from({length: 24}, (_, i) => `${23-i}h ago`).reverse();
+    return of({
+      series: [
+        {
+          name: 'MTN MOMO',
+          data: Array.from({length: 24}, () => 99.5 + Math.random() * 0.4)
+        },
+        {
+          name: 'Airtel Money',
+          data: Array.from({length: 24}, () => 99.3 + Math.random() * 0.5)
+        },
+        {
+          name: 'Internal',
+          data: Array.from({length: 24}, () => 99.8 + Math.random() * 0.2)
+        }
+      ],
+      categories: hours,
+      colors: ['#ffc700', '#ff0000', '#3498db']
+    });
+  }
+
+  getAmountAnalysis(): Observable<ChartData> {
+    return of({
+      series: [
+        {
+          name: 'Total Value',
+          data: [2500000, 1800000, 5200000]
+        }
+      ],
+      categories: ['MTN MOMO', 'Airtel Money', 'Internal'],
+      colors: ['#3498db']
+    });
+  }
+
+  getErrorAnalysis(): Observable<ChartData> {
+    return of({
+      series: [{
+        name: 'Errors',
+        data: [45, 32, 28, 15, 10, 5]
+      }],
+      categories: [
+        'Insufficient Funds',
+        'Network Timeout',
+        'Invalid Account',
+        'Daily Limit Exceeded',
+        'Authentication Failed',
+        'Other'
+      ],
+      colors: ['#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16', '#22c55e']
+    });
+  }
+
+  getTransactionTypes(): Observable<ChartData> {
+    return of({
+      series: [
+        {
+          name: 'Deposits',
+          data: [450, 380, 620]
+        },
+        {
+          name: 'Withdrawals',
+          data: [380, 320, 480]
+        },
+        {
+          name: 'Transfers',
+          data: [180, 150, 350]
+        }
+      ],
+      categories: ['MTN MOMO', 'Airtel Money', 'Internal'],
+      colors: ['#2ecc71', '#e74c3c', '#3498db']
+    });
+  }
+
+  getValueTrends(): Observable<ChartData> {
+    const hours = Array.from({length: 24}, (_, i) => `${23-i}h ago`).reverse();
+    return of({
+      series: [
+        {
+          name: 'MTN MOMO',
+          data: Array.from({length: 24}, () => Math.floor(Math.random() * 1000000 + 1500000))
+        },
+        {
+          name: 'Airtel Money',
+          data: Array.from({length: 24}, () => Math.floor(Math.random() * 800000 + 1000000))
+        },
+        {
+          name: 'Internal',
+          data: Array.from({length: 24}, () => Math.floor(Math.random() * 2000000 + 3000000))
+        }
+      ],
+      categories: hours,
+      colors: ['#ffc700', '#ff0000', '#3498db']
     });
   }
 }

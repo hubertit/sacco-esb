@@ -638,7 +638,7 @@ export class DashboardComponent implements OnInit {
   services: ServiceMetrics[] = [];
   selectedService: string = '';
   
-  public volumeChartOptions: Partial<ChartOptions> = {
+  public volumeChartOptions: any = {
     series: [],
     chart: {
       type: 'area',
@@ -667,7 +667,7 @@ export class DashboardComponent implements OnInit {
     tooltip: { x: { format: 'dd MMM HH:mm' } }
   };
 
-  public successRateChartOptions: Partial<ChartOptions> = {
+  public successRateChartOptions: any = {
     series: [],
     chart: {
       type: 'line',
@@ -694,7 +694,7 @@ export class DashboardComponent implements OnInit {
     tooltip: { x: { format: 'dd MMM HH:mm' } }
   };
 
-  public amountChartOptions: Partial<ChartOptions> = {
+  public amountChartOptions: any = {
     series: [],
     chart: {
       type: 'bar',
@@ -727,7 +727,7 @@ export class DashboardComponent implements OnInit {
     colors: ['#ffc700', '#ff0000', '#3498db']
   };
 
-  public errorChartOptions: Partial<ChartOptions> = {
+  public errorChartOptions: any = {
     series: [],
     chart: {
       type: 'bar',
@@ -758,7 +758,7 @@ export class DashboardComponent implements OnInit {
     colors: ['#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16', '#22c55e']
   };
 
-  public transactionTypesChartOptions: Partial<ChartOptions> = {
+  public transactionTypesChartOptions: any = {
     series: [],
     chart: {
       type: 'bar',
@@ -797,7 +797,7 @@ export class DashboardComponent implements OnInit {
     }
   };
 
-  public valueTrendsChartOptions: Partial<ChartOptions> = {
+  public valueTrendsChartOptions: any = {
     series: [],
     chart: {
       type: 'area',
@@ -852,66 +852,30 @@ export class DashboardComponent implements OnInit {
   }
 
   private initializeCharts() {
-    // Initialize Distribution Chart
-    this.distributionChartOptions = {
-      chart: {
-        type: 'donut',
-        height: 350
-      },
-      legend: {
-        position: 'bottom',
-        horizontalAlign: 'center'
-      },
-      dataLabels: {
-        enabled: false
-      },
+    // Initialize chart options with default values
+    this.volumeChartOptions = this.getDefaultChartOptions();
+    this.successRateChartOptions = this.getDefaultChartOptions();
+    this.amountChartOptions = this.getDefaultChartOptions();
+    this.errorChartOptions = this.getDefaultChartOptions();
+    this.transactionTypesChartOptions = this.getDefaultChartOptions();
+    this.valueTrendsChartOptions = this.getDefaultChartOptions();
+  }
+
+  private getDefaultChartOptions(): any {
+    return {
       series: [],
-      labels: [],
-      colors: [],
+      chart: {
+        type: 'line',
+        height: 350,
+        toolbar: { show: false }
+      },
+      dataLabels: { enabled: false },
+      legend: { position: 'top', horizontalAlign: 'right' },
+      colors: ['#ffc700', '#ff0000', '#3498db'],
       xaxis: {
         type: 'category',
         categories: []
       },
-      stroke: {
-        width: 1
-      },
-      yaxis: {
-        labels: {
-          style: {
-            colors: []
-          }
-        }
-      },
-      title: {
-        text: ''
-      },
-      fill: {
-        opacity: 1
-      },
-      tooltip: {
-        enabled: true
-      }
-    };
-
-    // Initialize Performance Chart
-    this.performanceChartOptions = {
-      chart: {
-        type: 'bar',
-        height: 350,
-        stacked: true,
-        toolbar: {
-          show: false
-        }
-      },
-      xaxis: {
-        type: 'category',
-        categories: ['Internal', 'Push', 'Pull'],
-        labels: {
-          style: {
-            colors: '#64748b'
-          }
-        }
-      },
       yaxis: {
         labels: {
           style: {
@@ -919,17 +883,9 @@ export class DashboardComponent implements OnInit {
           }
         }
       },
-      legend: {
-        position: 'bottom',
-        horizontalAlign: 'center'
-      },
-      dataLabels: {
-        enabled: false
-      },
-      colors: [],
-      series: [],
       stroke: {
-        width: 1
+        width: 2,
+        curve: 'smooth'
       },
       fill: {
         opacity: 1
@@ -942,226 +898,10 @@ export class DashboardComponent implements OnInit {
       },
       labels: []
     };
+  }
 
-    // Initialize Error Distribution Chart
-    this.errorChartOptions = {
-      series: [],
-      chart: {
-        type: 'bar',
-        height: 350,
-        toolbar: {
-          show: false
-        }
-      },
-      plotOptions: {
-        bar: {
-          borderRadius: 4,
-          horizontal: true,
-          distributed: true,
-          dataLabels: {
-            position: 'top'
-          }
-        }
-      },
-      dataLabels: {
-        enabled: true,
-        formatter: function (val) {
-          return val.toString();
-        },
-        offsetX: 30
-      },
-      xaxis: {
-        type: 'category',
-        categories: [],
-        labels: {
-          style: {
-            colors: '#64748b'
-          }
-        }
-      },
-      yaxis: {
-        labels: {
-          style: {
-            colors: '#64748b'
-          }
-        }
-      },
-      colors: ['#e74c3c'],
-      stroke: {
-        width: 1
-      },
-      fill: {
-        opacity: 1
-      },
-      tooltip: {
-        enabled: true
-      },
-      title: {
-        text: ''
-      },
-      legend: {
-        position: 'bottom',
-        horizontalAlign: 'center'
-      },
-      labels: []
-    };
-
-    // Initialize Latency Chart
-    this.latencyChartOptions = {
-      series: [],
-      chart: {
-        type: 'line',
-        height: 350,
-        toolbar: {
-          show: false
-        },
-        zoom: {
-          enabled: false
-        }
-      },
-      stroke: {
-        curve: 'smooth',
-        width: 3
-      },
-      markers: {
-        size: 4,
-        strokeWidth: 2,
-        hover: {
-          size: 6
-        }
-      },
-      dataLabels: {
-        enabled: false
-      },
-      grid: {
-        borderColor: '#e5e7eb',
-        strokeDashArray: 4,
-        xaxis: {
-          lines: {
-            show: true
-          }
-        },
-        yaxis: {
-          lines: {
-            show: true
-          }
-        }
-      },
-      xaxis: {
-        type: 'category',
-        categories: [],
-        labels: {
-          style: {
-            colors: '#64748b'
-          }
-        }
-      },
-      yaxis: {
-        labels: {
-          style: {
-            colors: '#64748b'
-          },
-          formatter: function(val) {
-            return val.toFixed(0) + 'ms';
-          }
-        }
-      },
-      legend: {
-        position: 'top',
-        horizontalAlign: 'right'
-      },
-      colors: ['#e67e22', '#3498db'],
-      fill: {
-        opacity: 1
-      },
-      tooltip: {
-        enabled: true
-      },
-      title: {
-        text: ''
-      },
-      labels: []
-    };
-
-    // Initialize Service Metrics Chart
-    this.serviceMetricsChartOptions = {
-      series: [],
-      chart: {
-        type: 'line',
-        height: 350,
-        toolbar: {
-          show: false
-        },
-        zoom: {
-          enabled: false
-        }
-      },
-      stroke: {
-        curve: 'smooth',
-        width: [3, 3]
-      },
-      markers: {
-        size: 4,
-        strokeWidth: 2,
-        hover: {
-          size: 6
-        }
-      },
-      dataLabels: {
-        enabled: false
-      },
-      grid: {
-        borderColor: '#e5e7eb',
-        strokeDashArray: 4,
-        xaxis: {
-          lines: {
-            show: true
-          }
-        },
-        yaxis: {
-          lines: {
-            show: true
-          }
-        }
-      },
-      xaxis: {
-        type: 'category',
-        categories: [],
-        labels: {
-          style: {
-            colors: '#64748b'
-          }
-        }
-      },
-      yaxis: {
-        title: {
-          text: 'Response Time (ms)'
-        },
-        labels: {
-          style: {
-            colors: '#3498db'
-          },
-          formatter: function(val) {
-            return val.toFixed(0) + 'ms';
-          }
-        }
-      },
-      legend: {
-        position: 'top',
-        horizontalAlign: 'right'
-      },
-      colors: ['#3498db', '#2ecc71'],
-      fill: {
-        opacity: 1
-      },
-      tooltip: {
-        enabled: true
-      },
-      title: {
-        text: ''
-      },
-      labels: []
-    };
+  selectService(serviceId: string) {
+    // Service selection is no longer needed
   }
 
   private loadChartData() {
