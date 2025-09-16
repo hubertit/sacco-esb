@@ -165,15 +165,15 @@ export class ChartService {
       series: [
         {
           name: 'MTN MOMO',
-          data: Array.from({length: 24}, () => 99.5 + Math.random() * 0.4)
+          data: Array.from({length: 24}, () => Math.round((99.5 + Math.random() * 0.4) * 100) / 100)
         },
         {
           name: 'Airtel Money',
-          data: Array.from({length: 24}, () => 99.3 + Math.random() * 0.5)
+          data: Array.from({length: 24}, () => Math.round((99.3 + Math.random() * 0.5) * 100) / 100)
         },
         {
           name: 'Internal',
-          data: Array.from({length: 24}, () => 99.8 + Math.random() * 0.2)
+          data: Array.from({length: 24}, () => Math.round((99.8 + Math.random() * 0.2) * 100) / 100)
         }
       ],
       categories: hours,
