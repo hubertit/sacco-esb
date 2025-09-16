@@ -485,7 +485,7 @@ export class DashboardComponent implements OnInit {
     series: [],
     chart: {
       type: 'area',
-      height: 350,
+      height: 280,
       stacked: true,
       toolbar: { show: false }
     },
@@ -514,7 +514,7 @@ export class DashboardComponent implements OnInit {
     series: [],
     chart: {
       type: 'area',
-      height: 350,
+      height: 280,
       toolbar: { show: false }
     },
     xaxis: {
@@ -542,7 +542,7 @@ export class DashboardComponent implements OnInit {
     series: [],
     chart: {
       type: 'donut',
-      height: 350,
+      height: 280,
       toolbar: { show: false }
     },
     labels: ['MTN MOMO', 'Airtel Money', 'Internal Transfers'],
@@ -576,7 +576,7 @@ export class DashboardComponent implements OnInit {
     series: [],
     chart: {
       type: 'bar',
-      height: 350,
+      height: 280,
       toolbar: { show: false }
     },
     xaxis: {
@@ -607,7 +607,7 @@ export class DashboardComponent implements OnInit {
     series: [],
     chart: {
       type: 'bar',
-      height: 350,
+      height: 280,
       stacked: true,
       toolbar: { show: false }
     },
@@ -646,7 +646,7 @@ export class DashboardComponent implements OnInit {
     series: [],
     chart: {
       type: 'area',
-      height: 350,
+      height: 280,
       toolbar: { show: false }
     },
     xaxis: {
@@ -693,6 +693,7 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.initializeCharts();
     this.loadChartData();
   }
 
@@ -700,7 +701,7 @@ export class DashboardComponent implements OnInit {
     // Initialize chart options with default values
     this.volumeChartOptions = this.getDefaultChartOptions();
     this.successRateChartOptions = this.getDefaultChartOptions();
-    this.amountChartOptions = this.getDefaultChartOptions();
+    // Don't override amountChartOptions as it's already configured as donut chart
     this.errorChartOptions = this.getDefaultChartOptions();
     this.transactionTypesChartOptions = this.getDefaultChartOptions();
     this.valueTrendsChartOptions = this.getDefaultChartOptions();
@@ -711,7 +712,7 @@ export class DashboardComponent implements OnInit {
       series: [],
       chart: {
         type: 'area',
-        height: 350,
+        height: 280,
         toolbar: { show: false }
       },
       dataLabels: { enabled: false },
@@ -774,10 +775,7 @@ export class DashboardComponent implements OnInit {
       this.amountChartOptions = {
         ...this.amountChartOptions,
         series: data.series,
-        xaxis: {
-          ...this.amountChartOptions.xaxis,
-          categories: data.categories || []
-        },
+        labels: data.labels || [],
         colors: data.colors || []
       };
     });
