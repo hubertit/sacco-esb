@@ -513,7 +513,7 @@ export class DashboardComponent implements OnInit {
   public successRateChartOptions: any = {
     series: [],
     chart: {
-      type: 'line',
+      type: 'area',
       height: 350,
       toolbar: { show: false }
     },
@@ -531,7 +531,8 @@ export class DashboardComponent implements OnInit {
       max: 100
     },
     dataLabels: { enabled: false },
-    stroke: { curve: 'smooth', width: 3 },
+    stroke: { curve: 'smooth', width: 2 },
+    fill: { type: 'gradient', gradient: { opacityFrom: 0.6, opacityTo: 0.1 } },
     legend: { position: 'top', horizontalAlign: 'right' },
     colors: ['#ffc700', '#ff0000', '#3498db'],
     tooltip: { x: { format: 'dd MMM HH:mm' } }
@@ -708,7 +709,7 @@ export class DashboardComponent implements OnInit {
     return {
       series: [],
       chart: {
-        type: 'line',
+        type: 'area',
         height: 350,
         toolbar: { show: false }
       },
@@ -731,7 +732,11 @@ export class DashboardComponent implements OnInit {
         curve: 'smooth'
       },
       fill: {
-        opacity: 1
+        type: 'gradient',
+        gradient: {
+          opacityFrom: 0.6,
+          opacityTo: 0.1
+        }
       },
       tooltip: {
         enabled: true
