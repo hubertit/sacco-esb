@@ -541,34 +541,35 @@ export class DashboardComponent implements OnInit {
   public amountChartOptions: any = {
     series: [],
     chart: {
-      type: 'bar',
+      type: 'donut',
       height: 350,
       toolbar: { show: false }
     },
-    xaxis: {
-      type: 'category',
-      labels: { style: { colors: '#64748b' } }
+    labels: ['MTN MOMO', 'Airtel Money', 'Internal Transfers'],
+    colors: ['#ffc700', '#ff0000', '#3498db'],
+    dataLabels: { 
+      enabled: true,
+      formatter: (val) => val + '%'
     },
-    yaxis: {
-      title: { text: 'Amount (RWF)' },
-      labels: {
-        style: { colors: '#64748b' },
-        formatter: (val) => {
-          if (val >= 1000000) return (val / 1000000).toFixed(1) + 'M';
-          if (val >= 1000) return (val / 1000).toFixed(1) + 'K';
-          return val.toString();
+    plotOptions: {
+      pie: {
+        donut: {
+          size: '70%',
+          labels: {
+            show: true,
+            total: {
+              show: true,
+              label: 'Total',
+              formatter: (w) => {
+                const total = w.globals.seriesTotals.reduce((a, b) => a + b, 0);
+                return 'RWF ' + (total / 1000000).toFixed(1) + 'M';
+              }
+            }
+          }
         }
       }
     },
-    dataLabels: { enabled: false },
-    plotOptions: {
-      bar: {
-        borderRadius: 4,
-        columnWidth: '60%'
-      }
-    },
-    legend: { position: 'top', horizontalAlign: 'right' },
-    colors: ['#ffc700', '#ff0000', '#3498db']
+    legend: { position: 'top', horizontalAlign: 'right' }
   };
 
   public errorChartOptions: any = {

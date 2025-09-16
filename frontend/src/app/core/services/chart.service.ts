@@ -183,14 +183,9 @@ export class ChartService {
 
   getAmountAnalysis(): Observable<ChartData> {
     return of({
-      series: [
-        {
-          name: 'Total Value',
-          data: [2500000, 1800000, 5200000]
-        }
-      ],
-      categories: ['MTN MOMO', 'Airtel Money', 'Internal'],
-      colors: ['#3498db']
+      series: [2500000, 1800000, 5200000],
+      labels: ['MTN MOMO', 'Airtel Money', 'Internal Transfers'],
+      colors: ['#ffc700', '#ff0000', '#3498db']
     });
   }
 
