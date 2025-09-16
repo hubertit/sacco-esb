@@ -7,13 +7,14 @@
 }
 
 .page-wrapper {
-  margin-top: $header-height;
+  margin-top: calc(#{$header-height} + 10px);
   margin-left: $sidebar-width;
-  min-height: calc(100vh - #{$header-height});
-  background: #f8f9fa;
+  min-height: calc(100vh - #{$header-height} - 10px);
+  background: #f1f2f3;
+  padding: 12px;
   transition: all 0.3s ease;
 
-  .main-container.sidebar-collapsed & {
+  &.sidebar-collapsed {
     margin-left: $sidebar-mini-width;
   }
 }

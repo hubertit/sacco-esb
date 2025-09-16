@@ -44,7 +44,7 @@ export interface ChartOptions {
   standalone: true,
   imports: [CommonModule, RouterModule, FeatherIconComponent, NgApexchartsModule],
   template: `
-    <div class="page-container dashboard-container">
+    <div class="dashboard-container">
       <!-- Stats Cards -->
       <div class="stats-grid">
         <!-- Pull Transactions -->
@@ -303,81 +303,11 @@ export interface ChartOptions {
     </div>
   `,
   styles: [`
-    :host ::ng-deep {
-      .stat-card {
-        &.pull .stat-icon {
-          background: rgba(52, 152, 219, 0.1);
-          color: #3498db;
-        }
-
-        &.push .stat-icon {
-          background: rgba(46, 204, 113, 0.1);
-          color: #2ecc71;
-        }
-
-        &.internal .stat-icon {
-          background: rgba(155, 89, 182, 0.1);
-          color: #9b59b6;
-        }
-
-        &.customers .stat-icon {
-          background: rgba(231, 76, 60, 0.1);
-          color: #e74c3c;
-        }
-
-        &:hover {
-          &.pull { box-shadow: 0 4px 12px rgba(52, 152, 219, 0.08); }
-          &.push { box-shadow: 0 4px 12px rgba(46, 204, 113, 0.08); }
-          &.internal { box-shadow: 0 4px 12px rgba(155, 89, 182, 0.08); }
-          &.customers { box-shadow: 0 4px 12px rgba(231, 76, 60, 0.08); }
-        }
-
-        .stat-numbers {
-          .pull & .main-stat { color: #3498db; }
-          .push & .main-stat { color: #2ecc71; }
-          .internal & .main-stat { color: #9b59b6; }
-          .customers & .main-stat { color: #e74c3c; }
-
-          .sub-stats {
-            span {
-              &.success {
-                background: rgba(46, 204, 113, 0.1);
-                color: #2ecc71;
-              }
-
-              &.failed {
-                background: rgba(231, 76, 60, 0.1);
-                color: #e74c3c;
-              }
-
-              &.active {
-                background: rgba(46, 204, 113, 0.1);
-                color: #2ecc71;
-              }
-
-              &.inactive {
-                background: rgba(149, 165, 166, 0.1);
-                color: #95a5a6;
-              }
-            }
-          }
-        }
-      }
-
-      .btn-refresh {
-        background: none;
-        border: none;
-        color: #64748b;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        transition: all 0.2s ease;
-
-        &:hover {
-          background: rgba(100, 116, 139, 0.1);
-          color: #1e293b;
-        }
-      }
+    .dashboard-container {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
 
     .section-title {
@@ -507,7 +437,7 @@ export interface ChartOptions {
       padding: 24px;
       display: flex;
       align-items: center;
-      gap: 24px;
+      gap: 16px;
       border: 1px solid #e5e7eb;
       box-shadow: 0 1px 2px rgba(0,0,0,0.02);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -615,7 +545,7 @@ export interface ChartOptions {
     .charts-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 24px;
+      gap: 16px;
       margin-top: 24px;
 
       @media (max-width: 1200px) {
@@ -630,7 +560,7 @@ export interface ChartOptions {
     .chart-card {
       background: white;
       border-radius: 4px;
-      padding: 20px;
+      padding: 16px;
       border: 1px solid #e5e7eb;
       box-shadow: 0 1px 2px rgba(0,0,0,0.02);
 
