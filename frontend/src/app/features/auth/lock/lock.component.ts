@@ -16,7 +16,6 @@ import { FeatherIconComponent } from '../../../shared/components/feather-icon/fe
       <div class="login-section">
         <div class="login-container">
           <div class="logo-section">
-            <img src="assets/img/icon.png" alt="Logo" class="logo" />
             <h1>Welcome back to <span>SACCO ESB</span></h1>
           </div>
           <div class="user-info">
