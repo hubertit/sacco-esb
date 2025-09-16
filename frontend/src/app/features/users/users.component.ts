@@ -1,16 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { HttpClientModule } from '@angular/common/http';
 import { FeatherIconComponent } from '../../shared/components/feather-icon/feather-icon.component';
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { TableColumn } from '../../shared/components/data-table/data-table.component';
 
-import { UserService, User } from '../../core/services/user.service';
+import { UserService, User, UserType } from '../../core/services/user.service';
 
 @Component({
   selector: 'app-users',
   standalone: true,
-  imports: [CommonModule, RouterModule, FeatherIconComponent, DataTableComponent],
+  imports: [CommonModule, RouterModule, HttpClientModule, FeatherIconComponent, DataTableComponent],
   template: `
     <div class="container-fluid">
       <div class="row">
