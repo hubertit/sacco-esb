@@ -508,7 +508,7 @@ export class DashboardComponent implements OnInit {
       }
     },
     dataLabels: { enabled: false },
-    stroke: { curve: 'spline', width: 1 },
+    stroke: { curve: 'spline', width: 0.5 },
     fill: { type: 'gradient', gradient: { opacityFrom: 0.6, opacityTo: 0.1 } },
     legend: { position: 'top', horizontalAlign: 'right' },
     colors: ['#ffc700', '#ff0000', '#3498db'],
@@ -536,7 +536,7 @@ export class DashboardComponent implements OnInit {
       max: 100
     },
     dataLabels: { enabled: false },
-    stroke: { curve: 'spline', width: 1 },
+    stroke: { curve: 'spline', width: 0.5 },
     fill: { type: 'gradient', gradient: { opacityFrom: 0.6, opacityTo: 0.1 } },
     legend: { position: 'top', horizontalAlign: 'right' },
     colors: ['#ffc700', '#ff0000', '#3498db'],
@@ -670,7 +670,7 @@ export class DashboardComponent implements OnInit {
       }
     },
     dataLabels: { enabled: false },
-    stroke: { curve: 'spline', width: 1 },
+    stroke: { curve: 'spline', width: 0.5 },
     fill: { type: 'gradient', gradient: { opacityFrom: 0.6, opacityTo: 0.1 } },
     legend: { position: 'top', horizontalAlign: 'right' },
     colors: ['#ffc700', '#ff0000', '#3498db'],
@@ -735,7 +735,7 @@ export class DashboardComponent implements OnInit {
         }
       },
       stroke: {
-        width: 1,
+        width: 0.5,
         curve: 'spline'
       },
       fill: {
