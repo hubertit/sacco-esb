@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
 import { FeatherIconComponent } from '../../shared/components/feather-icon/feather-icon.component';
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { TableColumn } from '../../shared/components/data-table/data-table.component';
@@ -11,56 +12,94 @@ import { LogService, Log, LogLevel } from '../../core/services/log.service';
 @Component({
   selector: 'app-logs',
   standalone: true,
-  imports: [CommonModule, RouterModule, HttpClientModule, FeatherIconComponent, DataTableComponent],
+  imports: [CommonModule, RouterModule, HttpClientModule, FormsModule, FeatherIconComponent, DataTableComponent],
   template: `
     <div class="dashboard-container">
-          <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <h4 class="card-title mb-0">System Logs</h4>
+      <!-- Filter Card -->
+      <div class="card filter-card mb-4">
+        <div class="card-header">
+          <h5 class="card-title mb-0 d-flex align-items-center">
+            <app-feather-icon name="filter" size="18px" class="me-2"></app-feather-icon>
+            Filters
+          </h5>
+        </div>
+        <div class="card-body">
+          <form (ngSubmit)="applyFilters()" class="row g-3">
+            <!-- Status Filter -->
+            <div class="col-md-3">
+              <label for="statusFilter" class="form-label">Status</label>
+              <select id="statusFilter" class="form-select" [(ngModel)]="filters.status" name="status">
+                <option value="">All Statuses</option>
+                <option value="SUCCESS">Success</option>
+                <option value="FAILED">Failed</option>
+                <option value="PENDING">Pending</option>
+                <option value="PROCESSING">Processing</option>
+              </select>
+            </div>
+
+            <!-- Date Range Filter -->
+            <div class="col-md-3">
+              <label for="startDate" class="form-label">Start Date</label>
+              <input type="date" id="startDate" class="form-control" [(ngModel)]="filters.startDate" name="startDate">
+            </div>
+
+            <div class="col-md-3">
+              <label for="endDate" class="form-label">End Date</label>
+              <input type="date" id="endDate" class="form-control" [(ngModel)]="filters.endDate" name="endDate">
+            </div>
+
+            <!-- Transaction Type Filter -->
+            <div class="col-md-3">
+              <label for="transactionType" class="form-label">Transaction Type</label>
+              <select id="transactionType" class="form-select" [(ngModel)]="filters.transactionType" name="transactionType">
+                <option value="">All Types</option>
+                <option value="PUSH">Push</option>
+                <option value="PULL">Pull</option>
+                <option value="INTERNAL">Internal</option>
+              </select>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="col-12">
               <div class="d-flex gap-2">
-                <div class="dropdown">
-                  <button class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2" type="button" id="filterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                    <app-feather-icon name="filter" size="14px"></app-feather-icon>
-                    Filter
-                  </button>
-                  <ul class="dropdown-menu" aria-labelledby="filterDropdown">
-                    <li><h6 class="dropdown-header">Log Level</h6></li>
-                    <li *ngFor="let level of logLevels">
-                      <a class="dropdown-item" (click)="filterByLevel(level)">
-                        {{ level }}
-                      </a>
-                    </li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><h6 class="dropdown-header">Date Range</h6></li>
-                    <li>
-                      <a class="dropdown-item" (click)="filterByDate('today')">Today</a>
-                    </li>
-                    <li>
-                      <a class="dropdown-item" (click)="filterByDate('week')">Last 7 days</a>
-                    </li>
-                    <li>
-                      <a class="dropdown-item" (click)="filterByDate('month')">Last 30 days</a>
-                    </li>
-                  </ul>
-                </div>
-                <button class="btn btn-primary btn-sm d-flex align-items-center gap-2" (click)="exportLogs()">
-                  <app-feather-icon name="download" size="14px"></app-feather-icon>
+                <button type="submit" class="btn btn-primary">
+                  <app-feather-icon name="search" size="14px" class="me-1"></app-feather-icon>
+                  Apply Filters
+                </button>
+                <button type="button" class="btn btn-outline-secondary" (click)="clearFilters()">
+                  <app-feather-icon name="x" size="14px" class="me-1"></app-feather-icon>
+                  Clear
+                </button>
+                <button type="button" class="btn btn-outline-primary" (click)="exportLogs()">
+                  <app-feather-icon name="download" size="14px" class="me-1"></app-feather-icon>
                   Export
                 </button>
               </div>
             </div>
-            <div class="card-body">
-              <app-data-table
-                [columns]="columns"
-                [data]="logs"
-                [striped]="true"
-                (onSort)="handleSort($event)"
-                (onSearch)="handleSearch($event)"
-                (onPageChange)="handlePageChange($event)"
-                (onPageSizeChange)="handlePageSizeChange($event)"
-              ></app-data-table>
-            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Logs Table Card -->
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h4 class="card-title mb-0">System Logs</h4>
+          <div class="d-flex align-items-center gap-2">
+            <span class="text-muted small">Showing {{ filteredLogs.length }} of {{ logs.length }} logs</span>
           </div>
+        </div>
+        <div class="card-body">
+          <app-data-table
+            [columns]="columns"
+            [data]="filteredLogs"
+            [striped]="true"
+            (onSort)="handleSort($event)"
+            (onSearch)="handleSearch($event)"
+            (onPageChange)="handlePageChange($event)"
+            (onPageSizeChange)="handlePageSizeChange($event)"
+          ></app-data-table>
+        </div>
+      </div>
     </div>
   `,
   styles: [`
@@ -74,6 +113,16 @@ import { LogService, Log, LogLevel } from '../../core/services/log.service';
       border: 1px solid #e5e7eb;
       border-radius: 8px;
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .filter-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+    }
+
+    .filter-card .card-header {
+      background: #f1f5f9;
+      border-bottom: 1px solid #e2e8f0;
     }
 
     .card-header {
@@ -171,7 +220,15 @@ export class LogsComponent implements OnInit {
   ];
 
   logs: Log[] = [];
+  filteredLogs: Log[] = [];
   logLevels: LogLevel[] = [];
+
+  filters = {
+    status: '',
+    startDate: '',
+    endDate: '',
+    transactionType: ''
+  };
 
   constructor(private logService: LogService) {
     this.logLevels = this.logService.getLogLevels();
@@ -179,6 +236,7 @@ export class LogsComponent implements OnInit {
 
   ngOnInit() {
     this.logs = this.logService.getMockLogs();
+    this.filteredLogs = [...this.logs];
   }
 
   getLogLevelClass(level: LogLevel): string {
@@ -191,14 +249,50 @@ export class LogsComponent implements OnInit {
     }
   }
 
-  filterByLevel(level: LogLevel) {
-    // TODO: Implement level filtering
-    console.log('Filter by level:', level);
+  applyFilters() {
+    this.filteredLogs = this.logs.filter(log => {
+      // Status filter
+      if (this.filters.status && log.level !== this.filters.status) {
+        return false;
+      }
+
+      // Date range filter
+      if (this.filters.startDate || this.filters.endDate) {
+        const logDate = new Date(log.timestamp);
+        const startDate = this.filters.startDate ? new Date(this.filters.startDate) : null;
+        const endDate = this.filters.endDate ? new Date(this.filters.endDate) : null;
+
+        if (startDate && logDate < startDate) {
+          return false;
+        }
+        if (endDate && logDate > endDate) {
+          return false;
+        }
+      }
+
+      // Transaction type filter (assuming transaction type is in the message or source)
+      if (this.filters.transactionType) {
+        const message = log.message.toLowerCase();
+        const source = log.source.toLowerCase();
+        const type = this.filters.transactionType.toLowerCase();
+        
+        if (!message.includes(type) && !source.includes(type)) {
+          return false;
+        }
+      }
+
+      return true;
+    });
   }
 
-  filterByDate(range: 'today' | 'week' | 'month') {
-    // TODO: Implement date filtering
-    console.log('Filter by date range:', range);
+  clearFilters() {
+    this.filters = {
+      status: '',
+      startDate: '',
+      endDate: '',
+      transactionType: ''
+    };
+    this.filteredLogs = [...this.logs];
   }
 
   exportLogs() {
