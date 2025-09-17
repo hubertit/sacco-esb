@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 
 export interface MenuItem {
   title: string;
-  icon: string;
+  icon?: string;
   path?: string;
   children?: MenuItem[];
   roles?: string[];
@@ -38,7 +38,20 @@ export class NavigationService {
     {
       title: 'Logs',
       icon: 'file-text',
-      path: 'logs'
+      children: [
+        {
+          title: 'MTN',
+          path: 'logs'
+        },
+        {
+          title: 'AIRTEL',
+          path: 'logs'
+        },
+        {
+          title: 'BRD',
+          path: 'logs'
+        }
+      ]
     },
     {
       title: 'Audit',

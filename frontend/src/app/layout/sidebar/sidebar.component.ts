@@ -35,7 +35,7 @@ import { AuthService } from '../../core/services/auth.service';
             <!-- Menu Item with Children -->
             <div class="nav-item" *ngIf="item.children" [class.active]="isMenuActive(item)">
               <a class="nav-link" (click)="toggleSubmenu(item)">
-                <app-feather-icon [name]="item.icon" size="18px"></app-feather-icon>
+                <app-feather-icon [name]="item.icon" size="18px" *ngIf="item.icon"></app-feather-icon>
                 <span class="nav-text" *ngIf="!isCollapsed">{{ item.title }}</span>
                 <app-feather-icon name="chevron-right" size="14px" *ngIf="!isCollapsed"
                    [class.rotated]="item.expanded"></app-feather-icon>
@@ -53,7 +53,7 @@ import { AuthService } from '../../core/services/auth.service';
             <!-- Single Menu Item -->
             <div class="nav-item" *ngIf="!item.children">
               <a class="nav-link" [routerLink]="[item.path]" routerLinkActive="active">
-                <app-feather-icon [name]="item.icon" size="18px"></app-feather-icon>
+                <app-feather-icon [name]="item.icon" size="18px" *ngIf="item.icon"></app-feather-icon>
                 <span class="nav-text" *ngIf="!isCollapsed">{{ item.title }}</span>
               </a>
             </div>
@@ -78,7 +78,7 @@ import { AuthService } from '../../core/services/auth.service';
 export class SidebarComponent {
   @Input() isCollapsed = false;
   @Output() toggleCollapse = new EventEmitter<void>();
-  
+
   menuItems: MenuItem[];
   userName: string = '';
   userRole: string = '';
@@ -119,7 +119,7 @@ export class SidebarComponent {
     if (!item.children) {
       return false;
     }
-    return item.children.some(child => 
+    return item.children.some(child =>
       window.location.pathname.startsWith(child.path || '')
     );
   }
