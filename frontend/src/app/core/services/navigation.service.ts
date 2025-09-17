@@ -44,11 +44,6 @@ export class NavigationService {
       title: 'Audit',
       icon: 'activity',
       path: 'audit'
-    },
-    {
-      title: 'CBSEPR Mapping',
-      icon: 'git-merge',
-      path: 'cbsepr-mapping'
     }
   ];
 
