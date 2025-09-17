@@ -116,13 +116,13 @@ import { LogService, Log, LogLevel } from '../../core/services/log.service';
     }
 
     .filter-card {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
+      background: white;
+      border: 1px solid #e5e7eb;
     }
 
     .filter-card .card-header {
-      background: #f1f5f9;
-      border-bottom: 1px solid #e2e8f0;
+      background: white;
+      border-bottom: 1px solid #e5e7eb;
     }
 
     .card-header {
