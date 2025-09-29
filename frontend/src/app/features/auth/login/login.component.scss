@@ -1,4 +1,4 @@
-@import '../../../../styles/variables';
+@use '../../../../styles/variables' as *;
 
 :root {
   --second-rotation: 0deg;
@@ -36,8 +36,15 @@
     .logo-icon {
       width: 48px;
       height: 48px;
-      color: $primary;
-      margin-bottom: 1rem;
+      color: white;
+      margin-bottom: 1.5rem;
+      background: $primary;
+      border-radius: 50%;
+      padding: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba($primary, 0.3);
     }
 
     h1 {
