@@ -52,7 +52,10 @@
               "src/assets"
             ],
             "styles": [
-              "node_modules/bootstrap/dist/css/bootstrap.min.css",
+              "src/assets/libs/bootstrap.min.css",
+              "src/assets/libs/font-awesome.min.css",
+              "src/assets/libs/dataTables.bootstrap5.min.css",
+              "src/assets/libs/buttons.bootstrap5.min.css",
               "src/assets/css/main.css",
               "src/assets/css/structure.css",
               "src/assets/css/custom.css",
@@ -60,9 +63,17 @@
               "src/styles.scss"
             ],
             "scripts": [
-              "node_modules/jquery/dist/jquery.min.js",
-              "node_modules/@popperjs/core/dist/umd/popper.min.js",
-              "node_modules/bootstrap/dist/js/bootstrap.min.js",
+              "src/assets/libs/jquery.min.js",
+              "src/assets/libs/bootstrap.bundle.min.js",
+              "src/assets/libs/dataTables.min.js",
+              "src/assets/libs/dataTables.bootstrap5.min.js",
+              "src/assets/libs/dataTables.buttons.min.js",
+              "src/assets/libs/buttons.bootstrap5.min.js",
+              "src/assets/libs/jszip.min.js",
+              "src/assets/libs/pdfmake.min.js",
+              "src/assets/libs/vfs_fonts.js",
+              "src/assets/libs/buttons.html5.min.js",
+              "src/assets/libs/buttons.print.min.js",
               "src/assets/js/app.js",
               "src/assets/js/custom.js"
             ]
@@ -93,21 +104,16 @@
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "proxyConfig": "proxy.conf.json"
+          },
           "configurations": {
             "production": {
               "buildTarget": "frontend:build:production"
             },
             "development": {
-              "buildTarget": "frontend:build:development"
-            },
-            "direct": {
               "buildTarget": "frontend:build:development",
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.direct.ts"
-                }
-              ]
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"
@@ -129,7 +135,10 @@
               "src/assets"
             ],
             "styles": [
-              "node_modules/bootstrap/dist/css/bootstrap.min.css",
+              "src/assets/libs/bootstrap.min.css",
+              "src/assets/libs/font-awesome.min.css",
+              "src/assets/libs/dataTables.bootstrap5.min.css",
+              "src/assets/libs/buttons.bootstrap5.min.css",
               "src/assets/css/main.css",
               "src/assets/css/structure.css",
               "src/assets/css/custom.css",
@@ -137,9 +146,17 @@
               "src/styles.scss"
             ],
             "scripts": [
-              "node_modules/jquery/dist/jquery.min.js",
-              "node_modules/@popperjs/core/dist/umd/popper.min.js",
-              "node_modules/bootstrap/dist/js/bootstrap.min.js",
+              "src/assets/libs/jquery.min.js",
+              "src/assets/libs/bootstrap.bundle.min.js",
+              "src/assets/libs/dataTables.min.js",
+              "src/assets/libs/dataTables.bootstrap5.min.js",
+              "src/assets/libs/dataTables.buttons.min.js",
+              "src/assets/libs/buttons.bootstrap5.min.js",
+              "src/assets/libs/jszip.min.js",
+              "src/assets/libs/pdfmake.min.js",
+              "src/assets/libs/vfs_fonts.js",
+              "src/assets/libs/buttons.html5.min.js",
+              "src/assets/libs/buttons.print.min.js",
               "src/assets/js/app.js",
               "src/assets/js/custom.js"
             ]

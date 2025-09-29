@@ -29,16 +29,14 @@ The base URL for all API requests is centrally managed through:
 To change the API base URL, update the `apiUrl` in the environment files:
 
 ```typescript
-// src/environments/environment.ts (Development)
+// src/environments/environment.ts
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:5501'
-};
-
-// src/environments/environment.prod.ts (Production)
-export const environment = {
-  production: true,
-  apiUrl: 'https://your-production-api.com'
+  apiUrl: 'http://10.20.1.12:8083',
+  cors: {
+    withCredentials: true,
+    allowedOrigins: ['http://10.20.1.12:4200', 'http://localhost:4200']
+  }
 };
 ```
 

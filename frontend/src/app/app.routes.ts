@@ -8,6 +8,7 @@ import { RolesComponent } from './features/roles/roles.component';
 import { LogsComponent } from './features/logs/logs.component';
 import { AuditComponent } from './features/audit/audit.component';
 import { LockComponent } from './features/auth/lock/lock.component';
+import { ApiTestComponent } from './components/api-test/api-test.component';
 import { AuthGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
@@ -18,6 +19,10 @@ export const routes: Routes = [
   {
     path: 'lock',
     component: LockComponent
+  },
+  {
+    path: 'api-test',
+    component: ApiTestComponent
   },
   {
     path: '',
