@@ -28,15 +28,28 @@
   max-width: 400px;
   padding: 0 20px;
 
-  h1 {
-    font-size: 2rem;
-    font-weight: 500;
-    color: #333;
-    margin-bottom: 1rem;
+  .logo-section {
+    text-align: center;
+    margin-bottom: 2rem;
+    margin-top: -80px;
 
-    span {
+    .logo-icon {
+      width: 48px;
+      height: 48px;
       color: $primary;
-      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 500;
+      color: #333;
+      margin: 0;
+
+      span {
+        color: $primary;
+        font-weight: 600;
+      }
     }
   }
 }

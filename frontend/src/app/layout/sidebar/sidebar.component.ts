@@ -14,7 +14,7 @@ import { AuthService } from '../../core/services/auth.service';
     <aside class="sidebar" [class.collapsed]="isCollapsed">
       <div class="sidebar-header">
         <div class="logo-container">
-          <img src="assets/img/icon.png" alt="Logo" class="logo">
+          <app-feather-icon name="activity" size="32px" class="logo-icon"></app-feather-icon>
           <span class="logo-text" *ngIf="!isCollapsed">SACCO ESB</span>
         </div>
       </div>
