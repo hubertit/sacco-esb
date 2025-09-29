@@ -19,10 +19,6 @@ import { LucideIconComponent } from '../../../shared/components/lucide-icon/luci
             <h1>Log In to <span>SACCO ESB</span></h1>
           </div>
           
-          <div class="new-user">
-            <span>New Here? </span>
-            <a href="javascript:void(0)">Contact admin</a>
-          </div>
 
           <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
             <div class="form-group">
