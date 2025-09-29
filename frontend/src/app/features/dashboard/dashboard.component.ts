@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { ChartService } from '../../core/services/chart.service';
-import { FeatherIconComponent } from '../../shared/components/feather-icon/feather-icon.component';
+import { LucideIconComponent } from '../../shared/components/lucide-icon/lucide-icon.component';
 import { NgApexchartsModule } from 'ng-apexcharts';
 import {
   ApexNonAxisChartSeries,
@@ -42,7 +42,7 @@ export interface ChartOptions {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, FeatherIconComponent, NgApexchartsModule],
+  imports: [CommonModule, RouterModule, LucideIconComponent, NgApexchartsModule],
   template: `
     <div class="dashboard-container">
       <!-- Stats Cards -->
@@ -50,7 +50,7 @@ export interface ChartOptions {
         <!-- MTN MOMO Transactions -->
         <div class="stat-card mtn">
           <div class="stat-icon">
-            <app-feather-icon name="smartphone" size="28px"></app-feather-icon>
+            <app-lucide-icon name="smartphone" size="28px"></app-lucide-icon>
           </div>
           <div class="stat-details">
             <div class="stat-title">MTN MOMO</div>
@@ -67,7 +67,7 @@ export interface ChartOptions {
         <!-- Airtel Money -->
         <div class="stat-card airtel">
           <div class="stat-icon">
-            <app-feather-icon name="credit-card" size="28px"></app-feather-icon>
+            <app-lucide-icon name="credit-card" size="28px"></app-lucide-icon>
           </div>
           <div class="stat-details">
             <div class="stat-title">Airtel Money</div>
@@ -84,7 +84,7 @@ export interface ChartOptions {
         <!-- Internal Transactions -->
         <div class="stat-card internal">
           <div class="stat-icon">
-            <app-feather-icon name="refresh-cw" size="28px"></app-feather-icon>
+            <app-lucide-icon name="refresh-cw" size="28px"></app-lucide-icon>
           </div>
           <div class="stat-details">
             <div class="stat-title">Internal Transfers</div>
@@ -101,7 +101,7 @@ export interface ChartOptions {
         <!-- Transaction Value -->
         <div class="stat-card value">
           <div class="stat-icon">
-            <app-feather-icon name="dollar-sign" size="28px"></app-feather-icon>
+            <app-lucide-icon name="dollar-sign" size="28px"></app-lucide-icon>
           </div>
           <div class="stat-details">
             <div class="stat-title">Total Value (24h)</div>
@@ -125,7 +125,7 @@ export interface ChartOptions {
             <h3>Transaction Volume Trends</h3>
             <div class="card-actions">
               <button class="btn-refresh" (click)="refreshCharts()">
-                <app-feather-icon name="refresh-cw" size="16px"></app-feather-icon>
+                <app-lucide-icon name="refresh-cw" size="16px"></app-lucide-icon>
               </button>
             </div>
           </div>
@@ -150,7 +150,7 @@ export interface ChartOptions {
             <h3>Success Rate by Provider</h3>
             <div class="card-actions">
               <button class="btn-refresh" (click)="refreshCharts()">
-                <app-feather-icon name="refresh-cw" size="16px"></app-feather-icon>
+                <app-lucide-icon name="refresh-cw" size="16px"></app-lucide-icon>
               </button>
             </div>
           </div>
@@ -175,7 +175,7 @@ export interface ChartOptions {
             <h3>Transaction Amount Analysis</h3>
             <div class="card-actions">
               <button class="btn-refresh" (click)="refreshCharts()">
-                <app-feather-icon name="refresh-cw" size="16px"></app-feather-icon>
+                <app-lucide-icon name="refresh-cw" size="16px"></app-lucide-icon>
               </button>
             </div>
           </div>
@@ -200,7 +200,7 @@ export interface ChartOptions {
             <h3>Error Analysis</h3>
             <div class="card-actions">
               <button class="btn-refresh" (click)="refreshCharts()">
-                <app-feather-icon name="refresh-cw" size="16px"></app-feather-icon>
+                <app-lucide-icon name="refresh-cw" size="16px"></app-lucide-icon>
               </button>
             </div>
           </div>
@@ -225,7 +225,7 @@ export interface ChartOptions {
             <h3>Transaction Types by Provider</h3>
             <div class="card-actions">
               <button class="btn-refresh" (click)="refreshCharts()">
-                <app-feather-icon name="refresh-cw" size="16px"></app-feather-icon>
+                <app-lucide-icon name="refresh-cw" size="16px"></app-lucide-icon>
               </button>
             </div>
           </div>
@@ -250,7 +250,7 @@ export interface ChartOptions {
             <h3>Transaction Value Trends</h3>
             <div class="card-actions">
               <button class="btn-refresh" (click)="refreshCharts()">
-                <app-feather-icon name="refresh-cw" size="16px"></app-feather-icon>
+                <app-lucide-icon name="refresh-cw" size="16px"></app-lucide-icon>
               </button>
             </div>
           </div>

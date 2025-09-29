@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
-import { FeatherIconComponent } from '../../shared/components/feather-icon/feather-icon.component';
+import { LucideIconComponent } from '../../shared/components/lucide-icon/lucide-icon.component';
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { TableColumn } from '../../shared/components/data-table/data-table.component';
 
@@ -11,7 +11,7 @@ import { AuditService, AuditTrail, AuditAction } from '../../core/services/audit
 @Component({
   selector: 'app-audit',
   standalone: true,
-  imports: [CommonModule, RouterModule, HttpClientModule, FeatherIconComponent, DataTableComponent],
+  imports: [CommonModule, RouterModule, HttpClientModule, LucideIconComponent, DataTableComponent],
   template: `
     <div class="dashboard-container">
           <div class="card">
@@ -20,7 +20,7 @@ import { AuditService, AuditTrail, AuditAction } from '../../core/services/audit
               <div class="d-flex gap-2">
                 <div class="dropdown">
                   <button class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2" type="button" id="filterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                    <app-feather-icon name="filter" size="14px"></app-feather-icon>
+                    <app-lucide-icon name="filter" size="14px"></app-lucide-icon>
                     Filter
                   </button>
                   <ul class="dropdown-menu" aria-labelledby="filterDropdown">
@@ -44,7 +44,7 @@ import { AuditService, AuditTrail, AuditAction } from '../../core/services/audit
                   </ul>
                 </div>
                 <button class="btn btn-primary btn-sm d-flex align-items-center gap-2" (click)="exportAudit()">
-                  <app-feather-icon name="download" size="14px"></app-feather-icon>
+                  <app-lucide-icon name="download" size="14px"></app-lucide-icon>
                   Export
                 </button>
               </div>
@@ -101,7 +101,7 @@ import { AuditService, AuditTrail, AuditAction } from '../../core/services/audit
         border-color: #3498db;
       }
 
-      app-feather-icon {
+      app-lucide-icon {
         color: white;
       }
     }
@@ -115,7 +115,7 @@ import { AuditService, AuditTrail, AuditAction } from '../../core/services/audit
         border-color: #1b2e4b;
       }
 
-      app-feather-icon {
+      app-lucide-icon {
         color: #1b2e4b;
       }
     }

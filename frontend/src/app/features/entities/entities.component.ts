@@ -2,7 +2,7 @@ import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { TableColumn } from '../../shared/components/data-table/data-table.component';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { FeatherIconComponent } from '../../shared/components/feather-icon/feather-icon.component';
+import { LucideIconComponent } from '../../shared/components/lucide-icon/lucide-icon.component';
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 
 declare var $: any;
@@ -19,7 +19,7 @@ interface Entity {
 @Component({
   selector: 'app-entities',
   standalone: true,
-  imports: [CommonModule, RouterModule, FeatherIconComponent, DataTableComponent],
+  imports: [CommonModule, RouterModule, LucideIconComponent, DataTableComponent],
   template: `
     <div class="dashboard-container">
           <div class="card">
@@ -27,19 +27,19 @@ interface Entity {
               <h4 class="card-title mb-0">Entities</h4>
               <div class="dropdown">
                 <button class="btn btn-primary btn-sm d-flex align-items-center gap-2" type="button" id="addEntityDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                  <app-feather-icon name="plus" size="14px"></app-feather-icon>
+                  <app-lucide-icon name="plus" size="14px"></app-lucide-icon>
                   Add Entity
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="addEntityDropdown">
                   <li>
                     <a class="dropdown-item d-flex align-items-center gap-2" (click)="openAddEntityModal('Financial')">
-                      <app-feather-icon name="briefcase" size="14px"></app-feather-icon>
+                      <app-lucide-icon name="briefcase" size="14px"></app-lucide-icon>
                       Add Financial Institution
                     </a>
                   </li>
                   <li>
                     <a class="dropdown-item d-flex align-items-center gap-2" (click)="openAddEntityModal('Payment')">
-                      <app-feather-icon name="credit-card" size="14px"></app-feather-icon>
+                      <app-lucide-icon name="credit-card" size="14px"></app-lucide-icon>
                       Add Payment Service
                     </a>
                   </li>
@@ -100,7 +100,7 @@ interface Entity {
         border-color: #3498db;
       }
 
-      app-feather-icon {
+      app-lucide-icon {
         color: white;
       }
     }

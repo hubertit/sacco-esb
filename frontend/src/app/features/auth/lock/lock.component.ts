@@ -181,7 +181,7 @@ import { LucideIconComponent } from '../../../shared/components/lucide-icon/luci
       .input-wrapper {
         position: relative;
         
-        app-feather-icon {
+        app-lucide-icon {
           position: absolute;
           left: 15px;
           top: 50%;
@@ -250,7 +250,7 @@ import { LucideIconComponent } from '../../../shared/components/lucide-icon/luci
         cursor: not-allowed;
       }
 
-      app-feather-icon {
+      app-lucide-icon {
         color: white;
       }
     }
@@ -272,7 +272,7 @@ import { LucideIconComponent } from '../../../shared/components/lucide-icon/luci
           color: $primary;
         }
 
-        app-feather-icon {
+        app-lucide-icon {
           color: currentColor;
         }
       }
@@ -504,7 +504,7 @@ import { LucideIconComponent } from '../../../shared/components/lucide-icon/luci
         margin-bottom: 0.5rem;
         font-weight: 500;
 
-        app-feather-icon {
+        app-lucide-icon {
           color: #64748b;
         }
       }
@@ -541,7 +541,7 @@ import { LucideIconComponent } from '../../../shared/components/lucide-icon/luci
           background: #f8fafc;
         }
 
-        app-feather-icon {
+        app-lucide-icon {
           color: #64748b;
         }
       }
@@ -575,7 +575,7 @@ import { LucideIconComponent } from '../../../shared/components/lucide-icon/luci
         cursor: not-allowed;
       }
 
-      app-feather-icon {
+      app-lucide-icon {
         color: #fff;
       }
     }
@@ -604,7 +604,7 @@ import { LucideIconComponent } from '../../../shared/components/lucide-icon/luci
         color: #1b2e4b;
       }
 
-      app-feather-icon {
+      app-lucide-icon {
         color: currentColor;
       }
     }

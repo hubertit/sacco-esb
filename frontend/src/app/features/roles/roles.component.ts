@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
-import { FeatherIconComponent } from '../../shared/components/feather-icon/feather-icon.component';
+import { LucideIconComponent } from '../../shared/components/lucide-icon/lucide-icon.component';
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { TableColumn } from '../../shared/components/data-table/data-table.component';
 
@@ -11,7 +11,7 @@ import { RoleService, Role } from '../../core/services/role.service';
 @Component({
   selector: 'app-roles',
   standalone: true,
-  imports: [CommonModule, RouterModule, HttpClientModule, FeatherIconComponent, DataTableComponent],
+  imports: [CommonModule, RouterModule, HttpClientModule, LucideIconComponent, DataTableComponent],
   template: `
     <div class="dashboard-container">
           <div class="card">
@@ -19,19 +19,19 @@ import { RoleService, Role } from '../../core/services/role.service';
               <h4 class="card-title mb-0">Roles</h4>
               <div class="dropdown">
                 <button class="btn btn-primary btn-sm d-flex align-items-center gap-2" type="button" id="addRoleDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                  <app-feather-icon name="plus" size="14px"></app-feather-icon>
+                  <app-lucide-icon name="plus" size="14px"></app-lucide-icon>
                   Add Role
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="addRoleDropdown">
                   <li>
                     <a class="dropdown-item d-flex align-items-center gap-2" (click)="openAddRoleModal('System')">
-                      <app-feather-icon name="shield" size="14px"></app-feather-icon>
+                      <app-lucide-icon name="shield" size="14px"></app-lucide-icon>
                       Add System Role
                     </a>
                   </li>
                   <li>
                     <a class="dropdown-item d-flex align-items-center gap-2" (click)="openAddRoleModal('Custom')">
-                      <app-feather-icon name="users" size="14px"></app-feather-icon>
+                      <app-lucide-icon name="users" size="14px"></app-lucide-icon>
                       Add Custom Role
                     </a>
                   </li>
@@ -90,7 +90,7 @@ import { RoleService, Role } from '../../core/services/role.service';
         border-color: #3498db;
       }
 
-      app-feather-icon {
+      app-lucide-icon {
         color: white;
       }
     }
