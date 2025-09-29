@@ -18,7 +18,10 @@ export class ApiService {
     const token = localStorage.getItem('access_token');
     return new HttpHeaders({
       'Content-Type': 'application/json',
-      'Authorization': token ? `Bearer ${token}` : ''
+      'Authorization': token ? `Bearer ${token}` : '',
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
     });
   }
 
@@ -27,9 +30,13 @@ export class ApiService {
    */
   get<T>(endpoint: string, params?: HttpParams): Observable<T> {
     const url = this.apiConfig.getFullUrl(endpoint);
+    // Add timestamp to prevent caching
+    const timestamp = new Date().getTime();
+    const cacheBustParams = params ? params.set('_t', timestamp.toString()) : new HttpParams().set('_t', timestamp.toString());
+    
     return this.http.get<T>(url, {
       headers: this.getHeaders(),
-      params
+      params: cacheBustParams
     }).pipe(
       timeout(this.appConfig.getRequestTimeout())
     );
@@ -40,9 +47,13 @@ export class ApiService {
    */
   post<T>(endpoint: string, data: any, params?: HttpParams): Observable<T> {
     const url = this.apiConfig.getFullUrl(endpoint);
+    // Add timestamp to prevent caching
+    const timestamp = new Date().getTime();
+    const cacheBustParams = params ? params.set('_t', timestamp.toString()) : new HttpParams().set('_t', timestamp.toString());
+    
     return this.http.post<T>(url, data, {
       headers: this.getHeaders(),
-      params
+      params: cacheBustParams
     }).pipe(
       timeout(this.appConfig.getRequestTimeout())
     );

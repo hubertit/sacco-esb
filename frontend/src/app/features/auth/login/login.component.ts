@@ -124,11 +124,25 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Clear any cached authentication data
+    this.clearAuthCache();
+    
     // Update time every second
     setInterval(() => {
       this.currentTime = new Date();
       this.updateClockHands();
     }, 1000);
+  }
+
+  private clearAuthCache(): void {
+    // Clear localStorage items that might be cached
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('current_user');
+    localStorage.removeItem('cached_user_info');
+    
+    // Clear sessionStorage
+    sessionStorage.clear();
   }
 
   private updateClockHands(): void {
