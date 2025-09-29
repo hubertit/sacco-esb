@@ -1,14 +1,15 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject, tap, throwError } from 'rxjs';
+import { Observable, BehaviorSubject, tap, throwError, map } from 'rxjs';
 import { Router } from '@angular/router';
-import { AuthenticationRequest, AuthenticationResponse, User } from '../models/auth.models';
+import { AuthenticationRequest, AuthenticationResponse, User, ApiResponse } from '../models/auth.models';
 import { ApiService } from './api.service';
-import { JwtUtil } from '../utils/jwt.util';
+import { JwtUtil, JwtPayload } from '../utils/jwt.util';
 import { StorageUtil } from '../utils/storage.util';
 import { DateUtil } from '../utils/date.util';
 import { API_ENDPOINTS, STORAGE_KEYS } from '../constants/api.constants';
 import { APP_CONFIG } from '../constants/app.constants';
+import { CacheService } from './cache.service';
 
 @Injectable({
   providedIn: 'root'
@@ -20,21 +21,29 @@ export class AuthService {
   constructor(
     private http: HttpClient,
     private apiService: ApiService,
-    private router: Router
+    private router: Router,
+    private cacheService: CacheService
   ) {
-    this.loadUserFromStorage();
+    this.initializeAuth();
   }
 
   /**
    * Authenticate user with username and password
    */
   login(credentials: AuthenticationRequest): Observable<AuthenticationResponse> {
-    return this.apiService.post<AuthenticationResponse>(API_ENDPOINTS.AUTH.LOGIN, credentials)
+    return this.apiService.post<ApiResponse<AuthenticationResponse>>(API_ENDPOINTS.AUTH.LOGIN, credentials)
       .pipe(
         tap(response => {
-          this.setTokens(response.access_token, response.refresh_token);
+          // Extract tokens from the nested result object
+          const tokens = response.result;
+          this.setTokens(tokens.access_token, tokens.refresh_token);
           this.loadCurrentUser();
-        })
+          // Cache user info with tokens
+          const user = this.createUserFromToken(tokens.access_token);
+          this.cacheService.cacheUserInfo(user, tokens.access_token, tokens.refresh_token);
+        }),
+        // Map to return just the tokens
+        map(response => response.result)
       );
   }
 
@@ -47,11 +56,18 @@ export class AuthService {
       return throwError(() => new Error('No refresh token available'));
     }
     
-    return this.apiService.post<AuthenticationResponse>(API_ENDPOINTS.AUTH.REFRESH, refreshToken)
+    return this.apiService.post<ApiResponse<AuthenticationResponse>>(API_ENDPOINTS.AUTH.REFRESH, refreshToken)
       .pipe(
         tap(response => {
-          this.setTokens(response.access_token, response.refresh_token);
-        })
+          // Extract tokens from the nested result object
+          const tokens = response.result;
+          this.setTokens(tokens.access_token, tokens.refresh_token);
+          // Update cache with new tokens
+          const user = this.createUserFromToken(tokens.access_token);
+          this.cacheService.cacheUserInfo(user, tokens.access_token, tokens.refresh_token);
+        }),
+        // Map to return just the tokens
+        map(response => response.result)
       );
   }
 
@@ -59,22 +75,23 @@ export class AuthService {
    * Get current user information
    */
   getCurrentUser(): User | null {
-    return this.currentUserSubject.value;
+    return this.cacheService.getCachedUser();
   }
 
   /**
    * Check if user is authenticated
    */
   isAuthenticated(): boolean {
-    const token = StorageUtil.getItem<string>(STORAGE_KEYS.ACCESS_TOKEN);
-    return !!token && !JwtUtil.isTokenExpired(token);
+    return !this.cacheService.isTokenExpired() && 
+           !this.cacheService.isSessionTimedOut() && 
+           this.cacheService.isCacheValid();
   }
 
   /**
    * Logout user and clear tokens
    */
   logout(): void {
-    StorageUtil.clearAppData();
+    this.cacheService.clearCache();
     this.currentUserSubject.next(null);
     this.router.navigate(['/login']);
   }
@@ -102,52 +119,61 @@ export class AuthService {
   }
 
   /**
+   * Initialize authentication system
+   */
+  private initializeAuth(): void {
+    // Load user from cache if available
+    const cachedUser = this.cacheService.getCachedUser();
+    if (cachedUser) {
+      this.currentUserSubject.next(cachedUser);
+    }
+
+    // Subscribe to cache changes
+    this.cacheService.userInfo$.subscribe(cachedInfo => {
+      if (cachedInfo) {
+        this.currentUserSubject.next(cachedInfo.user);
+      } else {
+        this.currentUserSubject.next(null);
+      }
+    });
+  }
+
+  /**
    * Load current user from JWT token
    */
   private loadCurrentUser(): void {
     const token = this.getAccessToken();
     if (!token) return;
 
-    const payload = JwtUtil.decodeToken(token);
-    if (!payload) return;
-
-    const user = this.createUserFromPayload(payload);
+    const user = this.createUserFromToken(token);
     this.currentUserSubject.next(user);
-    StorageUtil.setItem(STORAGE_KEYS.CURRENT_USER, user);
   }
 
   /**
-   * Create User object from JWT payload
+   * Create User object from JWT token
    */
-  private createUserFromPayload(payload: any): User {
-    const firstName = payload.firstName || payload.given_name || '';
-    const lastName = payload.lastName || payload.family_name || '';
-    
+  private createUserFromToken(token: string): User {
+    const payload = JwtUtil.decodeToken(token);
+    if (!payload) {
+      throw new Error('Invalid token');
+    }
+
     return {
-      userId: payload.sub || payload.userId,
-      username: payload.username || payload.sub,
-      email: payload.email || '',
-      firstName,
-      lastName,
-      name: `${firstName} ${lastName}`.trim() || payload.username || payload.sub,
-      role: payload.role || payload.roleName || 'User',
-      userType: payload.userType || 'USER',
+      userId: payload.sub,
+      username: payload.sub,
+      email: '', // Not available in JWT
+      firstName: '', // Not available in JWT
+      lastName: '', // Not available in JWT
+      name: payload.sub,
+      role: 'User', // Default role
+      userType: 'USER',
       isActive: true,
-      avatar: payload.avatar,
-      createdAt: payload.iat ? DateUtil.toISOString(new Date(payload.iat * 1000)) : DateUtil.now(),
-      updatedAt: payload.exp ? DateUtil.toISOString(new Date(payload.exp * 1000)) : DateUtil.now()
+      avatar: undefined,
+      createdAt: DateUtil.toISOString(new Date(payload.iat * 1000)),
+      updatedAt: DateUtil.toISOString(new Date(payload.exp * 1000))
     };
   }
 
-  /**
-   * Load user from localStorage
-   */
-  private loadUserFromStorage(): void {
-    const user = StorageUtil.getItem<User>(STORAGE_KEYS.CURRENT_USER);
-    if (user) {
-      this.currentUserSubject.next(user);
-    }
-  }
 
   /**
    * Check if user is logged in (alias for isAuthenticated)
@@ -162,6 +188,55 @@ export class AuthService {
   getUserRole(): string {
     const user = this.getCurrentUser();
     return user?.role || 'Guest';
+  }
+
+  /**
+   * Check if user has specific permission
+   */
+  hasPermission(permission: string): boolean {
+    return this.cacheService.hasPermission(permission);
+  }
+
+  /**
+   * Check if user has any of the specified permissions
+   */
+  hasAnyPermission(permissions: string[]): boolean {
+    return this.cacheService.hasAnyPermission(permissions);
+  }
+
+  /**
+   * Check if user has all specified permissions
+   */
+  hasAllPermissions(permissions: string[]): boolean {
+    return this.cacheService.hasAllPermissions(permissions);
+  }
+
+  /**
+   * Get all user permissions
+   */
+  getUserPermissions(): string[] {
+    return this.cacheService.getCachedPermissions();
+  }
+
+  /**
+   * Update user activity
+   */
+  updateActivity(): void {
+    this.cacheService.updateActivity();
+  }
+
+  /**
+   * Check if token needs refresh
+   */
+  needsTokenRefresh(): boolean {
+    return this.cacheService.needsTokenRefresh();
+  }
+
+  /**
+   * Get cache statistics
+   */
+  getCacheStats() {
+    return this.cacheService.getCacheStats();
   }
 
   /**

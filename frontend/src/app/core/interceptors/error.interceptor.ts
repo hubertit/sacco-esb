@@ -3,25 +3,28 @@ import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { HTTP_STATUS } from '../constants/api.constants';
-
-export interface ApiError {
-  status: number;
-  message: string;
-  timestamp: string;
-  path: string;
-}
+import { ApiError } from '../models/auth.models';
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(req).pipe(
       catchError((error: HttpErrorResponse) => {
-        const apiError: ApiError = {
-          status: error.status,
-          message: this.getErrorMessage(error),
-          timestamp: new Date().toISOString(),
-          path: req.url
-        };
+        let apiError: ApiError;
+        
+        // Handle API error response format
+        if (error.error && error.error.message && error.error.dateTime) {
+          apiError = {
+            message: error.error.message,
+            dateTime: error.error.dateTime
+          };
+        } else {
+          // Handle generic HTTP errors
+          apiError = {
+            message: this.getErrorMessage(error),
+            dateTime: new Date().toISOString()
+          };
+        }
 
         console.error('API Error:', apiError);
         return throwError(() => apiError);

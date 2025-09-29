@@ -9,10 +9,17 @@ export interface AuthenticationResponse {
 }
 
 export interface ApiResponse<T> {
-  success: boolean;
+  result: T;
   message: string;
-  data: T;
-  timestamp: string;
+  messageNumber: number;
+  duration: number;
+  elements: number;
+  warning: string | null;
+}
+
+export interface ApiError {
+  message: string;
+  dateTime: string;
 }
 
 export interface User {
