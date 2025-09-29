@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
@@ -14,9 +14,9 @@ import { LucideIconComponent } from '../../shared/components/lucide-icon/lucide-
         <button class="menu-toggle" (click)="onToggleSidebar()">
           <app-lucide-icon name="menu" size="18px"></app-lucide-icon>
         </button>
-        <div class="search-box">
-          <app-lucide-icon name="search" size="18px"></app-lucide-icon>
-          <input type="text" placeholder="Search...">
+        <div class="datetime-display">
+          <div class="time">{{ currentTime }}</div>
+          <div class="date">{{ currentDate }}</div>
         </div>
       </div>
 
@@ -78,13 +78,16 @@ import { LucideIconComponent } from '../../shared/components/lucide-icon/lucide-
   `,
   styleUrls: ['./navbar.component.scss']
 })
-export class NavbarComponent {
+export class NavbarComponent implements OnInit, OnDestroy {
   @Input() isSidebarCollapsed = false;
   @Output() toggleSidebar = new EventEmitter<void>();
 
   userName: string;
   userRole: string;
   showUserMenu = false;
+  currentTime: string = '';
+  currentDate: string = '';
+  private timeInterval: any;
 
   constructor(
     private authService: AuthService,
@@ -93,6 +96,39 @@ export class NavbarComponent {
     const user = this.authService.getCurrentUser();
     this.userName = user?.name || 'User';
     this.userRole = user?.role || 'Guest';
+  }
+
+  ngOnInit() {
+    this.updateDateTime();
+    this.timeInterval = setInterval(() => {
+      this.updateDateTime();
+    }, 1000);
+  }
+
+  ngOnDestroy() {
+    if (this.timeInterval) {
+      clearInterval(this.timeInterval);
+    }
+  }
+
+  private updateDateTime() {
+    const now = new Date();
+    
+    // Format time (HH:MM:SS)
+    this.currentTime = now.toLocaleTimeString('en-US', {
+      hour12: false,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+    
+    // Format date (Day, Month DD, YYYY)
+    this.currentDate = now.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   }
 
   onToggleSidebar(): void {
