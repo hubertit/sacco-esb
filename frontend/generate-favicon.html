@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate Favicon</title>
+</head>
+<body>
+    <canvas id="canvas" width="32" height="32" style="border: 1px solid #ccc;"></canvas>
+    <br><br>
+    <button onclick="downloadFavicon()">Download Favicon</button>
+    
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set background
+        ctx.fillStyle = '#007bff';
+        ctx.fillRect(0, 0, 32, 32);
+        
+        // Draw activity icon
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        
+        // Activity icon path
+        ctx.beginPath();
+        ctx.moveTo(6, 16);  // Start from left
+        ctx.lineTo(10, 4);   // Up to top
+        ctx.lineTo(16, 20);  // Down to middle
+        ctx.lineTo(22, 8);   // Up to top right
+        ctx.lineTo(26, 16);  // Down to right
+        ctx.stroke();
+        
+        function downloadFavicon() {
+            const link = document.createElement('a');
+            link.download = 'favicon.ico';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+</body>
+</html>
