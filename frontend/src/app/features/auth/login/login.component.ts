@@ -156,7 +156,22 @@ export class LoginComponent implements OnInit {
         },
         error: (error) => {
           this.isLoading = false;
-          this.errorMessage = error;
+          console.error('Login error:', error);
+          
+          // Handle different error types
+          if (error && typeof error === 'object') {
+            if (error.message) {
+              this.errorMessage = error.message;
+            } else if (error.error && error.error.message) {
+              this.errorMessage = error.error.message;
+            } else {
+              this.errorMessage = 'Login failed. Please check your credentials and try again.';
+            }
+          } else if (typeof error === 'string') {
+            this.errorMessage = error;
+          } else {
+            this.errorMessage = 'An unexpected error occurred. Please try again.';
+          }
         }
       });
     } else {
