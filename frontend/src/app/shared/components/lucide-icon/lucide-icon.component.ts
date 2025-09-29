@@ -80,6 +80,49 @@ import { CommonModule } from '@angular/common';
         <circle cx="11" cy="11" r="8"/>
         <path d="M21 21l-4.35-4.35"/>
       </svg>
+      <svg *ngSwitchCase="'unlock'" [attr.width]="size" [attr.height]="size" [attr.fill]="color" [attr.stroke]="color" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+        <circle cx="12" cy="16" r="1"/>
+        <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
+      </svg>
+      <svg *ngSwitchCase="'filter'" [attr.width]="size" [attr.height]="size" [attr.fill]="color" [attr.stroke]="color" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46"/>
+      </svg>
+      <svg *ngSwitchCase="'x'" [attr.width]="size" [attr.height]="size" [attr.fill]="color" [attr.stroke]="color" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" x2="6" y1="6" y2="18"/>
+        <line x1="6" x2="18" y1="6" y2="18"/>
+      </svg>
+      <svg *ngSwitchCase="'smartphone'" [attr.width]="size" [attr.height]="size" [attr.fill]="color" [attr.stroke]="color" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+        <line x1="12" x2="12" y1="18" y2="18"/>
+      </svg>
+      <svg *ngSwitchCase="'credit-card'" [attr.width]="size" [attr.height]="size" [attr.fill]="color" [attr.stroke]="color" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+        <line x1="1" x2="23" y1="10" y2="10"/>
+      </svg>
+      <svg *ngSwitchCase="'refresh-cw'" [attr.width]="size" [attr.height]="size" [attr.fill]="color" [attr.stroke]="color" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="23,4 23,10 17,10"/>
+        <polyline points="1,20 1,14 7,14"/>
+        <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/>
+      </svg>
+      <svg *ngSwitchCase="'box'" [attr.width]="size" [attr.height]="size" [attr.fill]="color" [attr.stroke]="color" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+        <polyline points="3.27,6.96 12,12.01 20.73,6.96"/>
+        <line x1="12" x2="12" y1="22.08" y2="12"/>
+      </svg>
+      <svg *ngSwitchCase="'shield'" [attr.width]="size" [attr.height]="size" [attr.fill]="color" [attr.stroke]="color" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+      <svg *ngSwitchCase="'users'" [attr.width]="size" [attr.height]="size" [attr.fill]="color" [attr.stroke]="color" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+      <svg *ngSwitchCase="'briefcase'" [attr.width]="size" [attr.height]="size" [attr.fill]="color" [attr.stroke]="color" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+      </svg>
     </ng-container>
   `
 })

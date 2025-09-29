@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-import { FeatherIconComponent } from '../../shared/components/feather-icon/feather-icon.component';
+import { LucideIconComponent } from '../../shared/components/lucide-icon/lucide-icon.component';
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { TableColumn } from '../../shared/components/data-table/data-table.component';
 
@@ -12,14 +12,14 @@ import { LogService, Log, LogLevel } from '../../core/services/log.service';
 @Component({
   selector: 'app-logs',
   standalone: true,
-  imports: [CommonModule, RouterModule, HttpClientModule, FormsModule, FeatherIconComponent, DataTableComponent],
+  imports: [CommonModule, RouterModule, HttpClientModule, FormsModule, LucideIconComponent, DataTableComponent],
   template: `
     <div class="dashboard-container">
       <!-- Filter Card -->
       <div class="card filter-card mb-4">
         <div class="card-header">
           <h5 class="card-title mb-0 d-flex align-items-center">
-            <app-feather-icon name="filter" size="18px" class="me-2"></app-feather-icon>
+            <app-lucide-icon name="filter" size="18px" class="me-2"></app-lucide-icon>
             Filters
           </h5>
         </div>
@@ -63,15 +63,15 @@ import { LogService, Log, LogLevel } from '../../core/services/log.service';
             <div class="col-12">
               <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-primary">
-                  <app-feather-icon name="search" size="14px" class="me-1"></app-feather-icon>
+                  <app-lucide-icon name="search" size="14px" class="me-1"></app-lucide-icon>
                   Apply Filters
                 </button>
                 <button type="button" class="btn btn-outline-secondary" (click)="clearFilters()">
-                  <app-feather-icon name="x" size="14px" class="me-1"></app-feather-icon>
+                  <app-lucide-icon name="x" size="14px" class="me-1"></app-lucide-icon>
                   Clear
                 </button>
                 <button type="button" class="btn btn-outline-primary" (click)="exportLogs()">
-                  <app-feather-icon name="download" size="14px" class="me-1"></app-feather-icon>
+                  <app-lucide-icon name="download" size="14px" class="me-1"></app-lucide-icon>
                   Export
                 </button>
               </div>
@@ -150,7 +150,7 @@ import { LogService, Log, LogLevel } from '../../core/services/log.service';
         border-color: #3498db;
       }
 
-      app-feather-icon {
+      app-lucide-icon {
         color: white;
       }
     }
@@ -164,7 +164,7 @@ import { LogService, Log, LogLevel } from '../../core/services/log.service';
         border-color: #1b2e4b;
       }
 
-      app-feather-icon {
+      app-lucide-icon {
         color: #1b2e4b;
       }
     }
