@@ -32,11 +32,7 @@ To change the API base URL, update the `apiUrl` in the environment files:
 // src/environments/environment.ts
 export const environment = {
   production: false,
-  apiUrl: 'http://10.20.1.12:8083',
-  cors: {
-    withCredentials: true,
-    allowedOrigins: ['http://10.20.1.12:4200', 'http://localhost:4200']
-  }
+  apiUrl: 'http://10.20.1.12:8083/api'
 };
 ```
 
