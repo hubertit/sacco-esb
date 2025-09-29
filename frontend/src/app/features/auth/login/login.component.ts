@@ -3,19 +3,19 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
-import { FeatherIconComponent } from '../../../shared/components/feather-icon/feather-icon.component';
+import { LucideIconComponent } from '../../../shared/components/lucide-icon/lucide-icon.component';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, FeatherIconComponent],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, LucideIconComponent],
   template: `
     <div class="auth-page">
       <!-- Left side - Login Form -->
       <div class="login-section">
         <div class="login-container">
           <div class="logo-section">
-            <app-feather-icon name="activity" size="48px" class="logo-icon"></app-feather-icon>
+            <app-lucide-icon name="activity" size="48px" class="logo-icon"></app-lucide-icon>
             <h1>Log In to <span>SACCO ESB</span></h1>
           </div>
           

@@ -4,12 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { InactivityService } from '../../../core/services/inactivity.service';
-import { FeatherIconComponent } from '../../../shared/components/feather-icon/feather-icon.component';
+import { LucideIconComponent } from '../../../shared/components/lucide-icon/lucide-icon.component';
 
 @Component({
   selector: 'app-lock',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, FeatherIconComponent],
+  imports: [CommonModule, FormsModule, RouterModule, LucideIconComponent],
   template: `
     <div class="auth-page">
       <!-- Left side - Lock Form -->
@@ -28,7 +28,7 @@ import { FeatherIconComponent } from '../../../shared/components/feather-icon/fe
           <form (ngSubmit)="unlock()" #lockForm="ngForm" class="login-form">
             <div class="form-group">
               <div class="input-wrapper">
-                <app-feather-icon name="lock" size="16px"></app-feather-icon>
+                <app-lucide-icon name="lock" size="16px"></app-lucide-icon>
                 <input
                   type="password"
                   id="password"
@@ -44,12 +44,12 @@ import { FeatherIconComponent } from '../../../shared/components/feather-icon/fe
               </div>
             </div>
             <button type="submit" class="login-btn" [disabled]="!password">
-              <app-feather-icon name="unlock" size="16px"></app-feather-icon>
+              <app-lucide-icon name="unlock" size="16px"></app-lucide-icon>
               Unlock
             </button>
             <div class="footer-text">
               <a routerLink="/login" class="switch-account">
-                <app-feather-icon name="log-out" size="16px"></app-feather-icon>
+                <app-lucide-icon name="log-out" size="16px"></app-lucide-icon>
                 Sign in as a different user
               </a>
             </div>

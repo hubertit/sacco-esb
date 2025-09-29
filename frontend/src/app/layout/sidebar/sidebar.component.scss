@@ -1,4 +1,4 @@
-@import '../../../styles/variables';
+@use '../../../styles/variables' as *;
 
 .sidebar {
   position: fixed;
@@ -178,7 +178,7 @@
     color: white;
     background: rgba(white, 0.1);
     
-    app-feather-icon {
+    app-lucide-icon {
       opacity: 1;
     }
   }
@@ -187,12 +187,12 @@
     color: white;
     background: rgba(white, 0.1);
     
-    app-feather-icon {
+    app-lucide-icon {
       opacity: 1;
     }
   }
 
-  app-feather-icon {
+  app-lucide-icon {
     margin-right: 1rem;
     width: 20px;
     height: 20px;
