@@ -29,13 +29,13 @@ import { FeatherIconComponent } from '../../../shared/components/feather-icon/fe
               <div class="input-wrapper">
                 <i class="fas fa-user"></i>
                 <input 
-                  type="email" 
-                  formControlName="email" 
-                  placeholder="Email"
-                  [class.is-invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+                  type="text" 
+                  formControlName="username" 
+                  placeholder="Username"
+                  [class.is-invalid]="loginForm.get('username')?.invalid && loginForm.get('username')?.touched">
               </div>
-              <div class="invalid-feedback" *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
-                Please enter a valid email address
+              <div class="invalid-feedback" *ngIf="loginForm.get('username')?.invalid && loginForm.get('username')?.touched">
+                Username is required
               </div>
             </div>
 
@@ -115,7 +115,7 @@ export class LoginComponent implements OnInit {
     private router: Router
   ) {
     this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
+      username: ['', Validators.required],
       password: ['', Validators.required]
     });
   }
@@ -150,9 +150,9 @@ export class LoginComponent implements OnInit {
       this.isLoading = true;
       this.errorMessage = '';
 
-      const { email, password } = this.loginForm.value;
+      const { username, password } = this.loginForm.value;
 
-      this.authService.login(email, password).subscribe({
+      this.authService.login(username, password).subscribe({
         next: (user) => {
           this.isLoading = false;
           // Navigate to dashboard or home page
