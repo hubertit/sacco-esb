@@ -148,7 +148,7 @@ export class LoginComponent implements OnInit {
 
       const { username, password } = this.loginForm.value;
 
-      this.authService.login(username, password).subscribe({
+      this.authService.login({ username, password }).subscribe({
         next: (user) => {
           this.isLoading = false;
           // Navigate to dashboard or home page
