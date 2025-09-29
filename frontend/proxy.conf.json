@@ -3,6 +3,9 @@
     "target": "http://localhost:5501",
     "secure": false,
     "changeOrigin": true,
-    "logLevel": "debug"
+    "logLevel": "debug",
+    "timeout": 60000,
+    "proxyTimeout": 60000,
+    "onError": "onProxyError"
   }
 }

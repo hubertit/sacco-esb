@@ -55,8 +55,15 @@ import { LucideIconComponent } from '../../../shared/components/lucide-icon/luci
 
             <button type="submit" class="login-btn" [disabled]="loginForm.invalid || isLoading">
               <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
-              {{ isLoading ? 'Logging in...' : 'Log In' }}
+              {{ isLoading ? 'Connecting to server...' : 'Log In' }}
             </button>
+            
+            <div class="mt-3" *ngIf="isLoading">
+              <small class="text-muted">
+                <i class="fas fa-info-circle me-1"></i>
+                This may take a moment due to VPN connection...
+              </small>
+            </div>
           </form>
 
           <div class="footer-text">
@@ -161,7 +168,14 @@ export class LoginComponent implements OnInit {
           // Handle different error types
           if (error && typeof error === 'object') {
             if (error.message) {
-              this.errorMessage = error.message;
+              // Check for timeout errors
+              if (error.message.includes('timeout') || error.message.includes('Timeout')) {
+                this.errorMessage = 'Request timed out. Please check your VPN connection and try again.';
+              } else if (error.message.includes('Could not open JPA EntityManager')) {
+                this.errorMessage = 'Database connection failed. Please ensure the backend server is properly configured.';
+              } else {
+                this.errorMessage = error.message;
+              }
             } else if (error.error && error.error.message) {
               this.errorMessage = error.error.message;
             } else {

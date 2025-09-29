@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, timeout } from 'rxjs';
 import { ApiConfig } from '../config/api.config';
+import { AppConfigService } from '../config/app.config';
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +10,8 @@ import { ApiConfig } from '../config/api.config';
 export class ApiService {
   constructor(
     private http: HttpClient,
-    private apiConfig: ApiConfig
+    private apiConfig: ApiConfig,
+    private appConfig: AppConfigService
   ) {}
 
   private getHeaders(): HttpHeaders {
@@ -28,7 +30,9 @@ export class ApiService {
     return this.http.get<T>(url, {
       headers: this.getHeaders(),
       params
-    });
+    }).pipe(
+      timeout(this.appConfig.getRequestTimeout())
+    );
   }
 
   /**
@@ -39,7 +43,9 @@ export class ApiService {
     return this.http.post<T>(url, data, {
       headers: this.getHeaders(),
       params
-    });
+    }).pipe(
+      timeout(this.appConfig.getRequestTimeout())
+    );
   }
 
   /**
@@ -50,7 +56,9 @@ export class ApiService {
     return this.http.put<T>(url, data, {
       headers: this.getHeaders(),
       params
-    });
+    }).pipe(
+      timeout(this.appConfig.getRequestTimeout())
+    );
   }
 
   /**
@@ -61,7 +69,9 @@ export class ApiService {
     return this.http.delete<T>(url, {
       headers: this.getHeaders(),
       params
-    });
+    }).pipe(
+      timeout(this.appConfig.getRequestTimeout())
+    );
   }
 
   /**
@@ -72,7 +82,9 @@ export class ApiService {
     return this.http.patch<T>(url, data, {
       headers: this.getHeaders(),
       params
-    });
+    }).pipe(
+      timeout(this.appConfig.getRequestTimeout())
+    );
   }
 
   /**

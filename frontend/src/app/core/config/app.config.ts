@@ -44,9 +44,9 @@ export class AppConfigService {
         enableNotifications: true
       },
       timeouts: {
-        request: 30000, // 30 seconds
-        refresh: 10000, // 10 seconds
-        retry: 5000 // 5 seconds
+        request: 120000, // 2 minutes for slow VPN connections
+        refresh: 30000, // 30 seconds
+        retry: 10000 // 10 seconds
       },
       pagination: {
         defaultPageSize: 10,
