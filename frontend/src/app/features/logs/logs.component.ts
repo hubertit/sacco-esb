@@ -121,8 +121,18 @@ import { LogViewModalComponent } from '../../shared/components/log-view-modal/lo
             </div>
             <p class="mt-2 text-muted">Loading logs...</p>
           </div>
+          
+          <!-- Error State -->
+          <div *ngIf="!loading && currentLogType.includes('Error')" class="text-center py-5">
+            <div class="alert alert-danger d-inline-block">
+              <app-lucide-icon name="alert-circle" size="24px" class="me-2"></app-lucide-icon>
+              <strong>Invalid Log Type</strong>
+              <p class="mb-0 mt-2">Please navigate to a valid log type from the menu.</p>
+            </div>
+          </div>
+          
           <app-data-table
-            *ngIf="!loading"
+            *ngIf="!loading && !currentLogType.includes('Error')"
             [columns]="columns"
             [data]="filteredLogs"
             [striped]="true"
@@ -391,8 +401,18 @@ export class LogsComponent implements OnInit {
         this.currentLogType = `Transaction Logs - ${params['type'].charAt(0).toUpperCase() + params['type'].slice(1)}`;
         this.applyFilters();
       } else {
-        // Default to Push transaction logs
-        this.currentLogType = 'Push Transaction Logs';
+        // Check URL path for log type
+        const currentUrl = this.route.snapshot.url.join('/');
+        if (currentUrl.includes('logs/transaction/push')) {
+          this.currentLogType = 'Push Transaction Logs';
+        } else if (currentUrl.includes('logs/transaction/pull')) {
+          this.currentLogType = 'Pull Transaction Logs';
+        } else if (currentUrl.includes('logs/transaction/internal')) {
+          this.currentLogType = 'Internal Transaction Logs';
+        } else {
+          // Invalid log type - show error
+          this.currentLogType = 'Error: Invalid Log Type';
+        }
       }
     });
   }
@@ -411,12 +431,30 @@ export class LogsComponent implements OnInit {
     // Determine which API endpoint to call based on the current route or filters
     let logObservable;
     
-    if (this.filters.table === 'transactions') {
-      // For transaction logs, we'll use push logs as default
+    // Check route parameters to determine log type
+    const currentUrl = this.route.snapshot.url.join('/');
+    console.log('🔗 Current URL path:', currentUrl);
+    
+    if (currentUrl.includes('logs/transaction/push')) {
+      // Push transaction logs
+      console.log('📤 Loading Push transaction logs');
       logObservable = this.logService.getPushLogs(this.filters);
+    } else if (currentUrl.includes('logs/transaction/pull')) {
+      // Pull transaction logs
+      console.log('📥 Loading Pull transaction logs');
+      logObservable = this.logService.getPullLogs(this.filters);
+    } else if (currentUrl.includes('logs/transaction/internal')) {
+      // Internal transaction logs
+      console.log('🔄 Loading Internal transaction logs');
+      logObservable = this.logService.getInternalLogs(this.filters);
     } else {
-      // Default to push logs
-      logObservable = this.logService.getPushLogs(this.filters);
+      // No valid log type found - show error
+      console.error('❌ No valid log type found in URL:', currentUrl);
+      this.loading = false;
+      this.logs = [];
+      this.filteredLogs = [];
+      this.currentLogType = 'Error: Invalid Log Type';
+      return;
     }
     
     logObservable.subscribe({

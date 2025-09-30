@@ -20,7 +20,7 @@ import { LogData } from '../../../core/models/log-data.models';
               Transaction Log Details
             </h5>
             <button type="button" class="btn-close-custom" (click)="closeModal()" aria-label="Close">
-              <app-lucide-icon name="x" size="14px"></app-lucide-icon>
+              <app-lucide-icon name="x" size="18px"></app-lucide-icon>
             </button>
           </div>
 
@@ -49,8 +49,8 @@ import { LogData } from '../../../core/models/log-data.models';
               <div class="log-header">
                 <div class="status-section">
                   <span class="badge status-badge" [class]="getStatusClass(log.logStatus)">
-                    <app-lucide-icon name="check-circle" size="14px" class="me-1" *ngIf="log.logStatus === 'SUCCESS'"></app-lucide-icon>
-                    <app-lucide-icon name="x-circle" size="14px" class="me-1" *ngIf="log.logStatus === 'FAILED'"></app-lucide-icon>
+                    <app-lucide-icon name="check" size="14px" class="me-1" *ngIf="log.logStatus === 'SUCCESS'"></app-lucide-icon>
+                    <app-lucide-icon name="x" size="14px" class="me-1" *ngIf="log.logStatus === 'FAILED'"></app-lucide-icon>
                     <app-lucide-icon name="clock" size="14px" class="me-1" *ngIf="log.logStatus === 'PENDING'"></app-lucide-icon>
                     <app-lucide-icon name="loader" size="14px" class="me-1" *ngIf="log.logStatus === 'PROCESSING'"></app-lucide-icon>
                     {{ log.logStatus }}
@@ -136,7 +136,7 @@ import { LogData } from '../../../core/models/log-data.models';
 
                   <div class="info-section">
                     <h6 class="section-title">
-                      <app-lucide-icon name="building" size="14px" class="me-2"></app-lucide-icon>
+                      <app-lucide-icon name="home" size="14px" class="me-2"></app-lucide-icon>
                       Branch
                     </h6>
                     <div class="info-item">
@@ -161,13 +161,6 @@ import { LogData } from '../../../core/models/log-data.models';
             </div>
           </div>
 
-          <!-- Modal Footer -->
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" (click)="closeModal()">
-              <app-lucide-icon name="x" size="14px" class="me-1"></app-lucide-icon>
-              Close
-            </button>
-          </div>
         </div>
       </div>
     </div>
@@ -185,18 +178,32 @@ import { LogData } from '../../../core/models/log-data.models';
     }
 
     .btn-close-custom {
-      background: none;
-      border: none;
-      padding: 0.5rem;
-      border-radius: 0.375rem;
+      background: #f8f9fa;
+      border: 2px solid #dee2e6;
+      color: #6c757d;
+      padding: 0;
+      cursor: pointer;
       transition: all 0.2s ease;
       display: flex;
       align-items: center;
       justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
     .btn-close-custom:hover {
-      background-color: rgba(0, 0, 0, 0.1);
+      color: #fff;
+      background-color: #dc3545;
+      border-color: #dc3545;
+      transform: scale(1.05);
+      box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+    }
+
+    .btn-close-custom:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25);
     }
 
     .log-header {
@@ -204,7 +211,7 @@ import { LogData } from '../../../core/models/log-data.models';
       justify-content: space-between;
       align-items: center;
       padding: 1rem;
-      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      background: #f8fafc;
       border-radius: 0.5rem;
       margin-bottom: 1.5rem;
     }
