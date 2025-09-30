@@ -511,7 +511,7 @@ export class LogsComponent implements OnInit {
       if (params['partner']) {
         // Integration logs with specific partner
         this.currentPartnerId = params['partner'];
-        this.currentLogType = `Integration Logs - ${params['partner']}`;
+        this.setPartnerTitle(params['partner']);
         this.loadIntegrationLogs();
       } else if (params['type']) {
         // Transaction logs with specific type - set table filter
@@ -539,6 +539,11 @@ export class LogsComponent implements OnInit {
     this.partnerService.getPartners().subscribe(partners => {
       this.partners = partners;
       console.log('📊 Partners loaded:', partners);
+      
+      // Update partner title if we have a current partner ID
+      if (this.currentPartnerId) {
+        this.setPartnerTitle(this.currentPartnerId);
+      }
     });
   }
 
@@ -762,6 +767,25 @@ export class LogsComponent implements OnInit {
   closeIntegrationLogModal() {
     this.showLogModal = false;
     this.selectedIntegrationLog = null;
+  }
+
+  /**
+   * Set the title with partner name instead of ID
+   */
+  setPartnerTitle(partnerId: string) {
+    if (this.partners && this.partners.length > 0) {
+      const partner = this.partners.find(p => p.id === partnerId);
+      if (partner) {
+        this.currentLogType = `Integration Logs - ${partner.partnerName}`;
+      } else {
+        this.currentLogType = `Integration Logs - ${partnerId}`;
+      }
+    } else {
+      // If partners not loaded yet, set a temporary title and update when partners load
+      this.currentLogType = `Integration Logs - ${partnerId}`;
+      // Update title when partners are loaded
+      setTimeout(() => this.setPartnerTitle(partnerId), 100);
+    }
   }
 
   applyIntegrationFilters() {

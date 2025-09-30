@@ -54,7 +54,7 @@ export interface TableColumn {
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let item of data">
+            <tr *ngFor="let item of data; let i = index">
               <td *ngFor="let col of columns">
                 <ng-container [ngSwitch]="col.type">
                   <ng-container *ngSwitchCase="'date'">
@@ -67,7 +67,7 @@ export interface TableColumn {
                   </ng-container>
                   <ng-container *ngSwitchCase="'custom'">
                     <ng-container *ngIf="col.template && typeof col.template === 'function'">
-                      <span [innerHTML]="col.template(item)"></span>
+                      <span [innerHTML]="col.template(item, i)"></span>
                     </ng-container>
                     <ng-container *ngIf="col.template && typeof col.template !== 'function'">
                       <ng-container *ngTemplateOutlet="col.template; context: { $implicit: item }">
