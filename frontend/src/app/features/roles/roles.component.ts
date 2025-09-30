@@ -6,7 +6,8 @@ import { LucideIconComponent } from '../../shared/components/lucide-icon/lucide-
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { TableColumn } from '../../shared/components/data-table/data-table.component';
 
-import { RoleService, Role } from '../../core/services/role.service';
+import { RoleService } from '../../core/services/role.service';
+import { Role } from '../../core/models/role.models';
 
 @Component({
   selector: 'app-roles',
@@ -44,7 +45,6 @@ import { RoleService, Role } from '../../core/services/role.service';
                 [data]="roles"
                 [striped]="true"
                 (onSort)="handleSort($event)"
-                (onSearch)="handleSearch($event)"
                 (onPageChange)="handlePageChange($event)"
                 (onPageSizeChange)="handlePageSizeChange($event)"
               ></app-data-table>
@@ -115,24 +115,38 @@ import { RoleService, Role } from '../../core/services/role.service';
         color: #fff;
         background-color: #3498db;
       }
+
+      .badge-success {
+        color: #fff;
+        background-color: #28a745;
+      }
+
+      .badge-danger {
+        color: #fff;
+        background-color: #dc3545;
+      }
     }
   `]
 })
 export class RolesComponent implements OnInit {
-  permissionCountTemplate = (item: Role) => `
-    <span class="badge badge-info">
-      ${item.permissions.length} permissions
+  roleTypeTemplate = (item: Role) => `
+    <span class="badge ${item.roleType === 'ADMINISTRATOR' ? 'badge-primary' : 'badge-info'}">
+      ${item.roleType}
+    </span>
+  `;
+
+  statusTemplate = (item: Role) => `
+    <span class="badge ${item.entityState === 'ACTIVE' ? 'badge-success' : 'badge-danger'}">
+      ${item.entityState}
     </span>
   `;
 
   columns: TableColumn[] = [
-    { key: 'id', title: 'ID', type: 'text', sortable: true },
+    { key: 'index', title: 'No.', type: 'text', sortable: false },
     { key: 'name', title: 'Name', type: 'text', sortable: true },
-    { key: 'description', title: 'Description', type: 'text', sortable: true },
-    { key: 'permissions', title: 'Permissions', type: 'custom', sortable: true, template: this.permissionCountTemplate },
-    { key: 'status', title: 'Status', type: 'status', sortable: true },
-    { key: 'createdAt', title: 'Created At', type: 'date', sortable: true },
-    { key: 'updatedAt', title: 'Updated At', type: 'date', sortable: true }
+    { key: 'roleType', title: 'Role Type', type: 'custom', sortable: true, template: this.roleTypeTemplate },
+    { key: 'entityState', title: 'Status', type: 'custom', sortable: true, template: this.statusTemplate },
+    { key: 'version', title: 'Version', type: 'text', sortable: true }
   ];
 
   roles: Role[] = [];
@@ -145,7 +159,11 @@ export class RolesComponent implements OnInit {
 
   private loadRoles() {
     this.roleService.getRoles().subscribe(roles => {
-      this.roles = roles;
+      // Add index numbers to roles for the No. column
+      this.roles = roles.map((role, index) => ({
+        ...role,
+        index: index + 1
+      }));
     });
   }
 
@@ -159,10 +177,6 @@ export class RolesComponent implements OnInit {
     console.log('Sort:', event);
   }
 
-  handleSearch(term: string) {
-    // TODO: Implement search
-    console.log('Search term:', term);
-  }
 
   handlePageChange(page: number) {
     // TODO: Implement pagination

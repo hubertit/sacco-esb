@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, ActivatedRoute } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { LucideIconComponent } from '../../shared/components/lucide-icon/lucide-icon.component';
@@ -8,6 +8,8 @@ import { DataTableComponent } from '../../shared/components/data-table/data-tabl
 import { TableColumn } from '../../shared/components/data-table/data-table.component';
 
 import { LogService, Log, LogLevel } from '../../core/services/log.service';
+import { PartnerService } from '../../core/services/partner.service';
+import { Partner } from '../../core/models/partner.models';
 
 @Component({
   selector: 'app-logs',
@@ -25,8 +27,9 @@ import { LogService, Log, LogLevel } from '../../core/services/log.service';
         </div>
         <div class="card-body">
           <form (ngSubmit)="applyFilters()" class="row g-3">
+            <!-- First Row: 3 inputs -->
             <!-- Status Filter -->
-            <div class="col-md-3">
+            <div class="col-md-4">
               <label for="statusFilter" class="form-label">Status</label>
               <select id="statusFilter" class="form-select" [(ngModel)]="filters.status" name="status">
                 <option value="">All Statuses</option>
@@ -38,18 +41,30 @@ import { LogService, Log, LogLevel } from '../../core/services/log.service';
             </div>
 
             <!-- Date Range Filter -->
-            <div class="col-md-3">
+            <div class="col-md-4">
               <label for="startDate" class="form-label">Start Date</label>
               <input type="date" id="startDate" class="form-control" [(ngModel)]="filters.startDate" name="startDate">
             </div>
 
-            <div class="col-md-3">
+            <div class="col-md-4">
               <label for="endDate" class="form-label">End Date</label>
               <input type="date" id="endDate" class="form-control" [(ngModel)]="filters.endDate" name="endDate">
             </div>
 
+            <!-- Second Row: 2 inputs -->
+            <!-- Partner Filter -->
+            <div class="col-md-6">
+              <label for="partnerFilter" class="form-label">Partner</label>
+              <select id="partnerFilter" class="form-select" [(ngModel)]="filters.partner" name="partner">
+                <option value="">All Partners</option>
+                <option *ngFor="let partner of partners" [value]="partner.partnerCode">
+                  {{ partner.partnerName }}
+                </option>
+              </select>
+            </div>
+
             <!-- Transaction Type Filter -->
-            <div class="col-md-3">
+            <div class="col-md-6">
               <label for="transactionType" class="form-label">Transaction Type</label>
               <select id="transactionType" class="form-select" [(ngModel)]="filters.transactionType" name="transactionType">
                 <option value="">All Types</option>
@@ -141,6 +156,30 @@ import { LogService, Log, LogLevel } from '../../core/services/log.service';
       padding: 1rem;
     }
 
+    /* Ensure all form elements have consistent height */
+    .form-control,
+    .form-select,
+    .btn {
+      height: 38px;
+      min-height: 38px;
+    }
+
+    .form-control,
+    .form-select {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     .btn-primary {
       background-color: #1b2e4b;
       border-color: #1b2e4b;
@@ -222,21 +261,48 @@ export class LogsComponent implements OnInit {
   logs: Log[] = [];
   filteredLogs: Log[] = [];
   logLevels: LogLevel[] = [];
+  partners: Partner[] = [];
 
   filters = {
     status: '',
     startDate: '',
     endDate: '',
+    partner: '',
     transactionType: ''
   };
 
-  constructor(private logService: LogService) {
+  constructor(
+    private logService: LogService,
+    private partnerService: PartnerService,
+    private route: ActivatedRoute
+  ) {
     this.logLevels = this.logService.getLogLevels();
   }
 
   ngOnInit() {
+    this.loadPartners();
     this.logs = this.logService.getMockLogs();
     this.filteredLogs = [...this.logs];
+    
+    // Check for URL parameters
+    this.route.params.subscribe(params => {
+      if (params['partner']) {
+        // Integration logs with specific partner
+        this.filters.partner = params['partner'];
+        this.applyFilters();
+      } else if (params['type']) {
+        // Transaction logs with specific type
+        this.filters.transactionType = params['type'];
+        this.applyFilters();
+      }
+    });
+  }
+
+  private loadPartners() {
+    this.partnerService.getPartners().subscribe(partners => {
+      this.partners = partners;
+      console.log('📊 Partners loaded:', partners);
+    });
   }
 
   getLogLevelClass(level: LogLevel): string {
@@ -270,6 +336,17 @@ export class LogsComponent implements OnInit {
         }
       }
 
+      // Partner filter (assuming partner info is in the message or source)
+      if (this.filters.partner) {
+        const message = log.message.toLowerCase();
+        const source = log.source.toLowerCase();
+        const partner = this.filters.partner.toLowerCase();
+        
+        if (!message.includes(partner) && !source.includes(partner)) {
+          return false;
+        }
+      }
+
       // Transaction type filter (assuming transaction type is in the message or source)
       if (this.filters.transactionType) {
         const message = log.message.toLowerCase();
@@ -290,6 +367,7 @@ export class LogsComponent implements OnInit {
       status: '',
       startDate: '',
       endDate: '',
+      partner: '',
       transactionType: ''
     };
     this.filteredLogs = [...this.logs];

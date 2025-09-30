@@ -26,6 +26,11 @@ export const API_ENDPOINTS = {
     FILTER_PUSH: 'logs/filterPush',
     FILTER_INTERNAL: 'logs/filterInternal'
   },
+  PARTNERS: {
+    BASE: 'general-logs',
+    ALL: 'general-logs/partners',
+    BY_ID: 'general-logs/partner'
+  },
   ENTITIES: {
     BASE: 'ent',
     ALL: 'ent/entities',
@@ -33,6 +38,14 @@ export const API_ENDPOINTS = {
     CONTRACTS: 'ent/getcontracts',
     CONTRACT: 'ent/getcontract',
     ADD: 'ent/addentity'
+  },
+  ROLES: {
+    BASE: 'role',
+    ALL: 'role/all-roles',
+    BY_ID: 'role/id',
+    BY_TYPE: 'role/type',
+    SAVE: 'role/save',
+    UPDATE: 'role/update'
   }
 } as const;
 

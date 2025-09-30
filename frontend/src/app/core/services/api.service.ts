@@ -188,4 +188,162 @@ export class ApiService {
       })
     );
   }
+
+  /**
+   * GET request for role endpoints (without /api prefix)
+   */
+  getRoleEndpoint<T>(endpoint: string, params?: HttpParams): Observable<T> {
+    const url = endpoint; // Use endpoint directly without base URL
+    console.log('🚀 ApiService GET role endpoint:');
+    console.log('  📍 Endpoint:', endpoint);
+    console.log('  🌐 Full URL:', url);
+    console.log('  📦 Params:', params?.toString() || 'none');
+    console.log('  🔑 Headers:', this.getHeaders());
+    
+    return this.http.get<T>(url, {
+      headers: this.getHeaders(),
+      params: params
+    }).pipe(
+      timeout(this.appConfig.getRequestTimeout()),
+      catchError(error => {
+        console.error('❌ ApiService GET Role Endpoint Error:');
+        console.error('  📍 Endpoint:', endpoint);
+        console.error('  🌐 URL:', url);
+        console.error('  ❌ Error:', error);
+        console.error('  📊 Status:', error.status);
+        console.error('  📝 Message:', error.message);
+        
+        if (error.name === 'TimeoutError') {
+          console.error('⏰ Request timeout - backend may be slow or unreachable');
+        } else if (error.status === 0) {
+          console.error('🌐 Network error - check if backend is running');
+        } else if (error.status === 401) {
+          console.error('🔐 Unauthorized - check credentials/token');
+        } else if (error.status === 404) {
+          console.error('🔍 Not found - check endpoint URL');
+        }
+        
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * POST request for role endpoints (without /api prefix)
+   */
+  postRoleEndpoint<T>(endpoint: string, data: any, params?: HttpParams): Observable<T> {
+    const url = endpoint; // Use endpoint directly without base URL
+    console.log('🚀 ApiService POST role endpoint:');
+    console.log('  📍 Endpoint:', endpoint);
+    console.log('  🌐 Full URL:', url);
+    console.log('  📦 Data:', data);
+    console.log('  📦 Params:', params?.toString() || 'none');
+    console.log('  🔑 Headers:', this.getHeaders());
+    
+    return this.http.post<T>(url, data, {
+      headers: this.getHeaders(),
+      params: params
+    }).pipe(
+      timeout(this.appConfig.getRequestTimeout()),
+      catchError(error => {
+        console.error('❌ ApiService POST Role Endpoint Error:');
+        console.error('  📍 Endpoint:', endpoint);
+        console.error('  🌐 URL:', url);
+        console.error('  ❌ Error:', error);
+        console.error('  📊 Status:', error.status);
+        console.error('  📝 Message:', error.message);
+        
+        if (error.name === 'TimeoutError') {
+          console.error('⏰ Request timeout - backend may be slow or unreachable');
+        } else if (error.status === 0) {
+          console.error('🌐 Network error - check if backend is running');
+        } else if (error.status === 401) {
+          console.error('🔐 Unauthorized - check credentials/token');
+        } else if (error.status === 404) {
+          console.error('🔍 Not found - check endpoint URL');
+        }
+        
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * PUT request for role endpoints (without /api prefix)
+   */
+  putRoleEndpoint<T>(endpoint: string, data: any, params?: HttpParams): Observable<T> {
+    const url = endpoint; // Use endpoint directly without base URL
+    console.log('🚀 ApiService PUT role endpoint:');
+    console.log('  📍 Endpoint:', endpoint);
+    console.log('  🌐 Full URL:', url);
+    console.log('  📦 Data:', data);
+    console.log('  📦 Params:', params?.toString() || 'none');
+    console.log('  🔑 Headers:', this.getHeaders());
+    
+    return this.http.put<T>(url, data, {
+      headers: this.getHeaders(),
+      params: params
+    }).pipe(
+      timeout(this.appConfig.getRequestTimeout()),
+      catchError(error => {
+        console.error('❌ ApiService PUT Role Endpoint Error:');
+        console.error('  📍 Endpoint:', endpoint);
+        console.error('  🌐 URL:', url);
+        console.error('  ❌ Error:', error);
+        console.error('  📊 Status:', error.status);
+        console.error('  📝 Message:', error.message);
+        
+        if (error.name === 'TimeoutError') {
+          console.error('⏰ Request timeout - backend may be slow or unreachable');
+        } else if (error.status === 0) {
+          console.error('🌐 Network error - check if backend is running');
+        } else if (error.status === 401) {
+          console.error('🔐 Unauthorized - check credentials/token');
+        } else if (error.status === 404) {
+          console.error('🔍 Not found - check endpoint URL');
+        }
+        
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * GET request for partner endpoints (without /api prefix)
+   */
+  getPartnerEndpoint<T>(endpoint: string, params?: HttpParams): Observable<T> {
+    const url = endpoint; // Use endpoint directly without base URL
+    console.log('🚀 ApiService GET partner endpoint:');
+    console.log('  📍 Endpoint:', endpoint);
+    console.log('  🌐 Full URL:', url);
+    console.log('  📦 Params:', params?.toString() || 'none');
+    console.log('  🔑 Headers:', this.getHeaders());
+    
+    return this.http.get<T>(url, {
+      headers: this.getHeaders(),
+      params: params
+    }).pipe(
+      timeout(this.appConfig.getRequestTimeout()),
+      catchError(error => {
+        console.error('❌ ApiService GET Partner Endpoint Error:');
+        console.error('  📍 Endpoint:', endpoint);
+        console.error('  🌐 URL:', url);
+        console.error('  ❌ Error:', error);
+        console.error('  📊 Status:', error.status);
+        console.error('  📝 Message:', error.message);
+        
+        if (error.name === 'TimeoutError') {
+          console.error('⏰ Request timeout - backend may be slow or unreachable');
+        } else if (error.status === 0) {
+          console.error('🌐 Network error - check if backend is running');
+        } else if (error.status === 401) {
+          console.error('🔐 Unauthorized - check credentials/token');
+        } else if (error.status === 404) {
+          console.error('🔍 Not found - check endpoint URL');
+        }
+        
+        return throwError(() => error);
+      })
+    );
+  }
 }

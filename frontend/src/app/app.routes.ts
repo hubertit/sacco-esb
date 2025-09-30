@@ -50,6 +50,14 @@ export const routes: Routes = [
         component: LogsComponent
       },
       {
+        path: 'logs/transaction/:type',
+        component: LogsComponent
+      },
+      {
+        path: 'logs/integration/:partner',
+        component: LogsComponent
+      },
+      {
         path: 'audit',
         component: AuditComponent
       },

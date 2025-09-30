@@ -1,94 +1,79 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { delay } from 'rxjs/operators';
-
-export interface Permission {
-  id: number;
-  name: string;
-  description: string;
-  module: string;
-}
-
-export interface Role {
-  id: number;
-  name: string;
-  description: string;
-  permissions: Permission[];
-  createdAt: string;
-  updatedAt: string;
-  status: 'active' | 'inactive';
-}
+import { Observable } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
+import { ApiService } from './api.service';
+import { API_ENDPOINTS } from '../constants/api.constants';
+import { Role, RoleApiResponse, SingleRoleApiResponse, RoleType } from '../models/role.models';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RoleService {
-  private mockRoles: Role[] = [
-    {
-      id: 1,
-      name: 'Super Admin',
-      description: 'Full system access',
-      permissions: [
-        { id: 1, name: 'CREATE_USER', description: 'Create new users', module: 'Users' },
-        { id: 2, name: 'EDIT_USER', description: 'Edit existing users', module: 'Users' },
-        { id: 3, name: 'DELETE_USER', description: 'Delete users', module: 'Users' },
-        { id: 4, name: 'VIEW_REPORTS', description: 'View all reports', module: 'Reports' }
-      ],
-      createdAt: '2024-01-01',
-      updatedAt: '2024-01-01',
-      status: 'active'
-    },
-    {
-      id: 2,
-      name: 'Admin',
-      description: 'Administrative access with some restrictions',
-      permissions: [
-        { id: 1, name: 'CREATE_USER', description: 'Create new users', module: 'Users' },
-        { id: 2, name: 'EDIT_USER', description: 'Edit existing users', module: 'Users' },
-        { id: 4, name: 'VIEW_REPORTS', description: 'View all reports', module: 'Reports' }
-      ],
-      createdAt: '2024-01-15',
-      updatedAt: '2024-01-15',
-      status: 'active'
-    },
-    {
-      id: 3,
-      name: 'User Manager',
-      description: 'Manage users and their permissions',
-      permissions: [
-        { id: 1, name: 'CREATE_USER', description: 'Create new users', module: 'Users' },
-        { id: 2, name: 'EDIT_USER', description: 'Edit existing users', module: 'Users' }
-      ],
-      createdAt: '2024-02-01',
-      updatedAt: '2024-02-01',
-      status: 'active'
-    },
-    {
-      id: 4,
-      name: 'Report Viewer',
-      description: 'View and export reports',
-      permissions: [
-        { id: 4, name: 'VIEW_REPORTS', description: 'View all reports', module: 'Reports' }
-      ],
-      createdAt: '2024-02-15',
-      updatedAt: '2024-02-15',
-      status: 'active'
-    }
-  ];
+  constructor(private apiService: ApiService) {}
 
-  constructor(private http: HttpClient) {}
-
+  /**
+   * Get all roles from the API
+   */
   getRoles(): Observable<Role[]> {
-    // TODO: Replace with actual API call
-    return of(this.mockRoles).pipe(delay(100));
+    console.log('🎯 RoleService: Fetching roles from API');
+    console.log('🔗 API Endpoint:', API_ENDPOINTS.ROLES.ALL);
+    
+    // Use getRoleEndpoint method which bypasses /api prefix and uses proxy
+    return this.apiService.getRoleEndpoint<RoleApiResponse>(API_ENDPOINTS.ROLES.ALL)
+      .pipe(
+        map((response: RoleApiResponse) => {
+          console.log('📊 Raw API Response:', response);
+          console.log('👥 Number of roles received:', response?.result?.length || 0);
+          console.log('🔍 Roles data:', response?.result);
+          return response.result || [];
+        }),
+        catchError((error) => {
+          console.error('❌ Error fetching roles:', error);
+          console.error('❌ Error status:', error.status);
+          console.error('❌ Error message:', error.message);
+          console.error('❌ Error URL:', error.url);
+          throw error;
+        })
+      );
   }
 
-  getPermissions(): Observable<Permission[]> {
-    // TODO: Replace with actual API call
-    const allPermissions = Array.from(
-      new Set(this.mockRoles.flatMap(role => role.permissions))
-    );
-    return of(allPermissions).pipe(delay(100));
+  /**
+   * Get role by ID
+   */
+  getRoleById(id: string): Observable<Role> {
+    return this.apiService.getRoleEndpoint<SingleRoleApiResponse>(`${API_ENDPOINTS.ROLES.BY_ID}/${id}`)
+      .pipe(
+        map((response: SingleRoleApiResponse) => {
+          console.log('📊 Raw API Response for role by ID:', response);
+          return response.result;
+        })
+      );
+  }
+
+  /**
+   * Create a new role
+   */
+  createRole(role: Partial<Role>): Observable<Role> {
+    return this.apiService.postRoleEndpoint<Role>(API_ENDPOINTS.ROLES.SAVE, role);
+  }
+
+  /**
+   * Update an existing role
+   */
+  updateRole(id: string, role: Partial<Role>): Observable<Role> {
+    return this.apiService.putRoleEndpoint<Role>(`${API_ENDPOINTS.ROLES.UPDATE}/${id}`, role);
+  }
+
+  /**
+   * Get roles by type
+   */
+  getRolesByType(roleType: RoleType): Observable<Role[]> {
+    return this.apiService.getRoleEndpoint<RoleApiResponse>(`${API_ENDPOINTS.ROLES.BY_TYPE}/${roleType}`)
+      .pipe(
+        map((response: RoleApiResponse) => {
+          console.log('📊 Raw API Response for type roles:', response);
+          return response.result || [];
+        })
+      );
   }
 }

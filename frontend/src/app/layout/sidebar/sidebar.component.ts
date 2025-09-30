@@ -1,6 +1,7 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { NavigationService, MenuItem } from '../../core/services/navigation.service';
 import { LucideIconComponent } from '../../shared/components/lucide-icon/lucide-icon.component';
 import { InactivityService } from '../../core/services/inactivity.service';
@@ -41,12 +42,34 @@ import { AuthService } from '../../core/services/auth.service';
                    [class.rotated]="item.expanded"></app-lucide-icon>
               </a>
               <div class="submenu" *ngIf="item.expanded && !isCollapsed">
-                <a *ngFor="let child of item.children"
-                   [routerLink]="child.path"
-                   routerLinkActive="active"
-                   class="submenu-item">
-                  {{ child.title }}
-                </a>
+                <ng-container *ngFor="let child of item.children">
+                  <!-- Submenu item with its own children (nested submenu) -->
+                  <div *ngIf="child.children" class="nested-submenu">
+                    <a class="submenu-item parent level-1"
+                       [class.expanded]="child.expanded"
+                       (click)="toggleSubmenu(child)">
+                      {{ child.title }}
+                    </a>
+                    <div class="nested-submenu-items" *ngIf="child.expanded">
+                      <a *ngFor="let grandchild of child.children"
+                         [routerLink]="grandchild.path"
+                         [class.active]="isSubmenuItemActive(grandchild)"
+                         class="submenu-item nested level-2"
+                         (click)="onSubmenuClick(grandchild)">
+                        {{ grandchild.title }}
+                      </a>
+                    </div>
+                  </div>
+                  
+                  <!-- Simple submenu item without children -->
+                  <a *ngIf="!child.children"
+                     [routerLink]="child.path"
+                     [class.active]="isSubmenuItemActive(child)"
+                     class="submenu-item"
+                     (click)="onSubmenuClick(child)">
+                    {{ child.title }}
+                  </a>
+                </ng-container>
               </div>
             </div>
 
@@ -75,14 +98,15 @@ import { AuthService } from '../../core/services/auth.service';
   `,
   styleUrls: ['./sidebar.component.scss']
 })
-export class SidebarComponent {
+export class SidebarComponent implements OnInit, OnDestroy {
   @Input() isCollapsed = false;
   @Output() toggleCollapse = new EventEmitter<void>();
 
-  menuItems: MenuItem[];
+  menuItems: MenuItem[] = [];
   userName: string = '';
   userRole: string = '';
   userAvatar: string = '/assets/img/user.png';
+  private menuSubscription: Subscription = new Subscription();
 
   constructor(
     private navigationService: NavigationService,
@@ -90,7 +114,6 @@ export class SidebarComponent {
     private inactivityService: InactivityService,
     private authService: AuthService
   ) {
-    this.menuItems = this.navigationService.getMenuItems();
     const user = this.authService.getCurrentUser();
     if (user) {
       this.userName = user.name;
@@ -101,18 +124,63 @@ export class SidebarComponent {
     }
   }
 
+  ngOnInit(): void {
+    // Subscribe to menu items changes
+    this.menuSubscription = this.navigationService.menuItems$.subscribe(menuItems => {
+      console.log('🎯 Sidebar: Received updated menu items:', menuItems);
+      this.menuItems = menuItems;
+      
+      // Debug submenu paths
+      menuItems.forEach(item => {
+        if (item.children) {
+          console.log('🔍 Submenu for', item.title, ':', item.children);
+          item.children.forEach(child => {
+            console.log('  - Child:', child.title, 'Path:', child.path);
+          });
+        }
+      });
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.menuSubscription.unsubscribe();
+  }
+
+  /**
+   * Check if a submenu item should be active based on current URL
+   */
+  isSubmenuItemActive(child: MenuItem): boolean {
+    const currentUrl = this.router.url;
+    
+    // Check if current URL matches the child path exactly
+    if (child.path && currentUrl.includes(child.path)) {
+      return true;
+    }
+    
+    // For partner-specific paths, check if we're on the integration logs page with the specific partner
+    if (child.partnerCode && currentUrl.includes('/logs/integration/') && currentUrl.includes(child.partnerCode)) {
+      return true;
+    }
+    
+    return false;
+  }
+
   onToggleCollapse(): void {
     this.toggleCollapse.emit();
   }
 
+  onSubmenuClick(child: MenuItem): void {
+    console.log('🎯 Submenu clicked:', child);
+    console.log('🔗 Path:', child.path);
+    if (child.path) {
+      console.log('🚀 Navigating to:', child.path);
+    }
+  }
+
   toggleSubmenu(item: MenuItem): void {
     item.expanded = !item.expanded;
-    // Close other submenus
-    this.menuItems.forEach(menuItem => {
-      if (menuItem !== item) {
-        menuItem.expanded = false;
-      }
-    });
+    // Don't close other submenus - let users keep multiple submenus open
+    console.log('🎯 Toggling submenu:', item.title, 'expanded:', item.expanded);
   }
 
   isMenuActive(item: MenuItem): boolean {

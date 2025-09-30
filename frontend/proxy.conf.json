@@ -28,5 +28,17 @@
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug"
+  },
+  "/role": {
+    "target": "http://10.20.1.12:8083",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/general-logs": {
+    "target": "http://10.20.1.12:8083",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
   }
 }

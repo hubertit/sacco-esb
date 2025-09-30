@@ -821,4 +821,5 @@ export class DashboardComponent implements OnInit {
   refreshCharts() {
     this.loadChartData();
   }
+
 }
