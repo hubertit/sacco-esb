@@ -16,7 +16,10 @@ export class ApiService {
 
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('access_token');
-    return new HttpHeaders({
+    console.log('🔑 API Service - Token from localStorage:', token ? 'Present' : 'Missing');
+    console.log('🔑 API Service - Full token:', token);
+    
+    const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       'Authorization': token ? `Bearer ${token}` : '',
       'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -24,6 +27,9 @@ export class ApiService {
       'Expires': '0',
       'Accept': 'application/json'
     });
+    
+    console.log('🔑 API Service - Headers being sent:', headers);
+    return headers;
   }
 
   /**
@@ -35,11 +41,37 @@ export class ApiService {
     const timestamp = new Date().getTime();
     const cacheBustParams = params ? params.set('_t', timestamp.toString()) : new HttpParams().set('_t', timestamp.toString());
     
+    console.log('🚀 ApiService GET request:');
+    console.log('  📍 Endpoint:', endpoint);
+    console.log('  🌐 Full URL:', url);
+    console.log('  📦 Params:', cacheBustParams.toString());
+    console.log('  🔑 Headers:', this.getHeaders());
+    
     return this.http.get<T>(url, {
       headers: this.getHeaders(),
       params: cacheBustParams
     }).pipe(
-      timeout(this.appConfig.getRequestTimeout())
+      timeout(this.appConfig.getRequestTimeout()),
+      catchError(error => {
+        console.error('❌ ApiService GET Error:');
+        console.error('  📍 Endpoint:', endpoint);
+        console.error('  🌐 URL:', url);
+        console.error('  ❌ Error:', error);
+        console.error('  📊 Status:', error.status);
+        console.error('  📝 Message:', error.message);
+        
+        if (error.name === 'TimeoutError') {
+          console.error('⏰ Request timeout - backend may be slow or unreachable');
+        } else if (error.status === 0) {
+          console.error('🌐 Network error - check if backend is running');
+        } else if (error.status === 401) {
+          console.error('🔐 Unauthorized - check credentials/token');
+        } else if (error.status === 404) {
+          console.error('🔍 Not found - check endpoint URL');
+        }
+        
+        return throwError(() => error);
+      })
     );
   }
 
@@ -116,5 +148,44 @@ export class ApiService {
    */
   getBaseUrl(): string {
     return this.apiConfig.getBaseUrl();
+  }
+
+  /**
+   * GET request for user endpoints (without /api prefix)
+   */
+  getUserEndpoint<T>(endpoint: string, params?: HttpParams): Observable<T> {
+    const url = endpoint; // Use endpoint directly without base URL
+    console.log('🚀 ApiService GET user endpoint:');
+    console.log('  📍 Endpoint:', endpoint);
+    console.log('  🌐 Full URL:', url);
+    console.log('  📦 Params:', params?.toString() || 'none');
+    console.log('  🔑 Headers:', this.getHeaders());
+    
+    return this.http.get<T>(url, {
+      headers: this.getHeaders(),
+      params: params
+    }).pipe(
+      timeout(this.appConfig.getRequestTimeout()),
+      catchError(error => {
+        console.error('❌ ApiService GET User Endpoint Error:');
+        console.error('  📍 Endpoint:', endpoint);
+        console.error('  🌐 URL:', url);
+        console.error('  ❌ Error:', error);
+        console.error('  📊 Status:', error.status);
+        console.error('  📝 Message:', error.message);
+        
+        if (error.name === 'TimeoutError') {
+          console.error('⏰ Request timeout - backend may be slow or unreachable');
+        } else if (error.status === 0) {
+          console.error('🌐 Network error - check if backend is running');
+        } else if (error.status === 401) {
+          console.error('🔐 Unauthorized - check credentials/token');
+        } else if (error.status === 404) {
+          console.error('🔍 Not found - check endpoint URL');
+        }
+        
+        return throwError(() => error);
+      })
+    );
   }
 }

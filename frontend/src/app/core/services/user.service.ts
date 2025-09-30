@@ -1,194 +1,118 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { delay } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
+import { ApiService } from './api.service';
+import { API_ENDPOINTS } from '../constants/api.constants';
 
-export type UserType = 'Human' | 'Application';
+export type UserType = 'HUMAN' | 'APPLICATION';
 
 export interface User {
-  id: number;
-  name: string;
-  email: string;
-  type: UserType;
-  role: string;
-  status: 'active' | 'inactive';
-  lastLogin: string;
-  createdAt: string;
-  // Additional fields based on type
-  apiKey?: string;        // For Application users
-  phoneNumber?: string;   // For Human users
-  department?: string;    // For Human users
+  id: string;
+  version: number;
+  entityState: 'ACTIVE' | 'INACTIVE';
+  firstName: string;
+  lastName: string;
+  email: string | null;
+  phoneNumber: string | null;
+  username: string;
+  userType: UserType;
+  roleId: string | null;
+  roleName: string | null;
+  index?: number; // Optional index for table display
+}
+
+export interface UserApiResponse {
+  result: User[];
+  message: string | null;
+  messageNumber: number;
+  duration: number;
+  elements: number;
+  warning: string | null;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
-  private mockUsers: User[] = [
-    {
-      id: 1,
-      name: 'John Doe',
-      email: 'john.doe@example.com',
-      type: 'Human',
-      role: 'Admin',
-      status: 'active',
-      lastLogin: '2024-03-16T10:30:00',
-      createdAt: '2024-01-15',
-      phoneNumber: '+250789123456',
-      department: 'IT'
-    },
-    {
-      id: 2,
-      name: 'Jane Smith',
-      email: 'jane.smith@example.com',
-      type: 'Human',
-      role: 'Manager',
-      status: 'active',
-      lastLogin: '2024-03-15T16:45:00',
-      createdAt: '2024-01-20',
-      phoneNumber: '+250789123457',
-      department: 'Operations'
-    },
-    {
-      id: 3,
-      name: 'Payment Gateway',
-      email: 'payment.gateway@system.com',
-      type: 'Application',
-      role: 'System',
-      status: 'active',
-      lastLogin: '2024-03-10T09:15:00',
-      createdAt: '2024-02-01',
-      apiKey: 'pk_test_51NcezpLkdIwcKRf...'
-    },
-    {
-      id: 4,
-      name: 'Notification Service',
-      email: 'notifications@system.com',
-      type: 'Application',
-      role: 'System',
-      status: 'active',
-      lastLogin: '2024-03-16T08:30:00',
-      createdAt: '2024-02-15',
-      apiKey: 'sk_live_51NcezpLkdIwcKRf...'
-    },
-    {
-      id: 5,
-      name: 'Sarah Johnson',
-      email: 'sarah.j@example.com',
-      type: 'Human',
-      role: 'Support',
-      status: 'active',
-      lastLogin: '2024-03-16T11:20:00',
-      createdAt: '2024-02-20',
-      phoneNumber: '+250789123458',
-      department: 'Customer Support'
-    },
-    {
-      id: 6,
-      name: 'Michael Chen',
-      email: 'm.chen@example.com',
-      type: 'Human',
-      role: 'Developer',
-      status: 'active',
-      lastLogin: '2024-03-16T09:15:00',
-      createdAt: '2024-02-25',
-      phoneNumber: '+250789123459',
-      department: 'Engineering'
-    },
-    {
-      id: 7,
-      name: 'Analytics Service',
-      email: 'analytics@system.com',
-      type: 'Application',
-      role: 'System',
-      status: 'active',
-      lastLogin: '2024-03-16T00:00:00',
-      createdAt: '2024-03-01',
-      apiKey: 'ak_test_51NcezpLkdIwcKRf...'
-    },
-    {
-      id: 8,
-      name: 'Emma Wilson',
-      email: 'e.wilson@example.com',
-      type: 'Human',
-      role: 'Analyst',
-      status: 'inactive',
-      lastLogin: '2024-03-10T14:30:00',
-      createdAt: '2024-03-05',
-      phoneNumber: '+250789123460',
-      department: 'Analytics'
-    },
-    {
-      id: 9,
-      name: 'Reporting Service',
-      email: 'reports@system.com',
-      type: 'Application',
-      role: 'System',
-      status: 'inactive',
-      lastLogin: '2024-03-15T23:59:59',
-      createdAt: '2024-03-10',
-      apiKey: 'rk_test_51NcezpLkdIwcKRf...'
-    },
-    {
-      id: 10,
-      name: 'David Brown',
-      email: 'd.brown@example.com',
-      type: 'Human',
-      role: 'Manager',
-      status: 'active',
-      lastLogin: '2024-03-16T12:00:00',
-      createdAt: '2024-03-15',
-      phoneNumber: '+250789123461',
-      department: 'Sales'
-    }
-  ];
+  constructor(private apiService: ApiService) {}
 
-  constructor(private http: HttpClient) {}
-
-  getMockUsers(): User[] {
-    return this.mockUsers;
-  }
-
+  /**
+   * Get all users from the API
+   */
   getUsers(): Observable<User[]> {
-    // TODO: Replace with actual API call
-    return of(this.mockUsers).pipe(delay(100));
+    console.log('🎯 UserService: Fetching users from API');
+    console.log('🔗 API Endpoint:', API_ENDPOINTS.USERS.ALL);
+    
+    // Use getUserEndpoint method which bypasses /api prefix
+    return this.apiService.getUserEndpoint<UserApiResponse>(API_ENDPOINTS.USERS.ALL)
+      .pipe(
+        map((response: UserApiResponse) => {
+          console.log('📊 Raw API Response:', response);
+          console.log('👥 Number of users received:', response?.result?.length || 0);
+          console.log('🔍 Users data:', response?.result);
+          return response.result || [];
+        }),
+        catchError((error) => {
+          console.error('❌ Error fetching users:', error);
+          console.error('❌ Error status:', error.status);
+          console.error('❌ Error message:', error.message);
+          console.error('❌ Error URL:', error.url);
+          throw error;
+        })
+      );
   }
 
-  getUserById(id: number): Observable<User | undefined> {
-    // TODO: Replace with actual API call
-    const user = this.mockUsers.find(u => u.id === id);
-    return of(user).pipe(delay(500));
+  /**
+   * Get user by ID
+   */
+  getUserById(id: string): Observable<User> {
+    return this.apiService.get<User>(`${API_ENDPOINTS.USERS.BY_ID}/${id}`);
   }
 
-  createUser(user: Omit<User, 'id' | 'lastLogin' | 'createdAt'>): Observable<User> {
-    // TODO: Replace with actual API call
-    const newUser: User = {
-      ...user,
-      id: Math.max(...this.mockUsers.map(u => u.id)) + 1,
-      lastLogin: '-',
-      createdAt: new Date().toISOString()
-    };
-    this.mockUsers.push(newUser);
-    return of(newUser).pipe(delay(500));
+  /**
+   * Get user by username
+   */
+  getUserByUsername(username: string): Observable<User> {
+    return this.apiService.get<User>(`${API_ENDPOINTS.USERS.BY_USERNAME}/${username}`);
   }
 
-  updateUser(id: number, user: Partial<User>): Observable<User> {
-    // TODO: Replace with actual API call
-    const index = this.mockUsers.findIndex(u => u.id === id);
-    if (index !== -1) {
-      this.mockUsers[index] = { ...this.mockUsers[index], ...user };
-      return of(this.mockUsers[index]).pipe(delay(500));
-    }
-    throw new Error('User not found');
+  /**
+   * Create a new user
+   */
+  createUser(user: Partial<User>): Observable<User> {
+    return this.apiService.post<User>(API_ENDPOINTS.USERS.SAVE, user);
   }
 
-  deleteUser(id: number): Observable<void> {
-    // TODO: Replace with actual API call
-    const index = this.mockUsers.findIndex(u => u.id === id);
-    if (index !== -1) {
-      this.mockUsers.splice(index, 1);
-      return of(undefined).pipe(delay(500));
-    }
-    throw new Error('User not found');
+  /**
+   * Update an existing user
+   */
+  updateUser(id: string, user: Partial<User>): Observable<User> {
+    return this.apiService.put<User>(`${API_ENDPOINTS.USERS.UPDATE}/${id}`, user);
+  }
+
+  /**
+   * Get users by role
+   */
+  getUsersByRole(roleId: string): Observable<User[]> {
+    return this.apiService.get<UserApiResponse>(`${API_ENDPOINTS.USERS.BY_ROLE}/${roleId}`)
+      .pipe(
+        map((response: UserApiResponse) => {
+          console.log('📊 Raw API Response for role users:', response);
+          return response.result || [];
+        })
+      );
+  }
+
+  /**
+   * Get users by type
+   */
+  getUsersByType(userType: UserType): Observable<User[]> {
+    return this.apiService.get<UserApiResponse>(`${API_ENDPOINTS.USERS.BY_TYPE}/${userType}`)
+      .pipe(
+        map((response: UserApiResponse) => {
+          console.log('📊 Raw API Response for type users:', response);
+          return response.result || [];
+        })
+      );
   }
 }

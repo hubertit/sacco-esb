@@ -6,13 +6,17 @@ import { API_ENDPOINTS } from '../constants/api.constants';
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   
+  console.log('🔐 Auth Interceptor - Processing request:', req.url);
+  
   // Skip auth for login and refresh endpoints
   if (isAuthEndpoint(req.url)) {
+    console.log('🔐 Auth Interceptor - Skipping auth for endpoint:', req.url);
     return next(req);
   }
 
   // Add auth token to request
   const authReq = addAuthHeader(req, authService);
+  console.log('🔐 Auth Interceptor - Modified request headers:', authReq.headers);
   return next(authReq);
 };
 

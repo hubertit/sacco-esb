@@ -1,12 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef, ViewChild, ChangeDetectorRef, Renderer2 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
+import { Subject, takeUntil, finalize } from 'rxjs';
 import { LucideIconComponent } from '../../shared/components/lucide-icon/lucide-icon.component';
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { TableColumn } from '../../shared/components/data-table/data-table.component';
 
 import { UserService, User, UserType } from '../../core/services/user.service';
+
+declare var bootstrap: any;
 
 @Component({
   selector: 'app-users',
@@ -24,30 +27,85 @@ import { UserService, User, UserType } from '../../core/services/user.service';
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="addUserDropdown">
                   <li>
-                    <a class="dropdown-item d-flex align-items-center gap-2" (click)="openAddUserModal('Human')">
-                      <app-lucide-icon name="user" size="14px"></app-lucide-icon>
-                      Add Human User
+                    <a class="dropdown-item d-flex align-items-center gap-3" (click)="openAddUserModal('HUMAN')">
+                      <app-lucide-icon name="user" size="16px" class="text-primary"></app-lucide-icon>
+                      <span>Add Human User</span>
                     </a>
                   </li>
                   <li>
-                    <a class="dropdown-item d-flex align-items-center gap-2" (click)="openAddUserModal('Application')">
-                      <app-lucide-icon name="box" size="14px"></app-lucide-icon>
-                      Add Application
+                    <a class="dropdown-item d-flex align-items-center gap-3" (click)="openAddUserModal('APPLICATION')">
+                      <app-lucide-icon name="box" size="16px" class="text-info"></app-lucide-icon>
+                      <span>Add Application</span>
                     </a>
                   </li>
                 </ul>
               </div>
             </div>
             <div class="card-body">
+              <!-- Loading State -->
+              <div *ngIf="isLoading" class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2 text-muted">Loading users...</p>
+              </div>
+
+              <!-- Error State -->
+              <div *ngIf="hasError && !isLoading" class="alert alert-danger" role="alert">
+                <h4 class="alert-heading">Error!</h4>
+                <p>{{ errorMessage }}</p>
+                <hr>
+                <button class="btn btn-outline-danger btn-sm" (click)="refreshUsers()">
+                  Try Again
+                </button>
+              </div>
+
+              <!-- Data Table -->
               <app-data-table
+                *ngIf="!isLoading && !hasError"
                 [columns]="columns"
                 [data]="users"
                 [striped]="true"
+                [showActions]="true"
+                [showSearch]="false"
                 (onSort)="handleSort($event)"
-                (onSearch)="handleSearch($event)"
                 (onPageChange)="handlePageChange($event)"
-                (onPageSizeChange)="handlePageSizeChange($event)"
-              ></app-data-table>
+                (onPageSizeChange)="handlePageSizeChange($event)">
+                
+                <ng-template #rowActions let-user>
+                  <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" 
+                            [id]="'actionsDropdown' + user.id" 
+                            data-bs-toggle="dropdown" 
+                            aria-expanded="false"
+                            title="Actions"
+                            (click)="toggleDropdown($event, 'actionsDropdown' + user.id)">
+                      ⋯
+                    </button>
+                    <ul class="dropdown-menu" [attr.aria-labelledby]="'actionsDropdown' + user.id">
+                      <li>
+                        <a class="dropdown-item d-flex align-items-center gap-3" (click)="viewUser(user)">
+                          <app-lucide-icon name="eye" size="16px" class="text-primary"></app-lucide-icon>
+                          <span>View</span>
+                        </a>
+                      </li>
+                      <li>
+                        <a class="dropdown-item d-flex align-items-center gap-3" (click)="editUser(user)">
+                          <app-lucide-icon name="pencil" size="16px" class="text-warning" [title]="'Edit icon'"></app-lucide-icon>
+                          <span>Edit</span>
+                        </a>
+                      </li>
+                      <li><hr class="dropdown-divider my-2"></li>
+                      <li>
+                        <a class="dropdown-item d-flex align-items-center gap-3 text-danger" (click)="deleteUser(user)">
+                          <app-lucide-icon name="trash" size="16px" class="text-danger" [title]="'Delete icon'"></app-lucide-icon>
+                          <span>Delete</span>
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                </ng-template>
+              </app-data-table>
             </div>
           </div>
     </div>
@@ -81,29 +139,76 @@ import { UserService, User, UserType } from '../../core/services/user.service';
       padding: 1rem;
     }
 
-    .btn-primary {
-      background-color: #1b2e4b;
-      border-color: #1b2e4b;
+      .btn-primary {
+        background-color: #1b2e4b;
+        border-color: #1b2e4b;
 
-      &:hover {
-        background-color: #3498db;
-        border-color: #3498db;
+        &:hover {
+          background-color: #3498db;
+          border-color: #3498db;
+        }
+
+        app-lucide-icon {
+          color: white;
+        }
       }
 
-      app-lucide-icon {
-        color: white;
+      // Header dropdown styling
+      .card-header .dropdown-menu {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        border-radius: 0.5rem;
+        min-width: 200px;
+        padding: 0.5rem 0;
+        
+        .dropdown-item {
+          padding: 0.75rem 1rem;
+          font-size: 0.875rem;
+          font-weight: 500;
+          transition: all 0.2s ease-in-out;
+          
+          &:hover {
+            background-color: #f8f9fa;
+            color: #495057;
+            transform: translateX(2px);
+          }
+          
+          &:active {
+            background-color: #e9ecef;
+            transform: translateX(0);
+          }
+          
+          app-lucide-icon {
+            flex-shrink: 0;
+            width: 16px;
+            height: 16px;
+            display: inline-block;
+            
+            // Ensure icons are visible
+            svg {
+              width: 16px;
+              height: 16px;
+              display: block;
+            }
+          }
+          
+          span {
+            flex: 1;
+            white-space: nowrap;
+          }
+        }
       }
-    }
 
     :host ::ng-deep {
       .badge {
-        padding: 0.35em 0.65em;
         font-size: 0.75em;
         font-weight: 500;
         border-radius: 0.25rem;
         text-align: center;
         white-space: nowrap;
         vertical-align: baseline;
+        box-shadow: none !important;
+        border: none;
       }
 
       .badge-primary {
@@ -115,39 +220,349 @@ import { UserService, User, UserType } from '../../core/services/user.service';
         color: #fff;
         background-color: #3498db;
       }
+
+      .badge-success {
+        color: #fff;
+        background-color: #28a745;
+      }
+
+      .badge-danger {
+        color: #fff;
+        background-color: #dc3545;
+      }
+
+      // Dropdown styles
+      .dropdown-toggle {
+        cursor: pointer;
+        user-select: none;
+        border-color: #1b2e4b !important; // Primary color border
+        color: #1b2e4b !important; // Primary color text
+        
+        &:hover {
+          background-color: #1b2e4b !important;
+          border-color: #1b2e4b !important;
+          color: white !important;
+        }
+        
+        &:focus {
+          box-shadow: 0 0 0 0.2rem rgba(27, 46, 75, 0.25) !important;
+          border-color: #1b2e4b !important;
+        }
+        
+        &:after {
+          display: none; // Hide the default arrow since we're using ⋯
+        }
+      }
+
+      .dropdown-menu {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        border-radius: 0.5rem;
+        min-width: 180px;
+        padding: 0.5rem 0;
+        
+        .dropdown-item {
+          padding: 0.75rem 1rem;
+          font-size: 0.875rem;
+          font-weight: 500;
+          transition: all 0.2s ease-in-out;
+          border: none;
+          background: none;
+          width: 100%;
+          text-align: left;
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          
+          &:hover {
+            background-color: #f8f9fa;
+            color: #495057;
+            transform: translateX(2px);
+          }
+          
+          &:active {
+            background-color: #e9ecef;
+            transform: translateX(0);
+          }
+          
+          &:focus {
+            outline: none;
+            background-color: #f8f9fa;
+            box-shadow: inset 0 0 0 2px rgba(13, 110, 253, 0.25);
+          }
+          
+          // Icon styling
+          app-lucide-icon {
+            flex-shrink: 0;
+            width: 16px;
+            height: 16px;
+            display: inline-block;
+            
+            // Ensure icons are visible
+            svg {
+              width: 16px;
+              height: 16px;
+              display: block;
+            }
+          }
+          
+          span {
+            flex: 1;
+            white-space: nowrap;
+          }
+        }
+        
+        .dropdown-divider {
+          margin: 0.5rem 0;
+          border-color: #e9ecef;
+        }
+      }
     }
   `]
 })
-export class UsersComponent implements OnInit {
-  userTypeBadgeTemplate = (item: User) => `
-    <span class="badge ${item.type === 'Human' ? 'badge-primary' : 'badge-info'}">
-      ${item.type}
-    </span>
-  `;
+export class UsersComponent implements OnInit, OnDestroy, AfterViewInit {
+  private destroy$ = new Subject<void>();
+  
+  isLoading = true;
+  hasError = false;
+  errorMessage = '';
+
+  userTypeBadgeTemplate = (item: User) => {
+    const badgeClass = item.userType === 'HUMAN' ? 'badge-primary' : 'badge-info';
+    return `<span class="badge ${badgeClass}">${item.userType}</span>`;
+  };
+
+  statusBadgeTemplate = (item: User) => {
+    const badgeClass = item.entityState === 'ACTIVE' ? 'badge-success' : 'badge-danger';
+    return `<span class="badge ${badgeClass}">${item.entityState}</span>`;
+  };
+
+  roleTemplate = (item: User) => {
+    return item.roleName || '-';
+  };
 
   columns: TableColumn[] = [
-    { key: 'id', title: 'ID', type: 'text', sortable: true },
-    { key: 'name', title: 'Name', type: 'text', sortable: true },
-    { key: 'type', title: 'Type', type: 'custom', sortable: true, template: this.userTypeBadgeTemplate },
+    { key: 'index', title: 'No.', type: 'text', sortable: false },
+    { key: 'username', title: 'Username', type: 'text', sortable: true },
+    { key: 'firstName', title: 'First Name', type: 'text', sortable: true },
+    { key: 'lastName', title: 'Last Name', type: 'text', sortable: true },
+    { key: 'userType', title: 'Type', type: 'custom', sortable: true, template: this.userTypeBadgeTemplate },
     { key: 'email', title: 'Email', type: 'text', sortable: true },
-    { key: 'role', title: 'Role', type: 'text', sortable: true },
-    { key: 'status', title: 'Status', type: 'status', sortable: true },
-    { key: 'lastLogin', title: 'Last Login', type: 'date', sortable: true },
-    { key: 'createdAt', title: 'Created At', type: 'date', sortable: true }
+    { key: 'phoneNumber', title: 'Phone', type: 'text', sortable: true },
+    { key: 'entityState', title: 'Status', type: 'custom', sortable: true, template: this.statusBadgeTemplate }
   ];
 
   users: User[] = [];
 
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private cdr: ChangeDetectorRef,
+    private renderer: Renderer2
+  ) {}
 
   ngOnInit() {
-    // Data is loaded directly like in entities component
-    this.users = this.userService.getMockUsers();
+    // Debug authentication state
+    console.log('🔍 UsersComponent - Checking authentication state:');
+    console.log('🔍 Access token:', localStorage.getItem('access_token'));
+    console.log('🔍 Refresh token:', localStorage.getItem('refresh_token'));
+    console.log('🔍 Current user:', localStorage.getItem('current_user'));
+    console.log('🔍 UsersComponent - Columns:', this.columns);
+    console.log('🔍 UsersComponent - Show actions enabled');
+    
+    // Check Bootstrap availability
+    this.checkBootstrapAvailability();
+    
+    this.loadUsers();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+    
+    // Clean up is handled automatically by Renderer2
+  }
+
+  ngAfterViewInit() {
+    // Initialize Bootstrap dropdowns after view is ready
+    this.initializeBootstrapDropdowns();
+    
+    // Add event delegation for dropdown clicks
+    this.setupDropdownEventDelegation();
+  }
+
+  private initializeBootstrapDropdowns() {
+    // Wait for the DOM to be ready and ensure Bootstrap is loaded
+    setTimeout(() => {
+      if (typeof bootstrap === 'undefined') {
+        console.error('❌ Bootstrap is not available!');
+        return;
+      }
+
+      // Find all dropdown elements in the current component
+      const dropdownElements = document.querySelectorAll('[data-bs-toggle="dropdown"]');
+      console.log('🔍 Found dropdown elements:', dropdownElements.length);
+      
+      dropdownElements.forEach((element, index) => {
+        console.log(`🔍 Initializing dropdown ${index}:`, element);
+        try {
+          // Dispose existing dropdown if any
+          const existingDropdown = bootstrap.Dropdown.getInstance(element);
+          if (existingDropdown) {
+            existingDropdown.dispose();
+          }
+          
+          // Create new dropdown with proper configuration
+          const dropdown = new bootstrap.Dropdown(element, {
+            autoClose: true,
+            boundary: 'viewport'
+          });
+          
+          console.log(`✅ Dropdown ${index} initialized successfully`);
+        } catch (error) {
+          console.error(`❌ Error initializing dropdown ${index}:`, error);
+        }
+      });
+    }, 300);
+  }
+
+  private checkBootstrapAvailability() {
+    // Check if Bootstrap is available
+    if (typeof bootstrap !== 'undefined') {
+      console.log('✅ Bootstrap is available');
+      console.log('🔍 Bootstrap version:', bootstrap.Tooltip.VERSION || 'Unknown');
+    } else {
+      console.error('❌ Bootstrap is not available!');
+      console.log('🔍 Available global objects:', Object.keys(window));
+    }
+  }
+
+  private setupDropdownEventDelegation() {
+    // Use Renderer2 for better event handling
+    this.renderer.listen('document', 'click', this.handleDropdownClick);
+  }
+
+  private handleDropdownClick = (event: Event) => {
+    const target = event.target as HTMLElement;
+    const dropdownToggle = target.closest('[data-bs-toggle="dropdown"]');
+    
+    if (dropdownToggle) {
+      event.preventDefault();
+      event.stopPropagation();
+      
+      // Manually toggle the dropdown
+      if (typeof bootstrap !== 'undefined') {
+        const dropdown = bootstrap.Dropdown.getOrCreateInstance(dropdownToggle);
+        dropdown.toggle();
+      }
+    }
+    
+    // Handle dropdown menu item clicks
+    const dropdownItem = target.closest('.dropdown-item');
+    if (dropdownItem) {
+      // Let the click event propagate to handle the action
+      // Don't prevent default here as we want the click handlers to work
+    }
+  }
+
+  private loadUsers(): void {
+    this.isLoading = true;
+    this.hasError = false;
+    
+    console.log('🔄 UsersComponent: Starting to load users...');
+
+    // Check if user is authenticated
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      console.error('❌ No authentication token found!');
+      this.hasError = true;
+      this.errorMessage = 'You are not logged in. Please log in first to view users.';
+      this.isLoading = false;
+      return;
+    }
+
+    this.userService.getUsers()
+      .pipe(takeUntil(this.destroy$), finalize(() => {
+        this.isLoading = false;
+        console.log('⏹️ UsersComponent: Finished loading (isLoading set to false)');
+      }))
+      .subscribe({
+        next: (users: User[]) => {
+          console.log('✅ UsersComponent: Successfully loaded users');
+          console.log('👥 Number of users received:', users?.length || 0);
+          console.log('📋 Users data:', users);
+          
+          // Add index to each user for the No. column
+          this.users = users.map((user, index) => ({
+            ...user,
+            index: index + 1
+          }));
+          
+          // Trigger change detection to ensure DOM is updated
+          this.cdr.detectChanges();
+          
+          // Reinitialize Bootstrap dropdowns after data is loaded and DOM is updated
+          setTimeout(() => {
+            this.initializeBootstrapDropdowns();
+          }, 100);
+          
+          if (!users || users.length === 0) {
+            console.warn('⚠️ No users returned from API');
+          }
+        },
+        error: (error) => {
+          console.error('❌ UsersComponent: Error loading users');
+          console.error('❌ Error object:', error);
+          console.error('❌ Error status:', error.status);
+          console.error('❌ Error message:', error.message);
+          
+          this.hasError = true;
+          
+          if (error.status === 401) {
+            this.errorMessage = 'Authentication failed. Please log in again.';
+          } else if (error.status === 403) {
+            this.errorMessage = 'Access denied. You do not have permission to view users.';
+          } else {
+            this.errorMessage = error.message || 'Failed to load users from the API. Please check your connection and try again.';
+          }
+        }
+      });
+  }
+
+  public refreshUsers(): void {
+    this.loadUsers();
   }
 
   openAddUserModal(type: UserType) {
     // TODO: Implement add user modal
     console.log('Open add user modal for type:', type);
+  }
+
+  viewUser(user: User): void {
+    console.log('Viewing user:', user);
+    // TODO: Implement view user functionality
+  }
+
+  editUser(user: User): void {
+    console.log('Editing user:', user);
+    // TODO: Implement edit user functionality
+  }
+
+  deleteUser(user: User): void {
+    console.log('Deleting user:', user);
+    // TODO: Implement delete user functionality
+  }
+
+  toggleDropdown(event: Event, dropdownId: string): void {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    if (typeof bootstrap !== 'undefined') {
+      const dropdownElement = document.getElementById(dropdownId);
+      if (dropdownElement) {
+        const dropdown = bootstrap.Dropdown.getOrCreateInstance(dropdownElement);
+        dropdown.toggle();
+      }
+    }
   }
 
   handleSort(event: { column: string; direction: 'asc' | 'desc' }) {

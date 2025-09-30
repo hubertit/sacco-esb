@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, TemplateRef, ContentChild, AfterContentInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -66,7 +66,12 @@ export interface TableColumn {
                     </span>
                   </ng-container>
                   <ng-container *ngSwitchCase="'custom'">
-                    <ng-container *ngTemplateOutlet="col.template; context: { $implicit: item }">
+                    <ng-container *ngIf="col.template && typeof col.template === 'function'">
+                      <span [innerHTML]="col.template(item)"></span>
+                    </ng-container>
+                    <ng-container *ngIf="col.template && typeof col.template !== 'function'">
+                      <ng-container *ngTemplateOutlet="col.template; context: { $implicit: item }">
+                      </ng-container>
                     </ng-container>
                   </ng-container>
                   <ng-container *ngSwitchDefault>
@@ -75,8 +80,9 @@ export interface TableColumn {
                 </ng-container>
               </td>
               <td *ngIf="showActions" class="actions-column">
-                <ng-content select="[row-actions]" [ngTemplateOutlet]="rowActions" [ngTemplateOutletContext]="{ $implicit: item }">
-                </ng-content>
+                <ng-container *ngIf="rowActions" [ngTemplateOutlet]="rowActions" [ngTemplateOutletContext]="{ $implicit: item }">
+                </ng-container>
+                <span *ngIf="!rowActions" class="text-muted">No actions</span>
               </td>
             </tr>
             <tr *ngIf="!data?.length">
@@ -113,7 +119,7 @@ export interface TableColumn {
   `,
   styleUrls: ['./data-table.component.scss']
 })
-export class DataTableComponent {
+export class DataTableComponent implements AfterContentInit {
   @Input() columns: TableColumn[] = [];
   @Input() data: any[] = [];
   @Input() showHeader = true;
@@ -127,6 +133,8 @@ export class DataTableComponent {
   @Input() pageSize = 10;
   @Input() totalPages = 1;
   @Input() pageSizes = [5, 10, 25, 50];
+
+  @ContentChild('rowActions') rowActions!: TemplateRef<any>;
 
   @Output() onSort = new EventEmitter<{column: string, direction: 'asc' | 'desc'}>();
   @Output() onSearch = new EventEmitter<string>();
@@ -145,6 +153,11 @@ export class DataTableComponent {
       this.sortDirection = 'asc';
     }
     this.onSort.emit({ column: this.sortColumn, direction: this.sortDirection });
+  }
+
+  ngAfterContentInit() {
+    console.log('🔍 DataTableComponent - rowActions template:', this.rowActions);
+    console.log('🔍 DataTableComponent - showActions:', this.showActions);
   }
 
   getPages(): number[] {

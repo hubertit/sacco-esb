@@ -4,35 +4,35 @@ export const API_ENDPOINTS = {
     REFRESH: '/auth/refreshToken'
   },
   USERS: {
-    BASE: '/user',
-    ALL: '/user/all',
-    BY_ID: '/user/id',
-    BY_USERNAME: '/user/username',
-    BY_ROLE: '/user/Role',
-    BY_TYPE: '/user/roleType',
-    SAVE: '/user/save',
-    UPDATE: '/user/update'
+    BASE: 'user',
+    ALL: 'user/all',
+    BY_ID: 'user/id',
+    BY_USERNAME: 'user/username',
+    BY_ROLE: 'user/Role',
+    BY_TYPE: 'user/roleType',
+    SAVE: 'user/save',
+    UPDATE: 'user/update'
   },
   DASHBOARD: {
-    BASE: '/dashboard',
-    COUNT_PULL: '/dashboard/countPull',
-    COUNT_PUSH: '/dashboard/countPush',
-    COUNT_INTERNAL: '/dashboard/countInternal',
-    COUNT_TRANSACTIONS: '/dashboard/countTransactions'
+    BASE: 'dashboard',
+    COUNT_PULL: 'dashboard/countPull',
+    COUNT_PUSH: 'dashboard/countPush',
+    COUNT_INTERNAL: 'dashboard/countInternal',
+    COUNT_TRANSACTIONS: 'dashboard/countTransactions'
   },
   LOGS: {
-    BASE: '/logs',
-    FILTER_PULL: '/logs/filterPull',
-    FILTER_PUSH: '/logs/filterPush',
-    FILTER_INTERNAL: '/logs/filterInternal'
+    BASE: 'logs',
+    FILTER_PULL: 'logs/filterPull',
+    FILTER_PUSH: 'logs/filterPush',
+    FILTER_INTERNAL: 'logs/filterInternal'
   },
   ENTITIES: {
-    BASE: '/ent',
-    ALL: '/ent/entities',
-    BY_ID: '/ent/getentity',
-    CONTRACTS: '/ent/getcontracts',
-    CONTRACT: '/ent/getcontract',
-    ADD: '/ent/addentity'
+    BASE: 'ent',
+    ALL: 'ent/entities',
+    BY_ID: 'ent/getentity',
+    CONTRACTS: 'ent/getcontracts',
+    CONTRACT: 'ent/getcontract',
+    ADD: 'ent/addentity'
   }
 } as const;
 
