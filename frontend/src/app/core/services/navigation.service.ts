@@ -106,7 +106,7 @@ export class NavigationService {
         if (integrationLogsMenuItem) {
           integrationLogsMenuItem.children = partners.map(partner => ({
             title: partner.partnerName,
-            path: `logs/integration/${partner.partnerCode}`,
+            path: `logs/integration/${partner.id}`,
             // Store partner code for active state detection
             partnerCode: partner.partnerCode
           }));

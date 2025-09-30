@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideIconComponent } from '../lucide-icon/lucide-icon.component';
-import { LogData } from '../../../core/models/log-data.models';
+import { LogData, IntegrationLogData } from '../../../core/models/log-data.models';
 
 @Component({
   selector: 'app-log-view-modal',
@@ -17,7 +17,8 @@ import { LogData } from '../../../core/models/log-data.models';
           <div class="modal-header">
             <h5 class="modal-title d-flex align-items-center gap-2">
               <app-lucide-icon name="file-text" size="20px" class="text-primary"></app-lucide-icon>
-              Transaction Log Details
+              <span *ngIf="log">Transaction Log Details</span>
+              <span *ngIf="integrationLog">Integration Log Details</span>
             </h5>
             <button type="button" class="btn-close-custom" (click)="closeModal()" aria-label="Close">
               <app-lucide-icon name="x" size="18px"></app-lucide-icon>
@@ -43,15 +44,15 @@ import { LogData } from '../../../core/models/log-data.models';
               <p class="mb-0">{{ errorMessage }}</p>
             </div>
 
-            <!-- Log Information -->
-            <div *ngIf="log && !isLoading && !hasError" class="log-info">
+            <!-- Transaction Log Information -->
+            <div *ngIf="log && !integrationLog && !isLoading && !hasError" class="log-info">
               <!-- Header with Status and Key Info -->
               <div class="log-header">
                 <div class="status-section">
                   <span class="badge status-badge" [class]="getStatusClass(log.logStatus)">
                     <app-lucide-icon name="check" size="14px" class="me-1" *ngIf="log.logStatus === 'SUCCESS'"></app-lucide-icon>
                     <app-lucide-icon name="x" size="14px" class="me-1" *ngIf="log.logStatus === 'FAILED'"></app-lucide-icon>
-                    <app-lucide-icon name="clock" size="14px" class="me-1" *ngIf="log.logStatus === 'PENDING'"></app-lucide-icon>
+                    <app-lucide-icon name="pause" size="14px" class="me-1" *ngIf="log.logStatus === 'PENDING'"></app-lucide-icon>
                     <app-lucide-icon name="loader" size="14px" class="me-1" *ngIf="log.logStatus === 'PROCESSING'"></app-lucide-icon>
                     {{ log.logStatus }}
                   </span>
@@ -136,7 +137,7 @@ import { LogData } from '../../../core/models/log-data.models';
 
                   <div class="info-section">
                     <h6 class="section-title">
-                      <app-lucide-icon name="home" size="14px" class="me-2"></app-lucide-icon>
+                      <app-lucide-icon name="map-pin" size="14px" class="me-2"></app-lucide-icon>
                       Branch
                     </h6>
                     <div class="info-item">
@@ -156,6 +157,127 @@ import { LogData } from '../../../core/models/log-data.models';
                       <span class="value">{{ log.year }}</span>
                     </div>
                   </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Integration Log Information -->
+            <div *ngIf="integrationLog && !log && !isLoading && !hasError" class="log-info">
+              <!-- Header with Status and Key Info -->
+              <div class="log-header">
+                <div class="status-section">
+                  <span class="badge status-badge" [class]="getIntegrationStatusClass(integrationLog.status)">
+                    <app-lucide-icon name="check" size="14px" class="me-1" *ngIf="integrationLog.status === 'COMPLETED'"></app-lucide-icon>
+                    <app-lucide-icon name="x" size="14px" class="me-1" *ngIf="integrationLog.status === 'FAILED'"></app-lucide-icon>
+                    <app-lucide-icon name="pause" size="14px" class="me-1" *ngIf="integrationLog.status === 'PENDING'"></app-lucide-icon>
+                    <app-lucide-icon name="loader" size="14px" class="me-1" *ngIf="integrationLog.status === 'PROCESSING'"></app-lucide-icon>
+                    <app-lucide-icon name="clock" size="14px" class="me-1" *ngIf="integrationLog.status === 'TIMEOUT'"></app-lucide-icon>
+                    {{ integrationLog.status }}
+                  </span>
+                </div>
+                <div class="key-info">
+                  <div class="date-display">{{ formatDateTime(integrationLog.receivedAt) }}</div>
+                  <div class="size-display">{{ formatBytes(integrationLog.payloadSize) }}</div>
+                </div>
+              </div>
+
+              <!-- Main Content Grid -->
+              <div class="content-grid">
+                <!-- Left Column -->
+                <div class="content-column">
+                  <div class="info-section">
+                    <h6 class="section-title">
+                      <app-lucide-icon name="activity" size="14px" class="me-2"></app-lucide-icon>
+                      Message Details
+                    </h6>
+                    <div class="info-item">
+                      <label>Correlation ID</label>
+                      <span class="value">{{ integrationLog.correlationId }}</span>
+                    </div>
+                    <div class="info-item">
+                      <label>Direction</label>
+                      <span class="value">{{ integrationLog.direction }}</span>
+                    </div>
+                    <div class="info-item">
+                      <label>Message Type</label>
+                      <span class="value">{{ integrationLog.messageType }}</span>
+                    </div>
+                    <div class="info-item">
+                      <label>Description</label>
+                      <span class="value">{{ integrationLog.description }}</span>
+                    </div>
+                  </div>
+
+                  <div class="info-section">
+                    <h6 class="section-title">
+                      <app-lucide-icon name="users" size="14px" class="me-2"></app-lucide-icon>
+                      Partner
+                    </h6>
+                    <div class="info-item">
+                      <label>Partner Name</label>
+                      <span class="value">{{ integrationLog.partner.partnerName }}</span>
+                    </div>
+                    <div class="info-item">
+                      <label>Partner Code</label>
+                      <span class="value">{{ integrationLog.partner.partnerCode }}</span>
+                    </div>
+                    <div class="info-item">
+                      <label>Partner ID</label>
+                      <span class="value">{{ integrationLog.partner.id }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="content-column">
+                  <div class="info-section">
+                    <h6 class="section-title">
+                      <app-lucide-icon name="settings" size="14px" class="me-2"></app-lucide-icon>
+                      Technical Details
+                    </h6>
+                    <div class="info-item">
+                      <label>Response Code</label>
+                      <span class="value">{{ integrationLog.responseCode }}</span>
+                    </div>
+                    <div class="info-item">
+                      <label>Payload Format</label>
+                      <span class="value">{{ integrationLog.payloadFormat }}</span>
+                    </div>
+                    <div class="info-item">
+                      <label>Payload Size</label>
+                      <span class="value">{{ formatBytes(integrationLog.payloadSize) }}</span>
+                    </div>
+                    <div class="info-item">
+                      <label>Sensitive</label>
+                      <span class="value">{{ integrationLog.sensitive ? 'Yes' : 'No' }}</span>
+                    </div>
+                  </div>
+
+                  <div class="info-section">
+                    <h6 class="section-title">
+                      <app-lucide-icon name="clock" size="14px" class="me-2"></app-lucide-icon>
+                      Timing
+                    </h6>
+                    <div class="info-item">
+                      <label>Received At</label>
+                      <span class="value">{{ formatDateTime(integrationLog.receivedAt) }}</span>
+                    </div>
+                    <div class="info-item" *ngIf="integrationLog.processedAt">
+                      <label>Processed At</label>
+                      <span class="value">{{ formatDateTime(integrationLog.processedAt) }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Payload Section -->
+              <div class="info-section mt-3">
+                <h6 class="section-title">
+                  <app-lucide-icon name="code" size="14px" class="me-2"></app-lucide-icon>
+                  Payload
+                </h6>
+                <div class="payload-container">
+                  <pre class="payload-content">{{ formatPayload(integrationLog.payloadJson) }}</pre>
                 </div>
               </div>
             </div>
@@ -337,11 +459,37 @@ import { LogData } from '../../../core/models/log-data.models';
       background-color: #f8fafc;
       border-top: 1px solid #e2e8f0;
     }
+
+    .size-display {
+      font-size: 0.875rem;
+      color: #64748b;
+      margin-top: 0.25rem;
+    }
+
+    .payload-container {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .payload-content {
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      font-size: 0.75rem;
+      line-height: 1.4;
+      color: #1e293b;
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
   `]
 })
 export class LogViewModalComponent implements OnInit {
   @Input() isVisible = false;
   @Input() log: LogData | null = null;
+  @Input() integrationLog: IntegrationLogData | null = null;
   @Input() isLoading = false;
   @Input() hasError = false;
   @Input() errorMessage = '';
@@ -404,5 +552,34 @@ export class LogViewModalComponent implements OnInit {
       style: 'currency',
       currency: 'RWF'
     }).format(amount);
+  }
+
+  // Integration log helper methods
+  getIntegrationStatusClass(status: string): string {
+    switch (status) {
+      case 'COMPLETED': return 'badge-success';
+      case 'TIMEOUT': return 'badge-warning';
+      case 'FAILED': return 'badge-danger';
+      case 'PENDING': return 'badge-info';
+      case 'PROCESSING': return 'badge-primary';
+      default: return 'badge-secondary';
+    }
+  }
+
+  formatBytes(bytes: number): string {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  formatPayload(payloadJson: string): string {
+    try {
+      const parsed = JSON.parse(payloadJson);
+      return JSON.stringify(parsed, null, 2);
+    } catch (error) {
+      return payloadJson;
+    }
   }
 }

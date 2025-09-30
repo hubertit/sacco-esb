@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { API_ENDPOINTS } from '../constants/api.constants';
-import { LogData, LogFilterRequest } from '../models/log-data.models';
+import { LogData, LogFilterRequest, IntegrationLogData, IntegrationLogFilterRequest, IntegrationLogApiResponse } from '../models/log-data.models';
 
 export type LogLevel = 'INFO' | 'WARNING' | 'ERROR' | 'DEBUG';
 export type LogSource = 'API' | 'SYSTEM' | 'AUTH' | 'DATABASE' | 'INTEGRATION';
@@ -212,5 +212,59 @@ export class LogService {
           throw error;
         })
       );
+  }
+
+  /**
+   * Fetch integration logs for a specific partner
+   */
+  getIntegrationLogs(partnerId: string, filters: IntegrationLogFilterRequest = {}): Observable<IntegrationLogApiResponse> {
+    console.log('🎯 LogService: Fetching integration logs for partner:', partnerId);
+    console.log('🔗 API Endpoint:', `${API_ENDPOINTS.INTEGRATION_LOGS.PARTNER_LOGS}/${partnerId}`);
+    console.log('📋 Filters:', filters);
+
+    const params = new URLSearchParams();
+    if (filters.page !== undefined) params.append('page', filters.page.toString());
+    if (filters.size !== undefined) params.append('size', filters.size.toString());
+    if (filters.from) params.append('from', filters.from);
+    if (filters.to) params.append('to', filters.to);
+
+    const endpoint = `${API_ENDPOINTS.INTEGRATION_LOGS.PARTNER_LOGS}/${partnerId}`;
+
+    return this.apiService.get<IntegrationLogApiResponse>(endpoint, new HttpParams({ fromString: params.toString() }))
+      .pipe(
+        map((response: IntegrationLogApiResponse) => {
+          console.log('📊 Raw Integration Logs API Response:', response);
+          console.log('📈 Number of integration logs received:', response?.content?.length || 0);
+          return response;
+        }),
+        catchError((error) => {
+          console.error('❌ Error fetching integration logs:', error);
+          console.error('❌ Error status:', error.status);
+          console.error('❌ Error message:', error.message);
+          console.error('❌ Error URL:', error.url);
+          throw error;
+        })
+      );
+  }
+
+  /**
+   * Get integration log status options
+   */
+  getIntegrationLogStatuses(): string[] {
+    return ['COMPLETED', 'TIMEOUT', 'FAILED', 'PENDING', 'PROCESSING'];
+  }
+
+  /**
+   * Get integration log direction options
+   */
+  getIntegrationLogDirections(): string[] {
+    return ['IN', 'OUT', 'INTERNAL'];
+  }
+
+  /**
+   * Get integration log message types
+   */
+  getIntegrationLogMessageTypes(): string[] {
+    return ['SEND_ONLY', 'SEND_AND_RECEIVE'];
   }
 }

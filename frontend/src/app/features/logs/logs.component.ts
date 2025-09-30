@@ -10,7 +10,7 @@ import { TableColumn } from '../../shared/components/data-table/data-table.compo
 import { LogService, Log, LogLevel } from '../../core/services/log.service';
 import { PartnerService } from '../../core/services/partner.service';
 import { Partner } from '../../core/models/partner.models';
-import { LogData, LogFilterRequest } from '../../core/models/log-data.models';
+import { LogData, LogFilterRequest, IntegrationLogData, IntegrationLogFilterRequest, IntegrationLogApiResponse } from '../../core/models/log-data.models';
 import { LogViewModalComponent } from '../../shared/components/log-view-modal/log-view-modal.component';
 
 @Component({
@@ -28,7 +28,8 @@ import { LogViewModalComponent } from '../../shared/components/log-view-modal/lo
           </h5>
         </div>
         <div class="card-body">
-          <form (ngSubmit)="applyFilters()" class="row g-3">
+          <!-- Transaction Logs Filter Form -->
+          <form *ngIf="!currentLogType.includes('Integration')" (ngSubmit)="applyFilters()" class="row g-3">
             <!-- First Row: 4 inputs -->
             <!-- MSISDN Filter -->
             <div class="col-md-3">
@@ -103,6 +104,46 @@ import { LogViewModalComponent } from '../../shared/components/log-view-modal/lo
               </div>
             </div>
           </form>
+
+          <!-- Integration Logs Filter Form -->
+          <form *ngIf="currentLogType.includes('Integration')" (ngSubmit)="applyIntegrationFilters()" class="row g-3">
+            <!-- Date Range Filters -->
+            <div class="col-md-3">
+              <label for="integrationFromDate" class="form-label">From Date</label>
+              <input type="datetime-local" id="integrationFromDate" class="form-control" [(ngModel)]="integrationFilters.from" name="integrationFromDate">
+            </div>
+
+            <div class="col-md-3">
+              <label for="integrationToDate" class="form-label">To Date</label>
+              <input type="datetime-local" id="integrationToDate" class="form-control" [(ngModel)]="integrationFilters.to" name="integrationToDate">
+            </div>
+
+            <!-- Page Size Filter -->
+            <div class="col-md-3">
+              <label for="integrationPageSize" class="form-label">Page Size</label>
+              <select id="integrationPageSize" class="form-select" [(ngModel)]="integrationFilters.size" name="integrationPageSize">
+                <option value="10" selected>10 records</option>
+                <option value="25">25 records</option>
+                <option value="50">50 records</option>
+                <option value="100">100 records</option>
+              </select>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="col-md-3">
+              <label class="form-label">&nbsp;</label>
+              <div class="d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-outline-secondary" (click)="clearIntegrationFilters()">
+                  <app-lucide-icon name="x" size="14px" class="me-1"></app-lucide-icon>
+                  Clear
+                </button>
+                <button type="submit" class="btn btn-primary">
+                  <app-lucide-icon name="search" size="14px" class="me-1"></app-lucide-icon>
+                  Filter
+                </button>
+              </div>
+            </div>
+          </form>
         </div>
       </div>
 
@@ -111,7 +152,12 @@ import { LogViewModalComponent } from '../../shared/components/log-view-modal/lo
         <div class="card-header d-flex justify-content-between align-items-center">
           <h4 class="card-title mb-0">{{ currentLogType }}</h4>
           <div class="d-flex align-items-center gap-2">
-            <span class="text-muted small">Showing {{ filteredLogs.length }} of {{ logs.length }} logs</span>
+            <span class="text-muted small" *ngIf="!currentLogType.includes('Integration')">
+              Showing {{ filteredLogs.length }} of {{ logs.length }} logs
+            </span>
+            <span class="text-muted small" *ngIf="currentLogType.includes('Integration')">
+              Showing {{ filteredIntegrationLogs.length }} of {{ integrationLogs.length }} logs
+            </span>
           </div>
         </div>
         <div class="card-body">
@@ -131,8 +177,9 @@ import { LogViewModalComponent } from '../../shared/components/log-view-modal/lo
             </div>
           </div>
           
+          <!-- Transaction Logs Table -->
           <app-data-table
-            *ngIf="!loading && !currentLogType.includes('Error')"
+            *ngIf="!loading && !currentLogType.includes('Error') && !currentLogType.includes('Integration')"
             [columns]="columns"
             [data]="filteredLogs"
             [striped]="true"
@@ -153,6 +200,30 @@ import { LogViewModalComponent } from '../../shared/components/log-view-modal/lo
               </div>
             </ng-template>
           </app-data-table>
+
+          <!-- Integration Logs Table -->
+          <app-data-table
+            *ngIf="!loading && !currentLogType.includes('Error') && currentLogType.includes('Integration')"
+            [columns]="integrationColumns"
+            [data]="filteredIntegrationLogs"
+            [striped]="true"
+            [showSearch]="false"
+            [showActions]="true"
+            (onSort)="handleSort($event)"
+            (onPageChange)="handlePageChange($event)"
+            (onPageSizeChange)="handlePageSizeChange($event)">
+            
+            <ng-template #rowActions let-log>
+              <div class="d-flex justify-content-end">
+                <button class="btn btn-sm btn-outline-primary view-btn-icon" 
+                        type="button" 
+                        title="View Integration Log Details"
+                        (click)="viewIntegrationLog(log)">
+                  <app-lucide-icon name="eye" size="16px"></app-lucide-icon>
+                </button>
+              </div>
+            </ng-template>
+          </app-data-table>
         </div>
       </div>
 
@@ -160,6 +231,7 @@ import { LogViewModalComponent } from '../../shared/components/log-view-modal/lo
       <app-log-view-modal
         [isVisible]="showLogModal"
         [log]="selectedLog"
+        [integrationLog]="selectedIntegrationLog"
         [isLoading]="false"
         [hasError]="false"
         (close)="closeLogModal()">
@@ -343,6 +415,29 @@ export class LogsComponent implements OnInit {
     <span class="amount-cell">${this.formatAmount(item.amount)}</span>
   `;
 
+  // Integration log templates
+  integrationDateTimeTemplate = (item: IntegrationLogData) => `
+    <div class="datetime-cell">
+      <div class="datetime-single">${this.formatDateTimeSingle(item.receivedAt)}</div>
+    </div>
+  `;
+
+  directionTemplate = (item: IntegrationLogData) => `
+    <span class="badge ${this.getDirectionClass(item.direction)}">
+      ${item.direction}
+    </span>
+  `;
+
+  integrationStatusTemplate = (item: IntegrationLogData) => `
+    <span class="badge ${this.getIntegrationStatusClass(item.status)}">
+      ${item.status}
+    </span>
+  `;
+
+  integrationIndexTemplate = (item: IntegrationLogData, index: number) => `
+    <span class="index-number">${index + 1}</span>
+  `;
+
   columns: TableColumn[] = [
     { key: 'index', title: 'No.', type: 'text', sortable: false },
     { key: 'dateTime', title: 'Date/Time', type: 'custom', sortable: true, template: this.dateTimeTemplate },
@@ -355,14 +450,30 @@ export class LogsComponent implements OnInit {
     { key: 'logStatus', title: 'Status', type: 'custom', sortable: true, template: this.statusTemplate }
   ];
 
+  integrationColumns: TableColumn[] = [
+    { key: 'index', title: 'No.', type: 'custom', sortable: false, template: this.integrationIndexTemplate },
+    { key: 'receivedAt', title: 'Received At', type: 'custom', sortable: true, template: this.integrationDateTimeTemplate },
+    { key: 'partner.partnerName', title: 'Partner', type: 'text', sortable: true },
+    { key: 'direction', title: 'Direction', type: 'custom', sortable: true, template: this.directionTemplate },
+    { key: 'correlationId', title: 'Correlation ID', type: 'text', sortable: true },
+    { key: 'messageType', title: 'Message Type', type: 'text', sortable: true },
+    { key: 'status', title: 'Status', type: 'custom', sortable: true, template: this.integrationStatusTemplate },
+    { key: 'description', title: 'Description', type: 'text', sortable: true },
+    { key: 'payloadSize', title: 'Size (bytes)', type: 'text', sortable: true }
+  ];
+
   logs: LogData[] = [];
   filteredLogs: LogData[] = [];
+  integrationLogs: IntegrationLogData[] = [];
+  filteredIntegrationLogs: IntegrationLogData[] = [];
   logLevels: LogLevel[] = [];
   partners: Partner[] = [];
   loading = false;
   currentLogType = 'System Logs';
   showLogModal = false;
   selectedLog: LogData | null = null;
+  selectedIntegrationLog: IntegrationLogData | null = null;
+  currentPartnerId: string | null = null;
 
   filters = {
     msisdn: '',
@@ -374,6 +485,13 @@ export class LogsComponent implements OnInit {
     pageNumber: '1',
     pageSize: '10',
     referenceNumber: ''
+  };
+
+  integrationFilters: IntegrationLogFilterRequest = {
+    page: 0,
+    size: 10,
+    from: undefined,
+    to: undefined
   };
 
   constructor(
@@ -391,10 +509,10 @@ export class LogsComponent implements OnInit {
     // Check for URL parameters
     this.route.params.subscribe(params => {
       if (params['partner']) {
-        // Integration logs with specific partner - set table filter
-        this.filters.table = 'logs';
+        // Integration logs with specific partner
+        this.currentPartnerId = params['partner'];
         this.currentLogType = `Integration Logs - ${params['partner']}`;
-        this.applyFilters();
+        this.loadIntegrationLogs();
       } else if (params['type']) {
         // Transaction logs with specific type - set table filter
         this.filters.table = 'transactions';
@@ -482,6 +600,42 @@ export class LogsComponent implements OnInit {
         // Fallback to empty array
         this.logs = [];
         this.filteredLogs = [];
+      }
+    });
+  }
+
+  private loadIntegrationLogs() {
+    if (!this.currentPartnerId) {
+      console.error('❌ No partner ID provided for integration logs');
+      this.loading = false;
+      return;
+    }
+
+    this.loading = true;
+    console.log('🎯 Loading integration logs for partner:', this.currentPartnerId);
+    console.log('📋 Integration filters:', this.integrationFilters);
+
+    this.logService.getIntegrationLogs(this.currentPartnerId, this.integrationFilters).subscribe({
+      next: (response: IntegrationLogApiResponse) => {
+        console.log('📊 Integration logs response:', response);
+        
+        // Sort by receivedAt descending (newest first)
+        const sortedLogs = response.content.sort((a, b) => {
+          const dateA = new Date(a.receivedAt);
+          const dateB = new Date(b.receivedAt);
+          return dateB.getTime() - dateA.getTime();
+        });
+        
+        this.integrationLogs = sortedLogs;
+        this.filteredIntegrationLogs = [...this.integrationLogs];
+        this.loading = false;
+        console.log('📊 Integration logs loaded:', this.integrationLogs);
+      },
+      error: (error) => {
+        console.error('❌ Error loading integration logs:', error);
+        this.loading = false;
+        this.integrationLogs = [];
+        this.filteredIntegrationLogs = [];
       }
     });
   }
@@ -576,5 +730,53 @@ export class LogsComponent implements OnInit {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount);
+  }
+
+  // Integration log helper methods
+  getDirectionClass(direction: string): string {
+    switch (direction) {
+      case 'IN': return 'badge-info';
+      case 'OUT': return 'badge-warning';
+      case 'INTERNAL': return 'badge-secondary';
+      default: return 'badge-secondary';
+    }
+  }
+
+  getIntegrationStatusClass(status: string): string {
+    switch (status) {
+      case 'COMPLETED': return 'badge-success';
+      case 'TIMEOUT': return 'badge-warning';
+      case 'FAILED': return 'badge-danger';
+      case 'PENDING': return 'badge-info';
+      case 'PROCESSING': return 'badge-primary';
+      default: return 'badge-secondary';
+    }
+  }
+
+  viewIntegrationLog(log: IntegrationLogData) {
+    console.log('🔍 Viewing integration log:', log);
+    this.selectedIntegrationLog = log;
+    this.showLogModal = true;
+  }
+
+  closeIntegrationLogModal() {
+    this.showLogModal = false;
+    this.selectedIntegrationLog = null;
+  }
+
+  applyIntegrationFilters() {
+    console.log('🔍 Applying integration filters:', this.integrationFilters);
+    this.loadIntegrationLogs();
+  }
+
+  clearIntegrationFilters() {
+    this.integrationFilters = {
+      page: 0,
+      size: 10,
+      from: undefined,
+      to: undefined
+    };
+    console.log('🧹 Cleared integration filters');
+    this.loadIntegrationLogs();
   }
 }
