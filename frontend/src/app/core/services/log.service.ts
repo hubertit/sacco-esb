@@ -1,5 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
+import { ApiService } from './api.service';
+import { API_ENDPOINTS } from '../constants/api.constants';
+import { LogData, LogFilterRequest } from '../models/log-data.models';
 
 export type LogLevel = 'INFO' | 'WARNING' | 'ERROR' | 'DEBUG';
 export type LogSource = 'API' | 'SYSTEM' | 'AUTH' | 'DATABASE' | 'INTEGRATION';
@@ -120,7 +125,7 @@ export class LogService {
     }
   ];
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private apiService: ApiService) {}
 
   getMockLogs(): Log[] {
     return this.mockLogs;
@@ -132,5 +137,80 @@ export class LogService {
 
   getLogSources(): LogSource[] {
     return ['API', 'SYSTEM', 'AUTH', 'DATABASE', 'INTEGRATION'];
+  }
+
+  /**
+   * Fetch push transaction logs from API
+   */
+  getPushLogs(filters: LogFilterRequest): Observable<LogData[]> {
+    console.log('🎯 LogService: Fetching push logs from API');
+    console.log('🔗 API Endpoint:', API_ENDPOINTS.LOGS.FILTER_PUSH);
+    console.log('📋 Filters:', filters);
+
+    return this.apiService.postLogsEndpoint<LogData[]>(API_ENDPOINTS.LOGS.FILTER_PUSH, filters)
+      .pipe(
+        map((response: LogData[]) => {
+          console.log('📊 Raw API Response:', response);
+          console.log('📈 Number of logs received:', response?.length || 0);
+          return response || [];
+        }),
+        catchError((error) => {
+          console.error('❌ Error fetching push logs:', error);
+          console.error('❌ Error status:', error.status);
+          console.error('❌ Error message:', error.message);
+          console.error('❌ Error URL:', error.url);
+          throw error;
+        })
+      );
+  }
+
+  /**
+   * Fetch pull transaction logs from API
+   */
+  getPullLogs(filters: LogFilterRequest): Observable<LogData[]> {
+    console.log('🎯 LogService: Fetching pull logs from API');
+    console.log('🔗 API Endpoint:', API_ENDPOINTS.LOGS.FILTER_PULL);
+    console.log('📋 Filters:', filters);
+
+    return this.apiService.postLogsEndpoint<LogData[]>(API_ENDPOINTS.LOGS.FILTER_PULL, filters)
+      .pipe(
+        map((response: LogData[]) => {
+          console.log('📊 Raw API Response:', response);
+          console.log('📈 Number of logs received:', response?.length || 0);
+          return response || [];
+        }),
+        catchError((error) => {
+          console.error('❌ Error fetching pull logs:', error);
+          console.error('❌ Error status:', error.status);
+          console.error('❌ Error message:', error.message);
+          console.error('❌ Error URL:', error.url);
+          throw error;
+        })
+      );
+  }
+
+  /**
+   * Fetch internal transaction logs from API
+   */
+  getInternalLogs(filters: LogFilterRequest): Observable<LogData[]> {
+    console.log('🎯 LogService: Fetching internal logs from API');
+    console.log('🔗 API Endpoint:', API_ENDPOINTS.LOGS.FILTER_INTERNAL);
+    console.log('📋 Filters:', filters);
+
+    return this.apiService.postLogsEndpoint<LogData[]>(API_ENDPOINTS.LOGS.FILTER_INTERNAL, filters)
+      .pipe(
+        map((response: LogData[]) => {
+          console.log('📊 Raw API Response:', response);
+          console.log('📈 Number of logs received:', response?.length || 0);
+          return response || [];
+        }),
+        catchError((error) => {
+          console.error('❌ Error fetching internal logs:', error);
+          console.error('❌ Error status:', error.status);
+          console.error('❌ Error message:', error.message);
+          console.error('❌ Error URL:', error.url);
+          throw error;
+        })
+      );
   }
 }

@@ -346,4 +346,41 @@ export class ApiService {
       })
     );
   }
+
+  /**
+   * POST request for logs endpoints (without /api prefix)
+   */
+  postLogsEndpoint<T>(endpoint: string, data: any, params?: HttpParams): Observable<T> {
+    const url = endpoint; // Use endpoint directly without base URL
+    console.log('🚀 ApiService POST logs endpoint:');
+    console.log('  📍 Endpoint:', endpoint);
+    console.log('  🌐 Full URL:', url);
+    console.log('  📦 Data:', data);
+    console.log('  📋 Params:', params?.toString() || 'none');
+    console.log('  🔑 Headers:', this.getHeaders());
+    
+    return this.http.post<T>(url, data, {
+      headers: this.getHeaders(),
+      params: params
+    }).pipe(
+      timeout(30000),
+      catchError((error) => {
+        console.error('❌ ApiService POST logs endpoint error:', error);
+        console.error('❌ Error details:', {
+          status: error.status,
+          statusText: error.statusText,
+          url: error.url,
+          message: error.message
+        });
+        
+        if (error.status === 401) {
+          console.error('🔐 Unauthorized - check credentials/token');
+        } else if (error.status === 404) {
+          console.error('🔍 Not found - check endpoint URL');
+        }
+        
+        return throwError(() => error);
+      })
+    );
+  }
 }

@@ -1,0 +1,401 @@
+import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { LucideIconComponent } from '../lucide-icon/lucide-icon.component';
+import { LogData } from '../../../core/models/log-data.models';
+
+@Component({
+  selector: 'app-log-view-modal',
+  standalone: true,
+  imports: [CommonModule, LucideIconComponent],
+  template: `
+    <!-- Modal -->
+    <div class="modal fade" [class.show]="isVisible" [style.display]="isVisible ? 'block' : 'none'" 
+         tabindex="-1" role="dialog" [attr.aria-hidden]="!isVisible">
+      <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <!-- Modal Header -->
+          <div class="modal-header">
+            <h5 class="modal-title d-flex align-items-center gap-2">
+              <app-lucide-icon name="file-text" size="20px" class="text-primary"></app-lucide-icon>
+              Transaction Log Details
+            </h5>
+            <button type="button" class="btn-close-custom" (click)="closeModal()" aria-label="Close">
+              <app-lucide-icon name="x" size="14px"></app-lucide-icon>
+            </button>
+          </div>
+
+          <!-- Modal Body -->
+          <div class="modal-body">
+            <!-- Loading State -->
+            <div *ngIf="isLoading" class="text-center py-4">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="mt-2 text-muted">Loading log information...</p>
+            </div>
+
+            <!-- Error State -->
+            <div *ngIf="hasError && !isLoading" class="alert alert-danger" role="alert">
+              <h6 class="alert-heading">
+                <app-lucide-icon name="x" size="16px" class="me-2"></app-lucide-icon>
+                Error Loading Log
+              </h6>
+              <p class="mb-0">{{ errorMessage }}</p>
+            </div>
+
+            <!-- Log Information -->
+            <div *ngIf="log && !isLoading && !hasError" class="log-info">
+              <!-- Header with Status and Key Info -->
+              <div class="log-header">
+                <div class="status-section">
+                  <span class="badge status-badge" [class]="getStatusClass(log.logStatus)">
+                    <app-lucide-icon name="check-circle" size="14px" class="me-1" *ngIf="log.logStatus === 'SUCCESS'"></app-lucide-icon>
+                    <app-lucide-icon name="x-circle" size="14px" class="me-1" *ngIf="log.logStatus === 'FAILED'"></app-lucide-icon>
+                    <app-lucide-icon name="clock" size="14px" class="me-1" *ngIf="log.logStatus === 'PENDING'"></app-lucide-icon>
+                    <app-lucide-icon name="loader" size="14px" class="me-1" *ngIf="log.logStatus === 'PROCESSING'"></app-lucide-icon>
+                    {{ log.logStatus }}
+                  </span>
+                </div>
+                <div class="key-info">
+                  <div class="amount-display">{{ formatAmount(log.amount) }}</div>
+                  <div class="date-display">{{ formatDateTime(log.dateTime) }}</div>
+                </div>
+              </div>
+
+              <!-- Main Content Grid -->
+              <div class="content-grid">
+                <!-- Left Column -->
+                <div class="content-column">
+                  <div class="info-section">
+                    <h6 class="section-title">
+                      <app-lucide-icon name="credit-card" size="14px" class="me-2"></app-lucide-icon>
+                      Transaction
+                    </h6>
+                    <div class="info-item">
+                      <label>Reference</label>
+                      <span class="value">{{ log.referenceNumber }}</span>
+                    </div>
+                    <div class="info-item">
+                      <label>Status Code</label>
+                      <span class="value">{{ log.status }}</span>
+                    </div>
+                    <div class="info-item">
+                      <label>Message</label>
+                      <span class="value">{{ log.message }}</span>
+                    </div>
+                  </div>
+
+                  <div class="info-section">
+                    <h6 class="section-title">
+                      <app-lucide-icon name="users" size="14px" class="me-2"></app-lucide-icon>
+                      Accounts
+                    </h6>
+                    <div class="info-item">
+                      <label>Source Wallet</label>
+                      <span class="value">{{ log.sourceWallet }}</span>
+                    </div>
+                    <div class="info-item">
+                      <label>Wallet Name</label>
+                      <span class="value">{{ log.walletNames }}</span>
+                    </div>
+                    <div class="info-item">
+                      <label>Target Account</label>
+                      <span class="value">{{ log.targetAccountNumber }}</span>
+                    </div>
+                    <div class="info-item">
+                      <label>Target Name</label>
+                      <span class="value">{{ log.targetAccountName }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="content-column">
+                  <div class="info-section">
+                    <h6 class="section-title">
+                      <app-lucide-icon name="settings" size="14px" class="me-2"></app-lucide-icon>
+                      System
+                    </h6>
+                    <div class="info-item">
+                      <label>Channel</label>
+                      <span class="value">{{ log.channel }}</span>
+                    </div>
+                    <div class="info-item">
+                      <label>Provider</label>
+                      <span class="value">{{ log.provider }}</span>
+                    </div>
+                    <div class="info-item">
+                      <label>Session ID</label>
+                      <span class="value">{{ log.sessionId }}</span>
+                    </div>
+                    <div class="info-item">
+                      <label>External Ref</label>
+                      <span class="value">{{ log.externalRefNumber }}</span>
+                    </div>
+                  </div>
+
+                  <div class="info-section">
+                    <h6 class="section-title">
+                      <app-lucide-icon name="building" size="14px" class="me-2"></app-lucide-icon>
+                      Branch
+                    </h6>
+                    <div class="info-item">
+                      <label>Branch Code</label>
+                      <span class="value">{{ log.branchCode }}</span>
+                    </div>
+                    <div class="info-item">
+                      <label>Branch Name</label>
+                      <span class="value">{{ log.branchName }}</span>
+                    </div>
+                    <div class="info-item">
+                      <label>District Code</label>
+                      <span class="value">{{ log.districtCode }}</span>
+                    </div>
+                    <div class="info-item">
+                      <label>Year</label>
+                      <span class="value">{{ log.year }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="closeModal()">
+              <app-lucide-icon name="x" size="14px" class="me-1"></app-lucide-icon>
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Backdrop -->
+    <div class="modal-backdrop fade" [class.show]="isVisible" *ngIf="isVisible"></div>
+  `,
+  styles: [`
+    .modal {
+      z-index: 1055;
+    }
+
+    .modal-backdrop {
+      z-index: 1050;
+    }
+
+    .btn-close-custom {
+      background: none;
+      border: none;
+      padding: 0.5rem;
+      border-radius: 0.375rem;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-close-custom:hover {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .log-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      border-radius: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .status-section {
+      display: flex;
+      align-items: center;
+    }
+
+    .key-info {
+      text-align: right;
+    }
+
+    .amount-display {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #059669;
+      margin-bottom: 0.25rem;
+    }
+
+    .date-display {
+      font-size: 0.875rem;
+      color: #64748b;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .content-column {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .info-section {
+      background: #f8fafc;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      border: 1px solid #e2e8f0;
+    }
+
+    .section-title {
+      color: #1e293b;
+      font-weight: 600;
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+    }
+
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .info-item:last-child {
+      border-bottom: none;
+    }
+
+    .info-item label {
+      font-weight: 500;
+      color: #64748b;
+      font-size: 0.75rem;
+      margin: 0;
+      min-width: 100px;
+      flex-shrink: 0;
+    }
+
+    .info-item .value {
+      color: #1e293b;
+      font-size: 0.875rem;
+      font-weight: 500;
+      text-align: right;
+      word-break: break-all;
+      flex: 1;
+      margin-left: 1rem;
+    }
+
+    .status-badge {
+      padding: 0.375rem 0.75rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 0.375rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+    }
+
+    .status-badge.badge-success {
+      background-color: #10b981;
+      color: white;
+    }
+
+    .status-badge.badge-danger {
+      background-color: #ef4444;
+      color: white;
+    }
+
+    .status-badge.badge-warning {
+      background-color: #f59e0b;
+      color: white;
+    }
+
+    .status-badge.badge-info {
+      background-color: #3b82f6;
+      color: white;
+    }
+
+    .modal-header {
+      background-color: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .modal-footer {
+      background-color: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+    }
+  `]
+})
+export class LogViewModalComponent implements OnInit {
+  @Input() isVisible = false;
+  @Input() log: LogData | null = null;
+  @Input() isLoading = false;
+  @Input() hasError = false;
+  @Input() errorMessage = '';
+
+  @Output() close = new EventEmitter<void>();
+
+  ngOnInit() {
+    // Handle escape key
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && this.isVisible) {
+        this.closeModal();
+      }
+    });
+  }
+
+  closeModal() {
+    this.close.emit();
+  }
+
+  getStatusClass(status: string): string {
+    switch (status) {
+      case 'SUCCESS': return 'badge-success';
+      case 'FAILED': return 'badge-danger';
+      case 'PENDING': return 'badge-warning';
+      case 'PROCESSING': return 'badge-info';
+      default: return 'badge-secondary';
+    }
+  }
+
+  formatDateTime(dateTime: string): string {
+    const date = new Date(dateTime);
+    const now = new Date();
+    const diffInHours = Math.abs(now.getTime() - date.getTime()) / (1000 * 60 * 60);
+    
+    // If less than 24 hours, show relative time
+    if (diffInHours < 24) {
+      const diffInMinutes = Math.abs(now.getTime() - date.getTime()) / (1000 * 60);
+      if (diffInMinutes < 60) {
+        return `${Math.floor(diffInMinutes)} minutes ago`;
+      } else {
+        return `${Math.floor(diffInHours)} hours ago`;
+      }
+    }
+    
+    // Otherwise show full date and time
+    return date.toLocaleString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      timeZoneName: 'short'
+    });
+  }
+
+  formatAmount(amount: number): string {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'RWF'
+    }).format(amount);
+  }
+}

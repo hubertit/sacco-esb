@@ -10,11 +10,13 @@ import { TableColumn } from '../../shared/components/data-table/data-table.compo
 import { LogService, Log, LogLevel } from '../../core/services/log.service';
 import { PartnerService } from '../../core/services/partner.service';
 import { Partner } from '../../core/models/partner.models';
+import { LogData, LogFilterRequest } from '../../core/models/log-data.models';
+import { LogViewModalComponent } from '../../shared/components/log-view-modal/log-view-modal.component';
 
 @Component({
   selector: 'app-logs',
   standalone: true,
-  imports: [CommonModule, RouterModule, HttpClientModule, FormsModule, LucideIconComponent, DataTableComponent],
+  imports: [CommonModule, RouterModule, HttpClientModule, FormsModule, LucideIconComponent, DataTableComponent, LogViewModalComponent],
   template: `
     <div class="dashboard-container">
       <!-- Filter Card -->
@@ -27,67 +29,76 @@ import { Partner } from '../../core/models/partner.models';
         </div>
         <div class="card-body">
           <form (ngSubmit)="applyFilters()" class="row g-3">
-            <!-- First Row: 3 inputs -->
-            <!-- Status Filter -->
-            <div class="col-md-4">
-              <label for="statusFilter" class="form-label">Status</label>
-              <select id="statusFilter" class="form-select" [(ngModel)]="filters.status" name="status">
-                <option value="">All Statuses</option>
-                <option value="SUCCESS">Success</option>
-                <option value="FAILED">Failed</option>
-                <option value="PENDING">Pending</option>
-                <option value="PROCESSING">Processing</option>
-              </select>
+            <!-- First Row: 4 inputs -->
+            <!-- MSISDN Filter -->
+            <div class="col-md-3">
+              <label for="msisdn" class="form-label">MSISDN</label>
+              <input type="text" id="msisdn" class="form-control" [(ngModel)]="filters.msisdn" name="msisdn" placeholder="Enter phone number">
             </div>
 
-            <!-- Date Range Filter -->
-            <div class="col-md-4">
+            <!-- Target Wallet Filter -->
+            <div class="col-md-3">
+              <label for="targetWallet" class="form-label">Target Wallet</label>
+              <input type="text" id="targetWallet" class="form-control" [(ngModel)]="filters.targetWallet" name="targetWallet" placeholder="Enter wallet ID">
+            </div>
+
+            <!-- Source Account Number Filter -->
+            <div class="col-md-3">
+              <label for="sourceAccountNumber" class="form-label">Source Account</label>
+              <input type="text" id="sourceAccountNumber" class="form-control" [(ngModel)]="filters.sourceAccountNumber" name="sourceAccountNumber" placeholder="Enter account number">
+            </div>
+
+            <!-- Reference Number Filter -->
+            <div class="col-md-3">
+              <label for="referenceNumber" class="form-label">Reference Number</label>
+              <input type="text" id="referenceNumber" class="form-control" [(ngModel)]="filters.referenceNumber" name="referenceNumber" placeholder="Enter reference number">
+            </div>
+
+            <!-- Second Row: 4 inputs -->
+            <!-- Start Date Filter -->
+            <div class="col-md-3">
               <label for="startDate" class="form-label">Start Date</label>
               <input type="date" id="startDate" class="form-control" [(ngModel)]="filters.startDate" name="startDate">
             </div>
 
-            <div class="col-md-4">
+            <!-- End Date Filter -->
+            <div class="col-md-3">
               <label for="endDate" class="form-label">End Date</label>
               <input type="date" id="endDate" class="form-control" [(ngModel)]="filters.endDate" name="endDate">
             </div>
 
-            <!-- Second Row: 2 inputs -->
-            <!-- Partner Filter -->
-            <div class="col-md-6">
-              <label for="partnerFilter" class="form-label">Partner</label>
-              <select id="partnerFilter" class="form-select" [(ngModel)]="filters.partner" name="partner">
-                <option value="">All Partners</option>
-                <option *ngFor="let partner of partners" [value]="partner.partnerCode">
-                  {{ partner.partnerName }}
-                </option>
+            <!-- Table Filter -->
+            <div class="col-md-3">
+              <label for="table" class="form-label">Table</label>
+              <select id="table" class="form-select" [(ngModel)]="filters.table" name="table">
+                <option value="">All Tables</option>
+                <option value="transactions">Transactions</option>
+                <option value="logs">Logs</option>
+                <option value="audit">Audit</option>
               </select>
             </div>
 
-            <!-- Transaction Type Filter -->
-            <div class="col-md-6">
-              <label for="transactionType" class="form-label">Transaction Type</label>
-              <select id="transactionType" class="form-select" [(ngModel)]="filters.transactionType" name="transactionType">
-                <option value="">All Types</option>
-                <option value="PUSH">Push</option>
-                <option value="PULL">Pull</option>
-                <option value="INTERNAL">Internal</option>
+            <!-- Page Size Filter -->
+            <div class="col-md-3">
+              <label for="pageSize" class="form-label">Page Size</label>
+              <select id="pageSize" class="form-select" [(ngModel)]="filters.pageSize" name="pageSize">
+                <option value="10" selected>10 records</option>
+                <option value="25">25 records</option>
+                <option value="50">50 records</option>
+                <option value="100">100 records</option>
               </select>
             </div>
 
             <!-- Action Buttons -->
             <div class="col-12">
-              <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-primary">
-                  <app-lucide-icon name="search" size="14px" class="me-1"></app-lucide-icon>
-                  Apply Filters
-                </button>
+              <div class="d-flex justify-content-end gap-2">
                 <button type="button" class="btn btn-outline-secondary" (click)="clearFilters()">
                   <app-lucide-icon name="x" size="14px" class="me-1"></app-lucide-icon>
                   Clear
                 </button>
-                <button type="button" class="btn btn-outline-primary" (click)="exportLogs()">
-                  <app-lucide-icon name="download" size="14px" class="me-1"></app-lucide-icon>
-                  Export
+                <button type="submit" class="btn btn-primary">
+                  <app-lucide-icon name="search" size="14px" class="me-1"></app-lucide-icon>
+                  Filter
                 </button>
               </div>
             </div>
@@ -98,23 +109,51 @@ import { Partner } from '../../core/models/partner.models';
       <!-- Logs Table Card -->
       <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-          <h4 class="card-title mb-0">System Logs</h4>
+          <h4 class="card-title mb-0">{{ currentLogType }}</h4>
           <div class="d-flex align-items-center gap-2">
             <span class="text-muted small">Showing {{ filteredLogs.length }} of {{ logs.length }} logs</span>
           </div>
         </div>
         <div class="card-body">
+          <div *ngIf="loading" class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2 text-muted">Loading logs...</p>
+          </div>
           <app-data-table
+            *ngIf="!loading"
             [columns]="columns"
             [data]="filteredLogs"
             [striped]="true"
+            [showSearch]="false"
+            [showActions]="true"
             (onSort)="handleSort($event)"
-            (onSearch)="handleSearch($event)"
             (onPageChange)="handlePageChange($event)"
-            (onPageSizeChange)="handlePageSizeChange($event)"
-          ></app-data-table>
+            (onPageSizeChange)="handlePageSizeChange($event)">
+            
+            <ng-template #rowActions let-log>
+              <div class="d-flex justify-content-end">
+                <button class="btn btn-sm btn-outline-primary view-btn-icon" 
+                        type="button" 
+                        title="View Log Details"
+                        (click)="viewLog(log)">
+                  <app-lucide-icon name="eye" size="16px"></app-lucide-icon>
+                </button>
+              </div>
+            </ng-template>
+          </app-data-table>
         </div>
       </div>
+
+      <!-- Log View Modal -->
+      <app-log-view-modal
+        [isVisible]="showLogModal"
+        [log]="selectedLog"
+        [isLoading]="false"
+        [hasError]="false"
+        (close)="closeLogModal()">
+      </app-log-view-modal>
     </div>
   `,
   styles: [`
@@ -193,6 +232,11 @@ import { Partner } from '../../core/models/partner.models';
         text-align: center;
         white-space: nowrap;
         vertical-align: baseline;
+        height: 24px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: none;
       }
 
       .badge-info {
@@ -214,37 +258,112 @@ import { Partner } from '../../core/models/partner.models';
         color: #fff;
         background-color: #95a5a6;
       }
+
+      .badge-success {
+        color: #fff;
+        background-color: #27ae60;
+      }
+
+      .view-btn-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px;
+        min-height: 32px;
+        max-width: 32px;
+        max-height: 32px;
+        padding: 0 !important;
+        margin: 0;
+        border-radius: 50% !important;
+        border: 1px solid #3b82f6;
+        background-color: transparent;
+        color: #3b82f6;
+        transition: all 0.2s ease-in-out;
+        box-sizing: border-box;
+        
+        &:hover {
+          background-color: #1b2e4b;
+          border-color: #1b2e4b;
+          color: white;
+          transform: scale(1.05);
+        }
+        
+        &:focus {
+          outline: none;
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+      }
+
+      .datetime-cell {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .datetime-single {
+        font-weight: 500;
+        color: #1e293b;
+        font-size: 0.875rem;
+        line-height: 1.4;
+      }
+
+      .amount-cell {
+        font-weight: 600;
+        color: #059669;
+        font-size: 0.875rem;
+      }
     }
   `]
 })
 export class LogsComponent implements OnInit {
-  logLevelTemplate = (item: Log) => `
-    <span class="badge ${this.getLogLevelClass(item.level)}">
-      ${item.level}
+  statusTemplate = (item: LogData) => `
+    <span class="badge ${this.getLogStatusClass(item.logStatus)}">
+      ${item.logStatus}
     </span>
   `;
 
+  dateTimeTemplate = (item: LogData) => `
+    <div class="datetime-cell">
+      <div class="datetime-single">${this.formatDateTimeSingle(item.dateTime)}</div>
+    </div>
+  `;
+
+  amountTemplate = (item: LogData) => `
+    <span class="amount-cell">${this.formatAmount(item.amount)}</span>
+  `;
+
   columns: TableColumn[] = [
-    { key: 'timestamp', title: 'Timestamp', type: 'date', sortable: true },
-    { key: 'level', title: 'Level', type: 'custom', sortable: true, template: this.logLevelTemplate },
-    { key: 'source', title: 'Source', type: 'text', sortable: true },
-    { key: 'message', title: 'Message', type: 'text', sortable: true },
-    { key: 'userId', title: 'User', type: 'text', sortable: true },
-    { key: 'entityId', title: 'Entity', type: 'text', sortable: true },
-    { key: 'transactionId', title: 'Transaction', type: 'text', sortable: true }
+    { key: 'index', title: 'No.', type: 'text', sortable: false },
+    { key: 'dateTime', title: 'Date/Time', type: 'custom', sortable: true, template: this.dateTimeTemplate },
+    { key: 'sourceWallet', title: 'Source Wallet', type: 'text', sortable: true },
+    { key: 'targetAccountNumber', title: 'Target Account', type: 'text', sortable: true },
+    { key: 'amount', title: 'Amount', type: 'custom', sortable: true, template: this.amountTemplate },
+    { key: 'targetAccountName', title: 'Target Name', type: 'text', sortable: true },
+    { key: 'channel', title: 'Channel', type: 'text', sortable: true },
+    { key: 'provider', title: 'Provider', type: 'text', sortable: true },
+    { key: 'logStatus', title: 'Status', type: 'custom', sortable: true, template: this.statusTemplate }
   ];
 
-  logs: Log[] = [];
-  filteredLogs: Log[] = [];
+  logs: LogData[] = [];
+  filteredLogs: LogData[] = [];
   logLevels: LogLevel[] = [];
   partners: Partner[] = [];
+  loading = false;
+  currentLogType = 'System Logs';
+  showLogModal = false;
+  selectedLog: LogData | null = null;
 
   filters = {
-    status: '',
+    msisdn: '',
+    targetWallet: '',
+    sourceAccountNumber: '',
     startDate: '',
     endDate: '',
-    partner: '',
-    transactionType: ''
+    table: '',
+    pageNumber: '1',
+    pageSize: '10',
+    referenceNumber: ''
   };
 
   constructor(
@@ -257,19 +376,23 @@ export class LogsComponent implements OnInit {
 
   ngOnInit() {
     this.loadPartners();
-    this.logs = this.logService.getMockLogs();
-    this.filteredLogs = [...this.logs];
+    this.loadLogs();
     
     // Check for URL parameters
     this.route.params.subscribe(params => {
       if (params['partner']) {
-        // Integration logs with specific partner
-        this.filters.partner = params['partner'];
+        // Integration logs with specific partner - set table filter
+        this.filters.table = 'logs';
+        this.currentLogType = `Integration Logs - ${params['partner']}`;
         this.applyFilters();
       } else if (params['type']) {
-        // Transaction logs with specific type
-        this.filters.transactionType = params['type'];
+        // Transaction logs with specific type - set table filter
+        this.filters.table = 'transactions';
+        this.currentLogType = `Transaction Logs - ${params['type'].charAt(0).toUpperCase() + params['type'].slice(1)}`;
         this.applyFilters();
+      } else {
+        // Default to Push transaction logs
+        this.currentLogType = 'Push Transaction Logs';
       }
     });
   }
@@ -281,88 +404,86 @@ export class LogsComponent implements OnInit {
     });
   }
 
-  getLogLevelClass(level: LogLevel): string {
-    switch (level) {
-      case 'INFO': return 'badge-info';
-      case 'WARNING': return 'badge-warning';
-      case 'ERROR': return 'badge-danger';
-      case 'DEBUG': return 'badge-secondary';
+  private loadLogs() {
+    this.loading = true;
+    console.log('🎯 Loading logs with filters:', this.filters);
+    
+    // Determine which API endpoint to call based on the current route or filters
+    let logObservable;
+    
+    if (this.filters.table === 'transactions') {
+      // For transaction logs, we'll use push logs as default
+      logObservable = this.logService.getPushLogs(this.filters);
+    } else {
+      // Default to push logs
+      logObservable = this.logService.getPushLogs(this.filters);
+    }
+    
+    logObservable.subscribe({
+      next: (logs) => {
+        // Sort by dateTime descending (newest first)
+        const sortedLogs = logs.sort((a, b) => {
+          const dateA = new Date(a.dateTime);
+          const dateB = new Date(b.dateTime);
+          return dateB.getTime() - dateA.getTime();
+        });
+        
+        // Add index numbers
+        this.logs = sortedLogs.map((log, index) => ({
+          ...log,
+          index: index + 1
+        }));
+        
+        this.filteredLogs = [...this.logs];
+        this.loading = false;
+        console.log('📊 Logs loaded and sorted:', this.logs);
+      },
+      error: (error) => {
+        console.error('❌ Error loading logs:', error);
+        this.loading = false;
+        // Fallback to empty array
+        this.logs = [];
+        this.filteredLogs = [];
+      }
+    });
+  }
+
+  getLogStatusClass(status: string): string {
+    switch (status) {
+      case 'SUCCESS': return 'badge-success';
+      case 'FAILED': return 'badge-danger';
+      case 'PENDING': return 'badge-warning';
+      case 'PROCESSING': return 'badge-info';
       default: return 'badge-secondary';
     }
   }
 
   applyFilters() {
-    this.filteredLogs = this.logs.filter(log => {
-      // Status filter
-      if (this.filters.status && log.level !== this.filters.status) {
-        return false;
-      }
-
-      // Date range filter
-      if (this.filters.startDate || this.filters.endDate) {
-        const logDate = new Date(log.timestamp);
-        const startDate = this.filters.startDate ? new Date(this.filters.startDate) : null;
-        const endDate = this.filters.endDate ? new Date(this.filters.endDate) : null;
-
-        if (startDate && logDate < startDate) {
-          return false;
-        }
-        if (endDate && logDate > endDate) {
-          return false;
-        }
-      }
-
-      // Partner filter (assuming partner info is in the message or source)
-      if (this.filters.partner) {
-        const message = log.message.toLowerCase();
-        const source = log.source.toLowerCase();
-        const partner = this.filters.partner.toLowerCase();
-        
-        if (!message.includes(partner) && !source.includes(partner)) {
-          return false;
-        }
-      }
-
-      // Transaction type filter (assuming transaction type is in the message or source)
-      if (this.filters.transactionType) {
-        const message = log.message.toLowerCase();
-        const source = log.source.toLowerCase();
-        const type = this.filters.transactionType.toLowerCase();
-        
-        if (!message.includes(type) && !source.includes(type)) {
-          return false;
-        }
-      }
-
-      return true;
-    });
+    console.log('🎯 Applying filters:', this.filters);
+    this.loadLogs();
   }
 
   clearFilters() {
     this.filters = {
-      status: '',
+      msisdn: '',
+      targetWallet: '',
+      sourceAccountNumber: '',
       startDate: '',
       endDate: '',
-      partner: '',
-      transactionType: ''
+      table: '',
+      pageNumber: '1',
+      pageSize: '10',
+      referenceNumber: ''
     };
-    this.filteredLogs = [...this.logs];
+    this.applyFilters();
   }
 
-  exportLogs() {
-    // TODO: Implement log export
-    console.log('Export logs');
-  }
 
   handleSort(event: { column: string; direction: 'asc' | 'desc' }) {
     // TODO: Implement sorting
     console.log('Sort:', event);
   }
 
-  handleSearch(term: string) {
-    // TODO: Implement search
-    console.log('Search term:', term);
-  }
 
   handlePageChange(page: number) {
     // TODO: Implement pagination
@@ -372,5 +493,50 @@ export class LogsComponent implements OnInit {
   handlePageSizeChange(size: number) {
     // TODO: Implement page size change
     console.log('Page size:', size);
+  }
+
+  viewLog(log: LogData) {
+    console.log('🔍 Viewing log:', log);
+    this.selectedLog = log;
+    this.showLogModal = true;
+  }
+
+  closeLogModal() {
+    this.showLogModal = false;
+    this.selectedLog = null;
+  }
+
+  formatDateTimeSingle(dateTime: string): string {
+    const date = new Date(dateTime);
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    });
+  }
+
+  formatDateTimeFull(dateTime: string): string {
+    const date = new Date(dateTime);
+    return date.toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  }
+
+  formatAmount(amount: number): string {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'RWF',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
   }
 }
