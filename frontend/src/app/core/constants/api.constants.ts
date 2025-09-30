@@ -1,6 +1,6 @@
 export const API_ENDPOINTS = {
   AUTH: {
-    LOGIN: '/auth/authenticate',
+    LOGIN: '/api/auth/authenticate',
     REFRESH: '/auth/refreshToken'
   },
   USERS: {

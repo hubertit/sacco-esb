@@ -30,6 +30,15 @@ export interface UserApiResponse {
   warning: string | null;
 }
 
+export interface SingleUserApiResponse {
+  result: User;
+  message: string | null;
+  messageNumber: number;
+  duration: number;
+  elements: number;
+  warning: string | null;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -73,7 +82,13 @@ export class UserService {
    * Get user by username
    */
   getUserByUsername(username: string): Observable<User> {
-    return this.apiService.get<User>(`${API_ENDPOINTS.USERS.BY_USERNAME}/${username}`);
+    return this.apiService.get<SingleUserApiResponse>(`${API_ENDPOINTS.USERS.BY_USERNAME}?username=${username}`)
+      .pipe(
+        map((response: SingleUserApiResponse) => {
+          console.log('📊 Raw API Response for user by username:', response);
+          return response.result;
+        })
+      );
   }
 
   /**
@@ -115,4 +130,5 @@ export class UserService {
         })
       );
   }
+
 }

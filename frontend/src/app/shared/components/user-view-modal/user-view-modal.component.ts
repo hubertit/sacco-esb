@@ -1,0 +1,414 @@
+import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { LucideIconComponent } from '../lucide-icon/lucide-icon.component';
+import { User } from '../../../core/services/user.service';
+
+@Component({
+  selector: 'app-user-view-modal',
+  standalone: true,
+  imports: [CommonModule, LucideIconComponent],
+  template: `
+    <!-- Modal -->
+    <div class="modal fade" [class.show]="isVisible" [style.display]="isVisible ? 'block' : 'none'" 
+         tabindex="-1" role="dialog" [attr.aria-hidden]="!isVisible">
+      <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <!-- Modal Header -->
+          <div class="modal-header">
+            <h5 class="modal-title d-flex align-items-center gap-2">
+              <app-lucide-icon name="user" size="20px" class="text-primary"></app-lucide-icon>
+              User Information
+            </h5>
+            <button type="button" class="btn-close-custom" (click)="closeModal()" aria-label="Close">
+              <app-lucide-icon name="x" size="14px"></app-lucide-icon>
+            </button>
+          </div>
+
+          <!-- Modal Body -->
+          <div class="modal-body">
+            <!-- Loading State -->
+            <div *ngIf="isLoading" class="text-center py-4">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="mt-2 text-muted">Loading user information...</p>
+            </div>
+
+            <!-- Error State -->
+            <div *ngIf="hasError && !isLoading" class="alert alert-danger" role="alert">
+              <h6 class="alert-heading">
+                <app-lucide-icon name="x" size="16px" class="me-2"></app-lucide-icon>
+                Error Loading User
+              </h6>
+              <p class="mb-0">{{ errorMessage }}</p>
+            </div>
+
+            <!-- User Information -->
+            <div *ngIf="user && !isLoading && !hasError" class="user-info">
+              <!-- User Avatar and Basic Info -->
+              <div class="row mb-4">
+                <div class="col-md-3 text-center">
+                  <div class="user-avatar">
+                    <app-lucide-icon name="user" size="48px" class="text-primary"></app-lucide-icon>
+                  </div>
+                </div>
+                <div class="col-md-9">
+                  <h4 class="user-name">{{ user.firstName }} {{ user.lastName }}</h4>
+                  <p class="user-username text-muted">@{{ user.username }}</p>
+                  <div class="user-badges">
+                    <span class="badge" [class]="getUserTypeBadgeClass(user.userType)">
+                      {{ user.userType }}
+                    </span>
+                    <span class="badge" [class]="getStatusBadgeClass(user.entityState)">
+                      {{ user.entityState }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- User Details -->
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="info-item">
+                    <label class="info-label">
+                      <app-lucide-icon name="mail" size="16px" class="me-2"></app-lucide-icon>
+                      Email Address
+                    </label>
+                    <p class="info-value">{{ user.email || 'Not provided' }}</p>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="info-item">
+                    <label class="info-label">
+                      <app-lucide-icon name="smartphone" size="16px" class="me-2"></app-lucide-icon>
+                      Phone Number
+                    </label>
+                    <p class="info-value">{{ user.phoneNumber || 'Not provided' }}</p>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="info-item">
+                    <label class="info-label">
+                      <app-lucide-icon name="shield" size="16px" class="me-2"></app-lucide-icon>
+                      Role
+                    </label>
+                    <p class="info-value">{{ user.roleName || 'No role assigned' }}</p>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="info-item">
+                    <label class="info-label">
+                      <app-lucide-icon name="database" size="16px" class="me-2"></app-lucide-icon>
+                      User ID
+                    </label>
+                    <p class="info-value text-muted small">{{ maskUserId(user.id) }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="modal-footer">
+            <div class="d-flex gap-2 w-100">
+              <button type="button" class="btn btn-outline-warning btn-soft" (click)="editUser()" [disabled]="!user">
+                <app-lucide-icon name="pencil" size="16px" class="me-2"></app-lucide-icon>
+                Edit User
+              </button>
+              <button type="button" class="btn btn-outline-danger btn-soft" (click)="deleteUser()" [disabled]="!user">
+                <app-lucide-icon name="trash" size="16px" class="me-2"></app-lucide-icon>
+                Delete User
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Backdrop -->
+    <div class="modal-backdrop fade" [class.show]="isVisible" *ngIf="isVisible"></div>
+  `,
+  styles: [`
+    .modal {
+      z-index: 1055;
+    }
+
+    .modal-backdrop {
+      z-index: 1050;
+    }
+
+    .modal-content {
+      border: none;
+      border-radius: 0.75rem;
+      box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+    }
+
+    .modal-header {
+      background: #1b2e4b;
+      color: white;
+      border-bottom: none;
+      border-radius: 0.75rem 0.75rem 0 0;
+      padding: 1.5rem;
+
+      .modal-title {
+        font-weight: 600;
+        margin: 0;
+      }
+
+      .btn-close-custom {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        opacity: 0.8;
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.2);
+          border-color: rgba(255, 255, 255, 0.4);
+          opacity: 1;
+          transform: scale(1.05);
+        }
+
+        &:focus {
+          box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
+          outline: none;
+        }
+
+        &:active {
+          transform: scale(0.95);
+        }
+      }
+    }
+
+    .modal-body {
+      padding: 2rem;
+    }
+
+    .user-info {
+      .user-avatar {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        border: 3px solid #1b2e4b;
+      }
+
+      .user-name {
+        color: #1b2e4b;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+      }
+
+      .user-username {
+        font-size: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .user-badges {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .info-item {
+        margin-bottom: 1.5rem;
+
+        .info-label {
+          display: flex;
+          align-items: center;
+          font-weight: 600;
+          color: #495057;
+          font-size: 0.875rem;
+          margin-bottom: 0.5rem;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .info-value {
+          color: #1b2e4b;
+          font-size: 1rem;
+          margin: 0;
+          word-break: break-word;
+        }
+      }
+    }
+
+    .modal-footer {
+      border-top: 1px solid #e9ecef;
+      padding: 1.5rem;
+      background-color: #f8f9fa;
+      border-radius: 0 0 0.75rem 0.75rem;
+
+      .btn {
+        border-radius: 0.5rem;
+        font-weight: 500;
+        padding: 0.75rem 1.5rem;
+        transition: all 0.2s ease;
+
+        &.btn-primary {
+          background-color: #1b2e4b;
+          border-color: #1b2e4b;
+
+          &:hover {
+            background-color: #3498db;
+            border-color: #3498db;
+          }
+        }
+
+        &.btn-secondary {
+          background-color: #6c757d;
+          border-color: #6c757d;
+
+          &:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+          }
+        }
+
+        &.btn-soft {
+          background-color: transparent;
+          border-width: 1px;
+          font-weight: 400;
+          opacity: 0.8;
+          
+          &:hover {
+            opacity: 1;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          }
+
+          &:active {
+            transform: translateY(0);
+          }
+
+          &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+          }
+
+          // Specific hover styles for outlined buttons
+          &.btn-outline-warning:hover {
+            background-color: #ffc107;
+            border-color: #ffc107;
+            color: #000;
+          }
+
+          &.btn-outline-danger:hover {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: #fff;
+          }
+        }
+      }
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.375rem;
+
+      &.badge-primary {
+        background-color: #1b2e4b;
+        color: white;
+      }
+
+      &.badge-info {
+        background-color: #3498db;
+        color: white;
+      }
+
+      &.badge-success {
+        background-color: #28a745;
+        color: white;
+      }
+
+      &.badge-danger {
+        background-color: #dc3545;
+        color: white;
+      }
+    }
+
+    // Responsive adjustments
+    @media (max-width: 768px) {
+      .modal-dialog {
+        margin: 1rem;
+      }
+
+      .user-info {
+        .row {
+          .col-md-3,
+          .col-md-6,
+          .col-md-9 {
+            margin-bottom: 1rem;
+          }
+        }
+      }
+    }
+  `]
+})
+export class UserViewModalComponent implements OnInit {
+  @Input() isVisible = false;
+  @Input() user: User | null = null;
+  @Input() isLoading = false;
+  @Input() hasError = false;
+  @Input() errorMessage = '';
+
+  @Output() close = new EventEmitter<void>();
+  @Output() edit = new EventEmitter<User>();
+  @Output() delete = new EventEmitter<User>();
+
+  ngOnInit() {
+    // Close modal on escape key
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && this.isVisible) {
+        this.closeModal();
+      }
+    });
+  }
+
+  closeModal() {
+    this.close.emit();
+  }
+
+  editUser() {
+    if (this.user) {
+      this.edit.emit(this.user);
+    }
+  }
+
+  deleteUser() {
+    if (this.user) {
+      this.delete.emit(this.user);
+    }
+  }
+
+  getUserTypeBadgeClass(userType: string): string {
+    return userType === 'HUMAN' ? 'badge-primary' : 'badge-info';
+  }
+
+  getStatusBadgeClass(status: string): string {
+    return status === 'ACTIVE' ? 'badge-success' : 'badge-danger';
+  }
+
+  maskUserId(id: string): string {
+    if (!id || id.length < 8) {
+      return id;
+    }
+    // Show first 4 and last 4 characters, mask the middle
+    const start = id.substring(0, 4);
+    const end = id.substring(id.length - 4);
+    const middle = '*'.repeat(Math.max(4, id.length - 8));
+    return `${start}${middle}${end}`;
+  }
+}

@@ -6,6 +6,7 @@ import { Subject, takeUntil, finalize } from 'rxjs';
 import { LucideIconComponent } from '../../shared/components/lucide-icon/lucide-icon.component';
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { TableColumn } from '../../shared/components/data-table/data-table.component';
+import { UserViewModalComponent } from '../../shared/components/user-view-modal/user-view-modal.component';
 
 import { UserService, User, UserType } from '../../core/services/user.service';
 
@@ -14,7 +15,7 @@ declare var bootstrap: any;
 @Component({
   selector: 'app-users',
   standalone: true,
-  imports: [CommonModule, RouterModule, HttpClientModule, LucideIconComponent, DataTableComponent],
+  imports: [CommonModule, RouterModule, HttpClientModule, LucideIconComponent, DataTableComponent, UserViewModalComponent],
   template: `
     <div class="dashboard-container">
           <div class="card">
@@ -73,41 +74,30 @@ declare var bootstrap: any;
                 (onPageSizeChange)="handlePageSizeChange($event)">
                 
                 <ng-template #rowActions let-user>
-                  <div class="dropdown">
-                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" 
-                            [id]="'actionsDropdown' + user.id" 
-                            data-bs-toggle="dropdown" 
-                            aria-expanded="false"
-                            title="Actions"
-                            (click)="toggleDropdown($event, 'actionsDropdown' + user.id)">
-                      ⋯
+                  <div class="d-flex justify-content-end">
+                    <button class="btn btn-sm btn-outline-secondary view-btn" 
+                            type="button" 
+                            title="View User Details"
+                            (click)="viewUser(user)">
+                      <app-lucide-icon name="eye" size="12px"></app-lucide-icon>
                     </button>
-                    <ul class="dropdown-menu" [attr.aria-labelledby]="'actionsDropdown' + user.id">
-                      <li>
-                        <a class="dropdown-item d-flex align-items-center gap-3" (click)="viewUser(user)">
-                          <app-lucide-icon name="eye" size="16px" class="text-primary"></app-lucide-icon>
-                          <span>View</span>
-                        </a>
-                      </li>
-                      <li>
-                        <a class="dropdown-item d-flex align-items-center gap-3" (click)="editUser(user)">
-                          <app-lucide-icon name="pencil" size="16px" class="text-warning" [title]="'Edit icon'"></app-lucide-icon>
-                          <span>Edit</span>
-                        </a>
-                      </li>
-                      <li><hr class="dropdown-divider my-2"></li>
-                      <li>
-                        <a class="dropdown-item d-flex align-items-center gap-3 text-danger" (click)="deleteUser(user)">
-                          <app-lucide-icon name="trash" size="16px" class="text-danger" [title]="'Delete icon'"></app-lucide-icon>
-                          <span>Delete</span>
-                        </a>
-                      </li>
-                    </ul>
                   </div>
                 </ng-template>
               </app-data-table>
             </div>
           </div>
+
+          <!-- User View Modal -->
+          <app-user-view-modal
+            [isVisible]="showViewModal"
+            [user]="selectedUser"
+            [isLoading]="isLoadingUser"
+            [hasError]="hasUserError"
+            [errorMessage]="userErrorMessage"
+            (close)="closeViewModal()"
+            (edit)="editUser($event)"
+            (delete)="deleteUser($event)">
+          </app-user-view-modal>
     </div>
   `,
   styles: [`
@@ -231,26 +221,31 @@ declare var bootstrap: any;
         background-color: #dc3545;
       }
 
-      // Dropdown styles
-      .dropdown-toggle {
+      // View button styles
+      .view-btn {
         cursor: pointer;
         user-select: none;
-        border-color: #1b2e4b !important; // Primary color border
-        color: #1b2e4b !important; // Primary color text
+        border-color: #6c757d !important; // Grayish border
+        color: #6c757d !important; // Grayish text
+        transition: all 0.2s ease;
+        padding: 0.25rem 0.5rem !important; // Smaller padding for compact width
+        min-width: auto !important; // Remove minimum width constraint
         
         &:hover {
-          background-color: #1b2e4b !important;
-          border-color: #1b2e4b !important;
+          background-color: #6c757d !important;
+          border-color: #6c757d !important;
           color: white !important;
+          transform: translateY(-1px);
+          box-shadow: 0 2px 4px rgba(108, 117, 125, 0.2);
         }
         
         &:focus {
-          box-shadow: 0 0 0 0.2rem rgba(27, 46, 75, 0.25) !important;
-          border-color: #1b2e4b !important;
+          box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25) !important;
+          border-color: #6c757d !important;
         }
         
-        &:after {
-          display: none; // Hide the default arrow since we're using ⋯
+        &:active {
+          transform: translateY(0);
         }
       }
 
@@ -327,6 +322,13 @@ export class UsersComponent implements OnInit, OnDestroy, AfterViewInit {
   hasError = false;
   errorMessage = '';
 
+  // View modal properties
+  showViewModal = false;
+  selectedUser: User | null = null;
+  isLoadingUser = false;
+  hasUserError = false;
+  userErrorMessage = '';
+
   userTypeBadgeTemplate = (item: User) => {
     const badgeClass = item.userType === 'HUMAN' ? 'badge-primary' : 'badge-info';
     return `<span class="badge ${badgeClass}">${item.userType}</span>`;
@@ -383,11 +385,7 @@ export class UsersComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    // Initialize Bootstrap dropdowns after view is ready
-    this.initializeBootstrapDropdowns();
-    
-    // Add event delegation for dropdown clicks
-    this.setupDropdownEventDelegation();
+    // Component initialization complete
   }
 
   private initializeBootstrapDropdowns() {
@@ -539,7 +537,28 @@ export class UsersComponent implements OnInit, OnDestroy, AfterViewInit {
 
   viewUser(user: User): void {
     console.log('Viewing user:', user);
-    // TODO: Implement view user functionality
+    this.selectedUser = null;
+    this.showViewModal = true;
+    this.isLoadingUser = true;
+    this.hasUserError = false;
+    this.userErrorMessage = '';
+
+    // Load user details by username
+    this.userService.getUserByUsername(user.username)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (userDetails: User) => {
+          console.log('✅ User details loaded:', userDetails);
+          this.selectedUser = userDetails;
+          this.isLoadingUser = false;
+        },
+        error: (error) => {
+          console.error('❌ Error loading user details:', error);
+          this.isLoadingUser = false;
+          this.hasUserError = true;
+          this.userErrorMessage = error.message || 'Failed to load user details. Please try again.';
+        }
+      });
   }
 
   editUser(user: User): void {
@@ -547,23 +566,19 @@ export class UsersComponent implements OnInit, OnDestroy, AfterViewInit {
     // TODO: Implement edit user functionality
   }
 
+  closeViewModal(): void {
+    this.showViewModal = false;
+    this.selectedUser = null;
+    this.isLoadingUser = false;
+    this.hasUserError = false;
+    this.userErrorMessage = '';
+  }
+
   deleteUser(user: User): void {
     console.log('Deleting user:', user);
     // TODO: Implement delete user functionality
   }
 
-  toggleDropdown(event: Event, dropdownId: string): void {
-    event.preventDefault();
-    event.stopPropagation();
-    
-    if (typeof bootstrap !== 'undefined') {
-      const dropdownElement = document.getElementById(dropdownId);
-      if (dropdownElement) {
-        const dropdown = bootstrap.Dropdown.getOrCreateInstance(dropdownElement);
-        dropdown.toggle();
-      }
-    }
-  }
 
   handleSort(event: { column: string; direction: 'asc' | 'desc' }) {
     // TODO: Implement sorting
