@@ -156,30 +156,6 @@ import { Partner } from '../../core/models/partner.models';
       padding: 1rem;
     }
 
-    /* Ensure all form elements have consistent height */
-    .form-control,
-    .form-select,
-    .btn {
-      height: 38px;
-      min-height: 38px;
-    }
-
-    .form-control,
-    .form-select {
-      padding: 0.5rem 0.75rem;
-      font-size: 0.875rem;
-      line-height: 1.5;
-    }
-
-    .btn {
-      padding: 0.5rem 1rem;
-      font-size: 0.875rem;
-      line-height: 1.5;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
     .btn-primary {
       background-color: #1b2e4b;
       border-color: #1b2e4b;
