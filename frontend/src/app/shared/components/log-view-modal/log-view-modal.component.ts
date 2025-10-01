@@ -280,6 +280,17 @@ import { LogData, IntegrationLogData } from '../../../core/models/log-data.model
                   <pre class="payload-content">{{ formatPayload(integrationLog.payloadJson) }}</pre>
                 </div>
               </div>
+
+              <!-- Extra Section -->
+              <div class="info-section mt-3" *ngIf="integrationLog.extra">
+                <h6 class="section-title">
+                  <app-lucide-icon name="info" size="14px" class="me-2"></app-lucide-icon>
+                  Extra Information
+                </h6>
+                <div class="payload-container">
+                  <pre class="payload-content">{{ formatPayload(integrationLog.extra) }}</pre>
+                </div>
+              </div>
             </div>
           </div>
 

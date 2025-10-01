@@ -192,7 +192,7 @@ export class RolesComponent implements OnInit {
     console.log('Open add role modal for type:', type);
   }
 
-  viewRole(role: Role) {
+  viewRole(role: Role): void {
     // TODO: Implement view role modal
     console.log('Viewing role:', role);
   }
