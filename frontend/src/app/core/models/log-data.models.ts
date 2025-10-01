@@ -5,7 +5,7 @@ export interface LogData {
   branchCode: string;
   branchName: string;
   provider: string;
-  logStatus: 'SUCCESS' | 'FAILED' | 'PENDING' | 'PROCESSING';
+  logStatus: 'SUCCESS' | 'FAILED' | 'FAILURE' | 'PENDING' | 'PROCESSING';
   dateTime: string;
   amount: number;
   referenceNumber: string;
@@ -49,7 +49,7 @@ export interface IntegrationLogData {
   direction: 'IN' | 'OUT' | 'INTERNAL';
   correlationId: string;
   messageType: 'SEND_ONLY' | 'SEND_AND_RECEIVE';
-  status: 'COMPLETED' | 'TIMEOUT' | 'FAILED' | 'PENDING' | 'PROCESSING';
+  status: 'COMPLETED' | 'TIMEOUT' | 'FAILED' | 'FAILURE' | 'PENDING' | 'PROCESSING';
   responseCode: number;
   processedAt: string | null;
   payloadFormat: 'JSON' | 'XML' | 'TEXT';

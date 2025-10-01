@@ -251,7 +251,7 @@ export class LogService {
    * Get integration log status options
    */
   getIntegrationLogStatuses(): string[] {
-    return ['COMPLETED', 'TIMEOUT', 'FAILED', 'PENDING', 'PROCESSING'];
+    return ['COMPLETED', 'TIMEOUT', 'FAILED', 'FAILURE', 'PENDING', 'PROCESSING'];
   }
 
   /**
@@ -266,5 +266,24 @@ export class LogService {
    */
   getIntegrationLogMessageTypes(): string[] {
     return ['SEND_ONLY', 'SEND_AND_RECEIVE'];
+  }
+
+  /**
+   * Generic method to get logs with filters (used by dashboard service)
+   */
+  getLogs(filters: any): Observable<any> {
+    console.log('🎯 LogService: Generic getLogs called with filters:', filters);
+    
+    // Determine which type of logs to fetch based on filters
+    if (filters.type === 'push') {
+      return this.getPushLogs(filters);
+    } else if (filters.type === 'pull') {
+      return this.getPullLogs(filters);
+    } else if (filters.type === 'internal') {
+      return this.getInternalLogs(filters);
+    } else {
+      // Default to push logs if no type specified
+      return this.getPushLogs(filters);
+    }
   }
 }

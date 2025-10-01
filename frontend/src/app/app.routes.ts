@@ -6,7 +6,7 @@ import { EntitiesComponent } from './features/entities/entities.component';
 import { UsersComponent } from './features/users/users.component';
 import { RolesComponent } from './features/roles/roles.component';
 import { LogsComponent } from './features/logs/logs.component';
-import { AuditComponent } from './features/audit/audit.component';
+import { PermissionsComponent } from './features/permissions/permissions.component';
 import { LockComponent } from './features/auth/lock/lock.component';
 import { ApiTestComponent } from './components/api-test/api-test.component';
 import { AuthGuard } from './core/guards/auth.guard';
@@ -58,8 +58,8 @@ export const routes: Routes = [
         component: LogsComponent
       },
       {
-        path: 'audit',
-        component: AuditComponent
+        path: 'permissions',
+        component: PermissionsComponent
       },
       {
         path: '',

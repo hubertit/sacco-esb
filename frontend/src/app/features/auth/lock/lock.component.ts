@@ -86,7 +86,8 @@ import { LucideIconComponent } from '../../../shared/components/lucide-icon/luci
     </div>
   `,
   styles: [`
-    @import '../../../../styles/variables';
+    @use '../../../../styles/variables' as *;
+    @use 'sass:color';
 
     :root {
       --second-rotation: 0deg;
@@ -242,7 +243,7 @@ import { LucideIconComponent } from '../../../shared/components/lucide-icon/luci
       gap: 0.5rem;
 
       &:hover:not(:disabled) {
-        background: darken($primary, 5%);
+        background: color.adjust($primary, $lightness: -5%);
       }
 
       &:disabled {

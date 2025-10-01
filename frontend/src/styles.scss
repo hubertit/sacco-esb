@@ -1,11 +1,11 @@
 // Import variables first
-@import 'styles/variables';
-
-// Import Bootstrap
-@import 'bootstrap/scss/bootstrap';
+@use 'styles/variables' as *;
 
 // Import custom components
-@import 'styles/components';
+@use 'styles/components';
+
+// Import Bootstrap last to make mixins available
+@import 'bootstrap/scss/bootstrap';
 
 // Global styles
 html, body {

@@ -72,9 +72,9 @@ export class NavigationService {
       path: 'roles'
     },
     {
-      title: 'Audit',
-      icon: 'activity',
-      path: 'audit'
+      title: 'Permissions',
+      icon: 'shield-check',
+      path: 'permissions'
     }
   ];
 
