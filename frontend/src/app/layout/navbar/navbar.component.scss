@@ -252,4 +252,188 @@
       }
     }
   }
+
+  // Notification styles
+  .notification-dropdown {
+    position: relative;
+
+    .notification-badge {
+      background: #dc2626 !important; // Red badge for failed transactions
+      color: white !important;
+      font-weight: 600;
+      font-size: 0.7rem;
+      min-width: 18px;
+      height: 18px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: pulse 2s infinite;
+      position: absolute;
+      top: -2px;
+      right: -2px;
+    }
+
+    .notification-menu {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      width: 380px;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 0.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      margin-top: 0.5rem;
+
+      .notification-header {
+        padding: 1rem;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        h6 {
+          margin: 0;
+          font-weight: 600;
+          color: #1e293b;
+        }
+
+        .notification-count {
+          font-size: 0.75rem;
+          color: #64748b;
+          background: #f1f5f9;
+          padding: 0.25rem 0.5rem;
+          border-radius: 0.25rem;
+        }
+      }
+
+      .notification-list {
+        max-height: 400px;
+        overflow-y: auto;
+
+        .no-notifications {
+          padding: 2rem;
+          text-align: center;
+          color: #64748b;
+
+          p {
+            margin: 0.5rem 0 0 0;
+            font-size: 0.875rem;
+          }
+        }
+
+        .notification-item {
+          display: flex;
+          align-items: flex-start;
+          padding: 1rem;
+          border-bottom: 1px solid #f1f5f9;
+          cursor: pointer;
+          transition: background-color 0.2s ease;
+
+          &:hover {
+            background-color: #f8fafc;
+          }
+
+          &:last-child {
+            border-bottom: none;
+          }
+
+          &.severity-high {
+            border-left: 3px solid #dc2626;
+          }
+
+          &.severity-medium {
+            border-left: 3px solid #f59e0b;
+          }
+
+          &.severity-low {
+            border-left: 3px solid #3b82f6;
+          }
+
+          .notification-icon {
+            margin-right: 0.75rem;
+            margin-top: 0.125rem;
+            color: #64748b;
+          }
+
+          .notification-content {
+            flex: 1;
+            min-width: 0;
+
+            .notification-message {
+              font-size: 0.875rem;
+              font-weight: 500;
+              color: #1e293b;
+              margin-bottom: 0.25rem;
+              line-height: 1.4;
+            }
+
+            .notification-time {
+              font-size: 0.75rem;
+              color: #64748b;
+            }
+          }
+
+          .notification-status {
+            margin-left: 0.5rem;
+
+            .status-badge {
+              font-size: 0.7rem;
+              font-weight: 600;
+              padding: 0.25rem 0.5rem;
+              border-radius: 0.25rem;
+              text-transform: uppercase;
+
+              &.status-danger {
+                background: #fee2e2;
+                color: #991b1b;
+              }
+
+              &.status-warning {
+                background: #fef3c7;
+                color: #92400e;
+              }
+
+              &.status-info {
+                background: #dbeafe;
+                color: #1e40af;
+              }
+
+              &.status-secondary {
+                background: #f1f5f9;
+                color: #475569;
+              }
+            }
+          }
+        }
+      }
+
+      .notification-footer {
+        padding: 0.75rem 1rem;
+        border-top: 1px solid #e2e8f0;
+        text-align: center;
+
+        .view-all-link {
+          color: $primary;
+          text-decoration: none;
+          font-size: 0.875rem;
+          font-weight: 500;
+
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+    }
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.7;
+    }
+  }
 }

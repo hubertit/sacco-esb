@@ -2,12 +2,14 @@ import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angu
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { NotificationService, NotificationItem } from '../../core/services/notification.service';
 import { LucideIconComponent } from '../../shared/components/lucide-icon/lucide-icon.component';
+import { NotificationViewModalComponent } from '../../shared/components/notification-view-modal/notification-view-modal.component';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideIconComponent],
+  imports: [CommonModule, RouterModule, LucideIconComponent, NotificationViewModalComponent],
   template: `
     <nav class="navbar" [class.sidebar-collapsed]="isSidebarCollapsed">
       <div class="navbar-left">
@@ -21,18 +23,49 @@ import { LucideIconComponent } from '../../shared/components/lucide-icon/lucide-
       </div>
 
       <div class="navbar-right">
-        <div class="nav-item">
+        <!-- Notifications -->
+        <div class="nav-item notification-dropdown" (click)="toggleNotifications()">
           <button class="icon-button">
             <app-lucide-icon name="bell" size="18px"></app-lucide-icon>
-            <span class="badge">3</span>
+            <span class="badge notification-badge" *ngIf="notificationCount > 0">{{ notificationCount }}</span>
           </button>
-        </div>
-
-        <div class="nav-item">
-          <button class="icon-button">
-            <app-lucide-icon name="mail" size="18px"></app-lucide-icon>
-            <span class="badge">5</span>
-          </button>
+          
+          <!-- Notification Dropdown -->
+          <div class="notification-menu" *ngIf="showNotifications">
+            <div class="notification-header">
+              <h6>Failed Transactions</h6>
+              <span class="notification-count">{{ notificationCount }} issues</span>
+            </div>
+            <div class="notification-list">
+              <div *ngIf="notifications.length === 0" class="no-notifications">
+                <app-lucide-icon name="check-circle" size="24px" class="text-success"></app-lucide-icon>
+                <p>No failed transactions</p>
+              </div>
+              <div *ngFor="let notification of notifications" 
+                   class="notification-item" 
+                   [class]="'severity-' + notification.severity"
+                   (click)="viewNotification(notification)">
+                <div class="notification-icon">
+                  <app-lucide-icon 
+                    [name]="notification.type === 'transaction' ? 'credit-card' : 'activity'" 
+                    size="16px">
+                  </app-lucide-icon>
+                </div>
+                <div class="notification-content">
+                  <div class="notification-message">{{ notification.message }}</div>
+                  <div class="notification-time">{{ formatTime(notification.timestamp) }}</div>
+                </div>
+                <div class="notification-status">
+                  <span class="status-badge" [class]="getStatusClass(notification.status)">
+                    {{ notification.status }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="notification-footer" *ngIf="notifications.length > 0">
+              <a href="/logs" class="view-all-link">View All Logs</a>
+            </div>
+          </div>
         </div>
 
         <div class="nav-item user-profile" (click)="toggleUserMenu()">
@@ -75,6 +108,16 @@ import { LucideIconComponent } from '../../shared/components/lucide-icon/lucide-
         </div>
       </div>
     </nav>
+
+    <!-- Notification View Modal -->
+    <app-notification-view-modal
+      [isVisible]="showNotificationModal"
+      [notification]="selectedNotification"
+      [isLoading]="false"
+      [hasError]="false"
+      (close)="closeNotificationModal()"
+      (viewRelatedLogs)="navigateToRelatedLogs($event)">
+    </app-notification-view-modal>
   `,
   styleUrls: ['./navbar.component.scss']
 })
@@ -85,13 +128,21 @@ export class NavbarComponent implements OnInit, OnDestroy {
   userName: string;
   userRole: string;
   showUserMenu = false;
+  showNotifications = false;
   currentTime: string = '';
   currentDate: string = '';
   private timeInterval: any;
 
+  // Notification properties
+  notifications: NotificationItem[] = [];
+  notificationCount = 0;
+  showNotificationModal = false;
+  selectedNotification: NotificationItem | null = null;
+
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private notificationService: NotificationService
   ) {
     const user = this.authService.getCurrentUser();
     this.userName = user?.name || 'User';
@@ -103,6 +154,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.timeInterval = setInterval(() => {
       this.updateDateTime();
     }, 1000);
+    
+    // Load notifications
+    this.loadNotifications();
   }
 
   ngOnDestroy() {
@@ -148,5 +202,85 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.showUserMenu = false;
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  // Notification methods
+  loadNotifications(): void {
+    console.log('🔔 Navbar: Loading notifications...');
+    this.notificationService.getFailedNotifications().subscribe({
+      next: (data) => {
+        console.log('🔔 Navbar: Received notifications:', data);
+        this.notifications = data.notifications;
+        this.notificationCount = data.count;
+        console.log('🔔 Navbar: Set notificationCount to:', this.notificationCount);
+      },
+      error: (error) => {
+        console.error('Error loading notifications:', error);
+      }
+    });
+  }
+
+  toggleNotifications(): void {
+    this.showNotifications = !this.showNotifications;
+    this.showUserMenu = false; // Close user menu if open
+  }
+
+  viewNotification(notification: NotificationItem): void {
+    this.showNotifications = false;
+    
+    // Open the notification modal
+    this.selectedNotification = notification;
+    this.showNotificationModal = true;
+  }
+
+  closeNotificationModal(): void {
+    this.showNotificationModal = false;
+    this.selectedNotification = null;
+  }
+
+  navigateToRelatedLogs(notification: NotificationItem): void {
+    console.log('Navigating to related logs for notification:', notification);
+    this.closeNotificationModal();
+    
+    // Navigate based on notification type
+    if (notification.type === 'transaction') {
+      // Navigate to transaction logs
+      this.router.navigate(['/logs/transaction/internal']);
+    } else if (notification.type === 'integration') {
+      // Navigate to integration logs for the specific partner
+      this.router.navigate(['/logs/integration']);
+    }
+  }
+
+  formatTime(timestamp: string): string {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+    
+    if (diffInMinutes < 1) {
+      return 'Just now';
+    } else if (diffInMinutes < 60) {
+      return `${diffInMinutes}m ago`;
+    } else if (diffInMinutes < 1440) {
+      const hours = Math.floor(diffInMinutes / 60);
+      return `${hours}h ago`;
+    } else {
+      const days = Math.floor(diffInMinutes / 1440);
+      return `${days}d ago`;
+    }
+  }
+
+  getStatusClass(status: string): string {
+    switch (status) {
+      case 'FAILURE':
+      case 'FAILED':
+        return 'status-danger';
+      case 'TIMEOUT':
+        return 'status-warning';
+      case 'PENDING':
+        return 'status-info';
+      default:
+        return 'status-secondary';
+    }
   }
 }
