@@ -266,6 +266,12 @@ import { LogData, IntegrationLogData } from '../../../core/models/log-data.model
                       <label>Processed At</label>
                       <span class="value">{{ formatDateTime(integrationLog.processedAt) }}</span>
                     </div>
+                    <div class="info-item" *ngIf="integrationLog.processedAt">
+                      <label>Response Time</label>
+                      <span class="value response-time" [class]="getResponseTimeClass(integrationLog.receivedAt, integrationLog.processedAt)">
+                        {{ calculateResponseTime(integrationLog.receivedAt, integrationLog.processedAt) }}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -495,6 +501,43 @@ import { LogData, IntegrationLogData } from '../../../core/models/log-data.model
       white-space: pre-wrap;
       word-break: break-all;
     }
+
+    .response-time {
+      font-weight: 600;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.8rem;
+    }
+
+    .response-time-excellent {
+      background-color: #dcfce7;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
+    .response-time-good {
+      background-color: #dbeafe;
+      color: #1e40af;
+      border: 1px solid #bfdbfe;
+    }
+
+    .response-time-warning {
+      background-color: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde68a;
+    }
+
+    .response-time-slow {
+      background-color: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+
+    .response-time-invalid {
+      background-color: #f3f4f6;
+      color: #6b7280;
+      border: 1px solid #d1d5db;
+    }
   `]
 })
 export class LogViewModalComponent implements OnInit {
@@ -593,6 +636,63 @@ export class LogViewModalComponent implements OnInit {
       return JSON.stringify(parsed, null, 2);
     } catch (error) {
       return payloadJson;
+    }
+  }
+
+  calculateResponseTime(receivedAt: string, processedAt: string): string {
+    try {
+      const received = new Date(receivedAt);
+      const processed = new Date(processedAt);
+      const diffInMs = processed.getTime() - received.getTime();
+      
+      if (diffInMs < 0) {
+        return 'Invalid time';
+      }
+      
+      // Convert to seconds
+      const diffInSeconds = diffInMs / 1000;
+      
+      if (diffInSeconds < 1) {
+        return `${Math.round(diffInMs)}ms`;
+      } else if (diffInSeconds < 60) {
+        return `${diffInSeconds.toFixed(2)}s`;
+      } else if (diffInSeconds < 3600) {
+        const minutes = Math.floor(diffInSeconds / 60);
+        const seconds = Math.round(diffInSeconds % 60);
+        return `${minutes}m ${seconds}s`;
+      } else {
+        const hours = Math.floor(diffInSeconds / 3600);
+        const minutes = Math.floor((diffInSeconds % 3600) / 60);
+        return `${hours}h ${minutes}m`;
+      }
+    } catch (error) {
+      return 'Invalid time';
+    }
+  }
+
+  getResponseTimeClass(receivedAt: string, processedAt: string): string {
+    try {
+      const received = new Date(receivedAt);
+      const processed = new Date(processedAt);
+      const diffInMs = processed.getTime() - received.getTime();
+      
+      if (diffInMs < 0) {
+        return 'response-time-invalid';
+      }
+      
+      const diffInSeconds = diffInMs / 1000;
+      
+      if (diffInSeconds < 1) {
+        return 'response-time-excellent'; // < 1 second
+      } else if (diffInSeconds < 5) {
+        return 'response-time-good'; // 1-5 seconds
+      } else if (diffInSeconds < 30) {
+        return 'response-time-warning'; // 5-30 seconds
+      } else {
+        return 'response-time-slow'; // > 30 seconds
+      }
+    } catch (error) {
+      return 'response-time-invalid';
     }
   }
 }
