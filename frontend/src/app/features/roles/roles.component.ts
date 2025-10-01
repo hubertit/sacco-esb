@@ -44,6 +44,12 @@ import { Role } from '../../core/models/role.models';
                 [columns]="columns"
                 [data]="roles"
                 [striped]="true"
+                [showSearch]="false"
+                [showPagination]="true"
+                [currentPage]="currentPage"
+                [pageSize]="pageSize"
+                [totalPages]="totalPages"
+                [totalItems]="totalItems"
                 (onSort)="handleSort($event)"
                 (onPageChange)="handlePageChange($event)"
                 (onPageSizeChange)="handlePageSizeChange($event)"
@@ -130,13 +136,13 @@ import { Role } from '../../core/models/role.models';
 })
 export class RolesComponent implements OnInit {
   roleTypeTemplate = (item: Role) => `
-    <span class="badge ${item.roleType === 'ADMINISTRATOR' ? 'badge-primary' : 'badge-info'}">
+    <span class="badge ${item.roleType === 'ADMINISTRATOR' ? 'bg-primary' : 'bg-info'}">
       ${item.roleType}
     </span>
   `;
 
   statusTemplate = (item: Role) => `
-    <span class="badge ${item.entityState === 'ACTIVE' ? 'badge-success' : 'badge-danger'}">
+    <span class="badge ${item.entityState === 'ACTIVE' ? 'bg-success' : 'bg-secondary'}">
       ${item.entityState}
     </span>
   `;
@@ -150,6 +156,13 @@ export class RolesComponent implements OnInit {
   ];
 
   roles: Role[] = [];
+  allRoles: Role[] = []; // Store all roles for client-side operations
+  currentPage = 1;
+  pageSize = 10;
+  totalItems = 0;
+  totalPages = 1;
+  sortColumn = '';
+  sortDirection: 'asc' | 'desc' = 'asc';
 
   constructor(private roleService: RoleService) {}
 
@@ -159,11 +172,17 @@ export class RolesComponent implements OnInit {
 
   private loadRoles() {
     this.roleService.getRoles().subscribe(roles => {
-      // Add index numbers to roles for the No. column
-      this.roles = roles.map((role, index) => ({
+      // Store all roles and add index
+      this.allRoles = roles.map((role, index) => ({
         ...role,
         index: index + 1
       }));
+      
+      this.totalItems = this.allRoles.length;
+      this.totalPages = Math.ceil(this.totalItems / this.pageSize);
+      
+      // Apply pagination to display roles
+      this.updateDisplayedRoles();
     });
   }
 
@@ -173,18 +192,49 @@ export class RolesComponent implements OnInit {
   }
 
   handleSort(event: { column: string; direction: 'asc' | 'desc' }) {
-    // TODO: Implement sorting
-    console.log('Sort:', event);
+    this.sortColumn = event.column;
+    this.sortDirection = event.direction;
+    this.currentPage = 1; // Reset to first page when sorting
+    this.updateDisplayedRoles();
   }
 
-
   handlePageChange(page: number) {
-    // TODO: Implement pagination
-    console.log('Page:', page);
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.updateDisplayedRoles();
+    }
   }
 
   handlePageSizeChange(size: number) {
-    // TODO: Implement page size change
-    console.log('Page size:', size);
+    this.pageSize = size;
+    this.currentPage = 1; // Reset to first page when changing page size
+    this.totalPages = Math.ceil(this.totalItems / this.pageSize);
+    this.updateDisplayedRoles();
+  }
+
+  private updateDisplayedRoles(): void {
+    let sortedRoles = [...this.allRoles];
+    
+    // Apply sorting if specified
+    if (this.sortColumn) {
+      sortedRoles.sort((a, b) => {
+        const aValue = a[this.sortColumn as keyof Role];
+        const bValue = b[this.sortColumn as keyof Role];
+        
+        if (aValue === null || aValue === undefined) return 1;
+        if (bValue === null || bValue === undefined) return -1;
+        
+        let comparison = 0;
+        if (aValue < bValue) comparison = -1;
+        else if (aValue > bValue) comparison = 1;
+        
+        return this.sortDirection === 'asc' ? comparison : -comparison;
+      });
+    }
+    
+    // Apply pagination
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.roles = sortedRoles.slice(startIndex, endIndex);
   }
 }

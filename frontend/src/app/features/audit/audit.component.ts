@@ -54,8 +54,13 @@ import { AuditService, AuditTrail, AuditAction } from '../../core/services/audit
                 [columns]="columns"
                 [data]="auditTrails"
                 [striped]="true"
+                [showSearch]="false"
+                [showPagination]="true"
+                [currentPage]="currentPage"
+                [pageSize]="pageSize"
+                [totalPages]="totalPages"
+                [totalItems]="totalItems"
                 (onSort)="handleSort($event)"
-                (onSearch)="handleSearch($event)"
                 (onPageChange)="handlePageChange($event)"
                 (onPageSizeChange)="handlePageSizeChange($event)"
               ></app-data-table>
@@ -166,7 +171,7 @@ export class AuditComponent implements OnInit {
   `;
 
   statusTemplate = (item: AuditTrail) => `
-    <span class="badge ${item.status === 'SUCCESS' ? 'badge-success' : 'badge-danger'}">
+    <span class="badge ${item.status === 'SUCCESS' ? 'bg-success' : 'bg-danger'}">
       ${item.status}
     </span>
   `;
@@ -182,26 +187,37 @@ export class AuditComponent implements OnInit {
   ];
 
   auditTrails: AuditTrail[] = [];
+  allAuditTrails: AuditTrail[] = []; // Store all audit trails for client-side operations
   auditActions: AuditAction[] = [];
+  currentPage = 1;
+  pageSize = 10;
+  totalItems = 0;
+  totalPages = 1;
+  sortColumn = '';
+  sortDirection: 'asc' | 'desc' = 'asc';
 
   constructor(private auditService: AuditService) {
     this.auditActions = this.auditService.getAuditActions();
   }
 
   ngOnInit() {
-    this.auditTrails = this.auditService.getMockAuditTrails();
+    const mockTrails = this.auditService.getMockAuditTrails();
+    this.allAuditTrails = mockTrails;
+    this.totalItems = this.allAuditTrails.length;
+    this.totalPages = Math.ceil(this.totalItems / this.pageSize);
+    this.updateDisplayedAuditTrails();
   }
 
   getActionClass(action: AuditAction): string {
     switch (action) {
-      case 'CREATE': return 'badge-success';
-      case 'UPDATE': return 'badge-info';
-      case 'DELETE': return 'badge-danger';
+      case 'CREATE': return 'bg-success';
+      case 'UPDATE': return 'bg-info';
+      case 'DELETE': return 'bg-danger';
       case 'LOGIN':
-      case 'LOGOUT': return 'badge-primary';
-      case 'APPROVE': return 'badge-success';
-      case 'REJECT': return 'badge-danger';
-      default: return 'badge-primary';
+      case 'LOGOUT': return 'bg-primary';
+      case 'APPROVE': return 'bg-success';
+      case 'REJECT': return 'bg-danger';
+      default: return 'bg-primary';
     }
   }
 
@@ -221,22 +237,49 @@ export class AuditComponent implements OnInit {
   }
 
   handleSort(event: { column: string; direction: 'asc' | 'desc' }) {
-    // TODO: Implement sorting
-    console.log('Sort:', event);
-  }
-
-  handleSearch(term: string) {
-    // TODO: Implement search
-    console.log('Search term:', term);
+    this.sortColumn = event.column;
+    this.sortDirection = event.direction;
+    this.currentPage = 1; // Reset to first page when sorting
+    this.updateDisplayedAuditTrails();
   }
 
   handlePageChange(page: number) {
-    // TODO: Implement pagination
-    console.log('Page:', page);
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.updateDisplayedAuditTrails();
+    }
   }
 
   handlePageSizeChange(size: number) {
-    // TODO: Implement page size change
-    console.log('Page size:', size);
+    this.pageSize = size;
+    this.currentPage = 1; // Reset to first page when changing page size
+    this.totalPages = Math.ceil(this.totalItems / this.pageSize);
+    this.updateDisplayedAuditTrails();
+  }
+
+  private updateDisplayedAuditTrails(): void {
+    let sortedTrails = [...this.allAuditTrails];
+    
+    // Apply sorting if specified
+    if (this.sortColumn) {
+      sortedTrails.sort((a, b) => {
+        const aValue = a[this.sortColumn as keyof AuditTrail];
+        const bValue = b[this.sortColumn as keyof AuditTrail];
+        
+        if (aValue === null || aValue === undefined) return 1;
+        if (bValue === null || bValue === undefined) return -1;
+        
+        let comparison = 0;
+        if (aValue < bValue) comparison = -1;
+        else if (aValue > bValue) comparison = 1;
+        
+        return this.sortDirection === 'asc' ? comparison : -comparison;
+      });
+    }
+    
+    // Apply pagination
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.auditTrails = sortedTrails.slice(startIndex, endIndex);
   }
 }

@@ -69,6 +69,11 @@ declare var bootstrap: any;
                 [striped]="true"
                 [showActions]="true"
                 [showSearch]="false"
+                [showPagination]="true"
+                [currentPage]="currentPage"
+                [pageSize]="pageSize"
+                [totalPages]="totalPages"
+                [totalItems]="totalItems"
                 (onSort)="handleSort($event)"
                 (onPageChange)="handlePageChange($event)"
                 (onPageSizeChange)="handlePageSizeChange($event)">
@@ -330,12 +335,12 @@ export class UsersComponent implements OnInit, OnDestroy, AfterViewInit {
   userErrorMessage = '';
 
   userTypeBadgeTemplate = (item: User) => {
-    const badgeClass = item.userType === 'HUMAN' ? 'badge-primary' : 'badge-info';
+    const badgeClass = item.userType === 'HUMAN' ? 'bg-primary' : 'bg-info';
     return `<span class="badge ${badgeClass}">${item.userType}</span>`;
   };
 
   statusBadgeTemplate = (item: User) => {
-    const badgeClass = item.entityState === 'ACTIVE' ? 'badge-success' : 'badge-danger';
+    const badgeClass = item.entityState === 'ACTIVE' ? 'bg-success' : 'bg-secondary';
     return `<span class="badge ${badgeClass}">${item.entityState}</span>`;
   };
 
@@ -355,6 +360,13 @@ export class UsersComponent implements OnInit, OnDestroy, AfterViewInit {
   ];
 
   users: User[] = [];
+  allUsers: User[] = []; // Store all users for client-side operations
+  currentPage = 1;
+  pageSize = 10;
+  totalItems = 0;
+  totalPages = 1;
+  sortColumn = '';
+  sortDirection: 'asc' | 'desc' = 'asc';
 
   constructor(
     private userService: UserService,
@@ -489,11 +501,17 @@ export class UsersComponent implements OnInit, OnDestroy, AfterViewInit {
           console.log('👥 Number of users received:', users?.length || 0);
           console.log('📋 Users data:', users);
           
-          // Add index to each user for the No. column
-          this.users = users.map((user, index) => ({
+          // Store all users and add index
+          this.allUsers = users.map((user, index) => ({
             ...user,
             index: index + 1
           }));
+          
+          this.totalItems = this.allUsers.length;
+          this.totalPages = Math.ceil(this.totalItems / this.pageSize);
+          
+          // Apply pagination to display users
+          this.updateDisplayedUsers();
           
           // Trigger change detection to ensure DOM is updated
           this.cdr.detectChanges();
@@ -581,22 +599,68 @@ export class UsersComponent implements OnInit, OnDestroy, AfterViewInit {
 
 
   handleSort(event: { column: string; direction: 'asc' | 'desc' }) {
-    // TODO: Implement sorting
-    console.log('Sort:', event);
-  }
-
-  handleSearch(term: string) {
-    // TODO: Implement search
-    console.log('Search term:', term);
+    this.sortColumn = event.column;
+    this.sortDirection = event.direction;
+    this.currentPage = 1; // Reset to first page when sorting
+    this.updateDisplayedUsers();
   }
 
   handlePageChange(page: number) {
-    // TODO: Implement pagination
-    console.log('Page:', page);
+    console.log('🔄 UsersComponent: Page change requested to:', page);
+    console.log('📊 Current state - currentPage:', this.currentPage, 'totalPages:', this.totalPages, 'pageSize:', this.pageSize);
+    
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.updateDisplayedUsers();
+      console.log('✅ UsersComponent: Page changed to:', this.currentPage, 'Displaying', this.users.length, 'users');
+    } else {
+      console.warn('⚠️ UsersComponent: Invalid page number:', page);
+    }
   }
 
   handlePageSizeChange(size: number) {
-    // TODO: Implement page size change
-    console.log('Page size:', size);
+    console.log('🔄 UsersComponent: Page size change requested to:', size);
+    console.log('📊 Current state - pageSize:', this.pageSize, 'totalItems:', this.totalItems);
+    
+    this.pageSize = size;
+    this.currentPage = 1; // Reset to first page when changing page size
+    this.totalPages = Math.ceil(this.totalItems / this.pageSize);
+    this.updateDisplayedUsers();
+    
+    console.log('✅ UsersComponent: Page size changed to:', this.pageSize, 'totalPages:', this.totalPages, 'Displaying', this.users.length, 'users');
+  }
+
+  private updateDisplayedUsers(): void {
+    console.log('🔄 UsersComponent: Updating displayed users');
+    console.log('📊 Pagination - currentPage:', this.currentPage, 'pageSize:', this.pageSize, 'totalItems:', this.totalItems);
+    console.log('📊 All users count:', this.allUsers.length);
+    
+    let sortedUsers = [...this.allUsers];
+    
+    // Apply sorting if specified
+    if (this.sortColumn) {
+      console.log('🔄 Applying sort - column:', this.sortColumn, 'direction:', this.sortDirection);
+      sortedUsers.sort((a, b) => {
+        const aValue = a[this.sortColumn as keyof User];
+        const bValue = b[this.sortColumn as keyof User];
+        
+        if (aValue === null || aValue === undefined) return 1;
+        if (bValue === null || bValue === undefined) return -1;
+        
+        let comparison = 0;
+        if (aValue < bValue) comparison = -1;
+        else if (aValue > bValue) comparison = 1;
+        
+        return this.sortDirection === 'asc' ? comparison : -comparison;
+      });
+    }
+    
+    // Apply pagination
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    console.log('📊 Pagination slice - startIndex:', startIndex, 'endIndex:', endIndex);
+    
+    this.users = sortedUsers.slice(startIndex, endIndex);
+    console.log('✅ UsersComponent: Updated displayed users count:', this.users.length);
   }
 }

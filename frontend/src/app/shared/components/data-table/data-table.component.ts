@@ -50,7 +50,7 @@ export interface TableColumn {
                    [class.desc]="sortColumn === col.key && sortDirection === 'desc'">
                 </i>
               </th>
-              <th *ngIf="showActions" class="actions-column">Actions</th>
+              <th *ngIf="showActions && rowActions" class="actions-column">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -61,8 +61,17 @@ export interface TableColumn {
                     {{ item[col.key] | date:'medium' }}
                   </ng-container>
                   <ng-container *ngSwitchCase="'boolean'">
-                    <span class="badge" [class.badge-success]="item[col.key]" [class.badge-danger]="!item[col.key]">
+                    <span class="badge" [class.bg-success]="item[col.key]" [class.bg-danger]="!item[col.key]">
                       {{ item[col.key] ? 'Yes' : 'No' }}
+                    </span>
+                  </ng-container>
+                  <ng-container *ngSwitchCase="'status'">
+                    <span class="badge" 
+                          [class.bg-success]="item[col.key] === 'ACTIVE' || item[col.key] === 'active' || item[col.key] === 'SUCCESS' || item[col.key] === 'success'"
+                          [class.bg-secondary]="item[col.key] === 'INACTIVE' || item[col.key] === 'inactive' || item[col.key] === 'FAILED' || item[col.key] === 'failed'"
+                          [class.bg-warning]="item[col.key] === 'PENDING' || item[col.key] === 'pending' || item[col.key] === 'PROCESSING' || item[col.key] === 'processing'"
+                          [class.bg-danger]="item[col.key] === 'ERROR' || item[col.key] === 'error'">
+                      {{ item[col.key] }}
                     </span>
                   </ng-container>
                   <ng-container *ngSwitchCase="'custom'">
@@ -79,14 +88,13 @@ export interface TableColumn {
                   </ng-container>
                 </ng-container>
               </td>
-              <td *ngIf="showActions" class="actions-column">
-                <ng-container *ngIf="rowActions" [ngTemplateOutlet]="rowActions" [ngTemplateOutletContext]="{ $implicit: item }">
+              <td *ngIf="showActions && rowActions" class="actions-column">
+                <ng-container [ngTemplateOutlet]="rowActions" [ngTemplateOutletContext]="{ $implicit: item }">
                 </ng-container>
-                <span *ngIf="!rowActions" class="text-muted">No actions</span>
               </td>
             </tr>
             <tr *ngIf="!data?.length">
-              <td [attr.colspan]="columns.length + (showActions ? 1 : 0)" class="text-center py-4">
+              <td [attr.colspan]="columns.length + (showActions && rowActions ? 1 : 0)" class="text-center py-4">
                 {{ noDataMessage }}
               </td>
             </tr>
@@ -96,10 +104,15 @@ export interface TableColumn {
 
       <!-- Pagination -->
       <div class="data-table-footer d-flex justify-content-between align-items-center mt-3" *ngIf="showPagination">
-        <div class="page-size">
-          <select class="form-select" [(ngModel)]="pageSize" (ngModelChange)="onPageSizeChange.emit($event)">
-            <option *ngFor="let size of pageSizes" [value]="size">{{ size }} per page</option>
-          </select>
+        <div class="d-flex align-items-center gap-3">
+          <div class="page-size">
+            <select class="form-select" [ngModel]="pageSize" (ngModelChange)="onPageSizeChange.emit($event)">
+              <option *ngFor="let size of pageSizes" [value]="size">{{ size }} per page</option>
+            </select>
+          </div>
+          <div class="page-info text-muted small">
+            Showing {{ ((currentPage - 1) * pageSize) + 1 }} to {{ (currentPage * pageSize) > totalItems ? totalItems : (currentPage * pageSize) }} of {{ totalItems }} entries
+          </div>
         </div>
         <nav aria-label="Table navigation" *ngIf="totalPages > 1">
           <ul class="pagination mb-0">
@@ -123,7 +136,7 @@ export class DataTableComponent implements AfterContentInit {
   @Input() columns: TableColumn[] = [];
   @Input() data: any[] = [];
   @Input() showHeader = true;
-  @Input() showSearch = true;
+  @Input() showSearch = false;
   @Input() showActions = true;
   @Input() showPagination = true;
   @Input() hover = true;
@@ -132,7 +145,8 @@ export class DataTableComponent implements AfterContentInit {
   @Input() currentPage = 1;
   @Input() pageSize = 10;
   @Input() totalPages = 1;
-  @Input() pageSizes = [5, 10, 25, 50];
+  @Input() totalItems = 0;
+  @Input() pageSizes = [5, 10, 25, 50, 100];
 
   @ContentChild('rowActions') rowActions!: TemplateRef<any>;
 
@@ -156,8 +170,7 @@ export class DataTableComponent implements AfterContentInit {
   }
 
   ngAfterContentInit() {
-    console.log('🔍 DataTableComponent - rowActions template:', this.rowActions);
-    console.log('🔍 DataTableComponent - showActions:', this.showActions);
+    // Component initialization complete
   }
 
   getPages(): number[] {
@@ -175,4 +188,5 @@ export class DataTableComponent implements AfterContentInit {
     }
     return pages;
   }
+
 }

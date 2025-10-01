@@ -511,11 +511,11 @@ export class LogViewModalComponent implements OnInit {
 
   getStatusClass(status: string): string {
     switch (status) {
-      case 'SUCCESS': return 'badge-success';
-      case 'FAILED': return 'badge-danger';
-      case 'PENDING': return 'badge-warning';
-      case 'PROCESSING': return 'badge-info';
-      default: return 'badge-secondary';
+      case 'SUCCESS': return 'bg-success';
+      case 'FAILED': return 'bg-danger';
+      case 'PENDING': return 'bg-warning';
+      case 'PROCESSING': return 'bg-info';
+      default: return 'bg-secondary';
     }
   }
 
@@ -557,12 +557,12 @@ export class LogViewModalComponent implements OnInit {
   // Integration log helper methods
   getIntegrationStatusClass(status: string): string {
     switch (status) {
-      case 'COMPLETED': return 'badge-success';
-      case 'TIMEOUT': return 'badge-warning';
-      case 'FAILED': return 'badge-danger';
-      case 'PENDING': return 'badge-info';
-      case 'PROCESSING': return 'badge-primary';
-      default: return 'badge-secondary';
+      case 'COMPLETED': return 'bg-success';
+      case 'TIMEOUT': return 'bg-warning';
+      case 'FAILED': return 'bg-danger';
+      case 'PENDING': return 'bg-info';
+      case 'PROCESSING': return 'bg-primary';
+      default: return 'bg-secondary';
     }
   }
 

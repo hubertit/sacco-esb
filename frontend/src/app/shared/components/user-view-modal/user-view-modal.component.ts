@@ -394,11 +394,11 @@ export class UserViewModalComponent implements OnInit {
   }
 
   getUserTypeBadgeClass(userType: string): string {
-    return userType === 'HUMAN' ? 'badge-primary' : 'badge-info';
+    return userType === 'HUMAN' ? 'bg-primary' : 'bg-info';
   }
 
   getStatusBadgeClass(status: string): string {
-    return status === 'ACTIVE' ? 'badge-success' : 'badge-danger';
+    return status === 'ACTIVE' ? 'bg-success' : 'bg-secondary';
   }
 
   maskUserId(id: string): string {

@@ -185,6 +185,11 @@ import { LogViewModalComponent } from '../../shared/components/log-view-modal/lo
             [striped]="true"
             [showSearch]="false"
             [showActions]="true"
+            [showPagination]="true"
+            [currentPage]="currentPage"
+            [pageSize]="pageSize"
+            [totalPages]="totalPages"
+            [totalItems]="totalItems"
             (onSort)="handleSort($event)"
             (onPageChange)="handlePageChange($event)"
             (onPageSizeChange)="handlePageSizeChange($event)">
@@ -209,6 +214,11 @@ import { LogViewModalComponent } from '../../shared/components/log-view-modal/lo
             [striped]="true"
             [showSearch]="false"
             [showActions]="true"
+            [showPagination]="true"
+            [currentPage]="integrationCurrentPage"
+            [pageSize]="integrationPageSize"
+            [totalPages]="integrationTotalPages"
+            [totalItems]="integrationTotalItems"
             (onSort)="handleSort($event)"
             (onPageChange)="handlePageChange($event)"
             (onPageSizeChange)="handlePageSizeChange($event)">
@@ -453,7 +463,6 @@ export class LogsComponent implements OnInit {
   integrationColumns: TableColumn[] = [
     { key: 'index', title: 'No.', type: 'custom', sortable: false, template: this.integrationIndexTemplate },
     { key: 'receivedAt', title: 'Received At', type: 'custom', sortable: true, template: this.integrationDateTimeTemplate },
-    { key: 'partner.partnerName', title: 'Partner', type: 'text', sortable: true },
     { key: 'direction', title: 'Direction', type: 'custom', sortable: true, template: this.directionTemplate },
     { key: 'correlationId', title: 'Correlation ID', type: 'text', sortable: true },
     { key: 'messageType', title: 'Message Type', type: 'text', sortable: true },
@@ -464,8 +473,10 @@ export class LogsComponent implements OnInit {
 
   logs: LogData[] = [];
   filteredLogs: LogData[] = [];
+  allLogs: LogData[] = []; // Store all logs for client-side operations
   integrationLogs: IntegrationLogData[] = [];
   filteredIntegrationLogs: IntegrationLogData[] = [];
+  allIntegrationLogs: IntegrationLogData[] = []; // Store all integration logs for client-side operations
   logLevels: LogLevel[] = [];
   partners: Partner[] = [];
   loading = false;
@@ -474,6 +485,22 @@ export class LogsComponent implements OnInit {
   selectedLog: LogData | null = null;
   selectedIntegrationLog: IntegrationLogData | null = null;
   currentPartnerId: string | null = null;
+  
+  // Pagination properties for regular logs
+  currentPage = 1;
+  pageSize = 10;
+  totalItems = 0;
+  totalPages = 1;
+  sortColumn = '';
+  sortDirection: 'asc' | 'desc' = 'asc';
+  
+  // Pagination properties for integration logs
+  integrationCurrentPage = 1;
+  integrationPageSize = 10;
+  integrationTotalItems = 0;
+  integrationTotalPages = 1;
+  integrationSortColumn = '';
+  integrationSortDirection: 'asc' | 'desc' = 'asc';
 
   filters = {
     msisdn: '',
@@ -589,15 +616,20 @@ export class LogsComponent implements OnInit {
           return dateB.getTime() - dateA.getTime();
         });
         
-        // Add index numbers
-        this.logs = sortedLogs.map((log, index) => ({
+        // Store all logs and add index
+        this.allLogs = sortedLogs.map((log, index) => ({
           ...log,
           index: index + 1
         }));
         
-        this.filteredLogs = [...this.logs];
+        this.totalItems = this.allLogs.length;
+        this.totalPages = Math.ceil(this.totalItems / this.pageSize);
+        
+        // Apply pagination to display logs
+        this.updateDisplayedLogs();
+        
         this.loading = false;
-        console.log('📊 Logs loaded and sorted:', this.logs);
+        console.log('📊 Logs loaded and sorted:', this.allLogs);
       },
       error: (error) => {
         console.error('❌ Error loading logs:', error);
@@ -631,10 +663,17 @@ export class LogsComponent implements OnInit {
           return dateB.getTime() - dateA.getTime();
         });
         
-        this.integrationLogs = sortedLogs;
-        this.filteredIntegrationLogs = [...this.integrationLogs];
+        // Store all integration logs
+        this.allIntegrationLogs = sortedLogs;
+        
+        this.integrationTotalItems = this.allIntegrationLogs.length;
+        this.integrationTotalPages = Math.ceil(this.integrationTotalItems / this.integrationPageSize);
+        
+        // Apply pagination to display integration logs
+        this.updateDisplayedIntegrationLogs();
+        
         this.loading = false;
-        console.log('📊 Integration logs loaded:', this.integrationLogs);
+        console.log('📊 Integration logs loaded:', this.allIntegrationLogs);
       },
       error: (error) => {
         console.error('❌ Error loading integration logs:', error);
@@ -647,11 +686,11 @@ export class LogsComponent implements OnInit {
 
   getLogStatusClass(status: string): string {
     switch (status) {
-      case 'SUCCESS': return 'badge-success';
-      case 'FAILED': return 'badge-danger';
-      case 'PENDING': return 'badge-warning';
-      case 'PROCESSING': return 'badge-info';
-      default: return 'badge-secondary';
+      case 'SUCCESS': return 'bg-success';
+      case 'FAILED': return 'bg-danger';
+      case 'PENDING': return 'bg-warning';
+      case 'PROCESSING': return 'bg-info';
+      default: return 'bg-secondary';
     }
   }
 
@@ -677,19 +716,97 @@ export class LogsComponent implements OnInit {
 
 
   handleSort(event: { column: string; direction: 'asc' | 'desc' }) {
-    // TODO: Implement sorting
-    console.log('Sort:', event);
+    if (this.currentLogType.includes('Integration')) {
+      this.integrationSortColumn = event.column;
+      this.integrationSortDirection = event.direction;
+      this.integrationCurrentPage = 1; // Reset to first page when sorting
+      this.updateDisplayedIntegrationLogs();
+    } else {
+      this.sortColumn = event.column;
+      this.sortDirection = event.direction;
+      this.currentPage = 1; // Reset to first page when sorting
+      this.updateDisplayedLogs();
+    }
   }
 
-
   handlePageChange(page: number) {
-    // TODO: Implement pagination
-    console.log('Page:', page);
+    if (this.currentLogType.includes('Integration')) {
+      if (page >= 1 && page <= this.integrationTotalPages) {
+        this.integrationCurrentPage = page;
+        this.updateDisplayedIntegrationLogs();
+      }
+    } else {
+      if (page >= 1 && page <= this.totalPages) {
+        this.currentPage = page;
+        this.updateDisplayedLogs();
+      }
+    }
   }
 
   handlePageSizeChange(size: number) {
-    // TODO: Implement page size change
-    console.log('Page size:', size);
+    if (this.currentLogType.includes('Integration')) {
+      this.integrationPageSize = size;
+      this.integrationCurrentPage = 1; // Reset to first page when changing page size
+      this.integrationTotalPages = Math.ceil(this.integrationTotalItems / this.integrationPageSize);
+      this.updateDisplayedIntegrationLogs();
+    } else {
+      this.pageSize = size;
+      this.currentPage = 1; // Reset to first page when changing page size
+      this.totalPages = Math.ceil(this.totalItems / this.pageSize);
+      this.updateDisplayedLogs();
+    }
+  }
+
+  private updateDisplayedLogs(): void {
+    let sortedLogs = [...this.allLogs];
+    
+    // Apply sorting if specified
+    if (this.sortColumn) {
+      sortedLogs.sort((a, b) => {
+        const aValue = a[this.sortColumn as keyof LogData];
+        const bValue = b[this.sortColumn as keyof LogData];
+        
+        if (aValue === null || aValue === undefined) return 1;
+        if (bValue === null || bValue === undefined) return -1;
+        
+        let comparison = 0;
+        if (aValue < bValue) comparison = -1;
+        else if (aValue > bValue) comparison = 1;
+        
+        return this.sortDirection === 'asc' ? comparison : -comparison;
+      });
+    }
+    
+    // Apply pagination
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.filteredLogs = sortedLogs.slice(startIndex, endIndex);
+  }
+
+  private updateDisplayedIntegrationLogs(): void {
+    let sortedLogs = [...this.allIntegrationLogs];
+    
+    // Apply sorting if specified
+    if (this.integrationSortColumn) {
+      sortedLogs.sort((a, b) => {
+        const aValue = a[this.integrationSortColumn as keyof IntegrationLogData];
+        const bValue = b[this.integrationSortColumn as keyof IntegrationLogData];
+        
+        if (aValue === null || aValue === undefined) return 1;
+        if (bValue === null || bValue === undefined) return -1;
+        
+        let comparison = 0;
+        if (aValue < bValue) comparison = -1;
+        else if (aValue > bValue) comparison = 1;
+        
+        return this.integrationSortDirection === 'asc' ? comparison : -comparison;
+      });
+    }
+    
+    // Apply pagination
+    const startIndex = (this.integrationCurrentPage - 1) * this.integrationPageSize;
+    const endIndex = startIndex + this.integrationPageSize;
+    this.filteredIntegrationLogs = sortedLogs.slice(startIndex, endIndex);
   }
 
   viewLog(log: LogData) {
@@ -740,21 +857,21 @@ export class LogsComponent implements OnInit {
   // Integration log helper methods
   getDirectionClass(direction: string): string {
     switch (direction) {
-      case 'IN': return 'badge-info';
-      case 'OUT': return 'badge-warning';
-      case 'INTERNAL': return 'badge-secondary';
-      default: return 'badge-secondary';
+      case 'IN': return 'bg-info';
+      case 'OUT': return 'bg-warning';
+      case 'INTERNAL': return 'bg-secondary';
+      default: return 'bg-secondary';
     }
   }
 
   getIntegrationStatusClass(status: string): string {
     switch (status) {
-      case 'COMPLETED': return 'badge-success';
-      case 'TIMEOUT': return 'badge-warning';
-      case 'FAILED': return 'badge-danger';
-      case 'PENDING': return 'badge-info';
-      case 'PROCESSING': return 'badge-primary';
-      default: return 'badge-secondary';
+      case 'COMPLETED': return 'bg-success';
+      case 'TIMEOUT': return 'bg-warning';
+      case 'FAILED': return 'bg-danger';
+      case 'PENDING': return 'bg-info';
+      case 'PROCESSING': return 'bg-primary';
+      default: return 'bg-secondary';
     }
   }
 
