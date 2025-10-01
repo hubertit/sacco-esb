@@ -10,11 +10,13 @@ import { PermissionsComponent } from './features/permissions/permissions.compone
 import { LockComponent } from './features/auth/lock/lock.component';
 import { ApiTestComponent } from './components/api-test/api-test.component';
 import { AuthGuard } from './core/guards/auth.guard';
+import { GuestGuard } from './core/guards/guest.guard';
 
 export const routes: Routes = [
   {
     path: 'login',
-    component: LoginComponent
+    component: LoginComponent,
+    canActivate: [GuestGuard]
   },
   {
     path: 'lock',
