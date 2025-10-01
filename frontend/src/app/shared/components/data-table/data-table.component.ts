@@ -68,9 +68,9 @@ export interface TableColumn {
                   <ng-container *ngSwitchCase="'status'">
                     <span class="badge" 
                           [class.bg-success]="item[col.key] === 'ACTIVE' || item[col.key] === 'active' || item[col.key] === 'SUCCESS' || item[col.key] === 'success'"
-                          [class.bg-secondary]="item[col.key] === 'INACTIVE' || item[col.key] === 'inactive' || item[col.key] === 'FAILED' || item[col.key] === 'failed'"
+                          [class.bg-secondary]="item[col.key] === 'INACTIVE' || item[col.key] === 'inactive'"
                           [class.bg-warning]="item[col.key] === 'PENDING' || item[col.key] === 'pending' || item[col.key] === 'PROCESSING' || item[col.key] === 'processing'"
-                          [class.bg-danger]="item[col.key] === 'ERROR' || item[col.key] === 'error'">
+                          [class.bg-danger]="item[col.key] === 'ERROR' || item[col.key] === 'error' || item[col.key] === 'FAILED' || item[col.key] === 'failed' || item[col.key] === 'FAILURE' || item[col.key] === 'failure'">
                       {{ item[col.key] }}
                     </span>
                   </ng-container>

@@ -688,6 +688,7 @@ export class LogsComponent implements OnInit {
     switch (status) {
       case 'SUCCESS': return 'bg-success';
       case 'FAILED': return 'bg-danger';
+      case 'FAILURE': return 'bg-danger';
       case 'PENDING': return 'bg-warning';
       case 'PROCESSING': return 'bg-info';
       default: return 'bg-secondary';
@@ -869,6 +870,7 @@ export class LogsComponent implements OnInit {
       case 'COMPLETED': return 'bg-success';
       case 'TIMEOUT': return 'bg-warning';
       case 'FAILED': return 'bg-danger';
+      case 'FAILURE': return 'bg-danger';
       case 'PENDING': return 'bg-info';
       case 'PROCESSING': return 'bg-primary';
       default: return 'bg-secondary';

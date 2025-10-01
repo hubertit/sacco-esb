@@ -51,7 +51,7 @@ import { LogData, IntegrationLogData } from '../../../core/models/log-data.model
                 <div class="status-section">
                   <span class="badge status-badge" [class]="getStatusClass(log.logStatus)">
                     <app-lucide-icon name="check" size="14px" class="me-1" *ngIf="log.logStatus === 'SUCCESS'"></app-lucide-icon>
-                    <app-lucide-icon name="x" size="14px" class="me-1" *ngIf="log.logStatus === 'FAILED'"></app-lucide-icon>
+                    <app-lucide-icon name="x" size="14px" class="me-1" *ngIf="log.logStatus === 'FAILED' || log.logStatus === 'FAILURE'"></app-lucide-icon>
                     <app-lucide-icon name="pause" size="14px" class="me-1" *ngIf="log.logStatus === 'PENDING'"></app-lucide-icon>
                     <app-lucide-icon name="loader" size="14px" class="me-1" *ngIf="log.logStatus === 'PROCESSING'"></app-lucide-icon>
                     {{ log.logStatus }}
@@ -168,7 +168,7 @@ import { LogData, IntegrationLogData } from '../../../core/models/log-data.model
                 <div class="status-section">
                   <span class="badge status-badge" [class]="getIntegrationStatusClass(integrationLog.status)">
                     <app-lucide-icon name="check" size="14px" class="me-1" *ngIf="integrationLog.status === 'COMPLETED'"></app-lucide-icon>
-                    <app-lucide-icon name="x" size="14px" class="me-1" *ngIf="integrationLog.status === 'FAILED'"></app-lucide-icon>
+                    <app-lucide-icon name="x" size="14px" class="me-1" *ngIf="integrationLog.status === 'FAILED' || integrationLog.status === 'FAILURE'"></app-lucide-icon>
                     <app-lucide-icon name="pause" size="14px" class="me-1" *ngIf="integrationLog.status === 'PENDING'"></app-lucide-icon>
                     <app-lucide-icon name="loader" size="14px" class="me-1" *ngIf="integrationLog.status === 'PROCESSING'"></app-lucide-icon>
                     <app-lucide-icon name="clock" size="14px" class="me-1" *ngIf="integrationLog.status === 'TIMEOUT'"></app-lucide-icon>
@@ -513,6 +513,7 @@ export class LogViewModalComponent implements OnInit {
     switch (status) {
       case 'SUCCESS': return 'bg-success';
       case 'FAILED': return 'bg-danger';
+      case 'FAILURE': return 'bg-danger';
       case 'PENDING': return 'bg-warning';
       case 'PROCESSING': return 'bg-info';
       default: return 'bg-secondary';
@@ -560,6 +561,7 @@ export class LogViewModalComponent implements OnInit {
       case 'COMPLETED': return 'bg-success';
       case 'TIMEOUT': return 'bg-warning';
       case 'FAILED': return 'bg-danger';
+      case 'FAILURE': return 'bg-danger';
       case 'PENDING': return 'bg-info';
       case 'PROCESSING': return 'bg-primary';
       default: return 'bg-secondary';
