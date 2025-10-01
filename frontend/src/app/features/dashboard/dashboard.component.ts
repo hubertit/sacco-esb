@@ -257,7 +257,7 @@ export interface ChartOptions {
         <div class="col-md-4">
           <div class="card">
             <div class="card-header">
-              <h4 class="card-title">Response Time per Partner</h4>
+              <h4 class="card-title">Average Response Time per Partner</h4>
             </div>
             <div class="card-body">
               <div class="chart-container transaction-chart">
@@ -1113,28 +1113,39 @@ export class DashboardComponent implements OnInit {
   };
 
   responseTimeChartOptions: ChartOptions = {
-    series: [100],
+    series: [{
+      name: 'Response Time (ms)',
+      data: [0]
+    }],
     chart: {
-      type: 'donut',
+      type: 'bar',
       height: 280,
       width: '100%'
     },
-    labels: ['Loading...'],
+    xaxis: {
+      categories: ['Loading...']
+    },
     colors: ['#6c757d'],
-    legend: {
-      position: 'right'
-    },
-    plotOptions: {
-      pie: {
-        donut: {
-          size: '60%'
-        }
-      }
-    },
     dataLabels: {
       enabled: true,
       formatter: function (val: string) {
-        return parseFloat(val).toFixed(1) + "%";
+        return Math.round(parseFloat(val)) + 'ms';
+      }
+    },
+    plotOptions: {
+      bar: {
+        horizontal: true,
+        borderRadius: 4,
+        dataLabels: {
+          position: 'center'
+        }
+      }
+    },
+    tooltip: {
+      y: {
+        formatter: function (val: number) {
+          return Math.round(val) + 'ms';
+        }
       }
     }
   };
@@ -1241,35 +1252,36 @@ export class DashboardComponent implements OnInit {
       // If no partners, show default
       this.responseTimeChartOptions = {
         ...this.responseTimeChartOptions,
-        series: [100],
-        labels: ['No Data'],
+        series: [{
+          name: 'Response Time (ms)',
+          data: [0]
+        }],
+        xaxis: {
+          categories: ['No Data']
+        },
         colors: ['#6c757d']
       };
       return;
     }
     
-    // Calculate percentages for the donut chart
-    const total = partners.reduce((sum, partner) => sum + partner.responseTime, 0);
+    // Sort partners by response time (fastest to slowest)
+    const sortedPartners = [...partners].sort((a, b) => a.responseTime - b.responseTime);
     
-    if (total === 0) {
-      // If no response time data, show equal distribution
-      const equalPercent = 100 / partners.length;
-      this.responseTimeChartOptions = {
-        ...this.responseTimeChartOptions,
-        series: new Array(partners.length).fill(equalPercent),
-        labels: partners.map(p => p.name),
-        colors: partners.map(p => p.color)
-      };
-    } else {
-      const percentages = partners.map(partner => (partner.responseTime / total) * 100);
-      
-      this.responseTimeChartOptions = {
-        ...this.responseTimeChartOptions,
-        series: percentages,
-        labels: partners.map(p => p.name),
-        colors: partners.map(p => p.color)
-      };
-    }
+    this.responseTimeChartOptions = {
+      ...this.responseTimeChartOptions,
+      series: [{
+        name: 'Response Time (ms)',
+        data: sortedPartners.map(p => ({
+          x: p.name,
+          y: p.responseTime,
+          fillColor: p.color
+        }))
+      }],
+      xaxis: {
+        categories: sortedPartners.map(p => p.name)
+      },
+      colors: sortedPartners.map(p => p.color)
+    };
 
     console.log('📊 Response time chart updated:', this.responseTimeChartOptions);
   }
