@@ -266,6 +266,25 @@ export class DashboardService {
   }
 
   /**
+   * Get response time data per partner
+   */
+  getResponseTimePerPartner(startDate: Date, endDate: Date): Observable<{
+    mtn: number;
+    airtel: number;
+    internal: number;
+    other: number;
+  }> {
+    // For now, simulate response time data per partner
+    // In a real implementation, this would fetch integration logs and calculate actual response times per partner
+    return of({
+      mtn: Math.floor(Math.random() * 2000) + 500, // 500-2500ms
+      airtel: Math.floor(Math.random() * 2000) + 500, // 500-2500ms
+      internal: Math.floor(Math.random() * 1000) + 200, // 200-1200ms (usually faster)
+      other: Math.floor(Math.random() * 3000) + 1000 // 1000-4000ms
+    });
+  }
+
+  /**
    * Get transaction summary statistics (legacy method)
    */
   getTransactionSummary(): Observable<TransactionSummary> {

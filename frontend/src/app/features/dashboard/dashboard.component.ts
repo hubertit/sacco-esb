@@ -200,7 +200,7 @@ export interface ChartOptions {
       <!-- Charts Section -->
       <div class="row g-4">
         <!-- Transaction Type Distribution -->
-        <div class="col-md-6">
+        <div class="col-md-4">
           <div class="card">
             <div class="card-header">
               <h4 class="card-title">Transaction Types Distribution</h4>
@@ -227,7 +227,7 @@ export interface ChartOptions {
         </div>
 
         <!-- Transaction Status Distribution -->
-        <div class="col-md-6">
+        <div class="col-md-4">
           <div class="card">
             <div class="card-header">
               <h4 class="card-title">Transaction Status Distribution</h4>
@@ -247,6 +247,33 @@ export interface ChartOptions {
                           [colors]="transactionStatusChartOptions.colors!"
                           [legend]="transactionStatusChartOptions.legend!"
                           [dataLabels]="transactionStatusChartOptions.dataLabels!">
+                </apx-chart>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Response Time per Partner -->
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-header">
+              <h4 class="card-title">Response Time per Partner</h4>
+            </div>
+            <div class="card-body">
+              <div class="chart-container transaction-chart">
+                <div *ngIf="loading" class="text-center p-4">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                  <p class="mt-2">Loading chart data...</p>
+                </div>
+                <apx-chart *ngIf="!loading"
+                          [series]="responseTimeChartOptions.series"
+                          [chart]="responseTimeChartOptions.chart"
+                          [labels]="responseTimeChartOptions.labels!"
+                          [colors]="responseTimeChartOptions.colors!"
+                          [legend]="responseTimeChartOptions.legend!"
+                          [dataLabels]="responseTimeChartOptions.dataLabels!">
                 </apx-chart>
               </div>
             </div>
@@ -1084,6 +1111,33 @@ export class DashboardComponent implements OnInit {
       }
     }
   };
+
+  responseTimeChartOptions: ChartOptions = {
+    series: [0, 0, 0, 0],
+    chart: {
+      type: 'donut',
+      height: 280,
+      width: '100%'
+    },
+    labels: ['MTN', 'Airtel', 'Internal', 'Other'],
+    colors: ['#ffc700', '#ff0000', '#3498db', '#6c757d'],
+    legend: {
+      position: 'right'
+    },
+    plotOptions: {
+      pie: {
+        donut: {
+          size: '60%'
+        }
+      }
+    },
+    dataLabels: {
+      enabled: true,
+      formatter: function (val: string) {
+        return parseFloat(val).toFixed(1) + "%";
+      }
+    }
+  };
   loading: boolean = true;
 
   constructor(
@@ -1113,6 +1167,7 @@ export class DashboardComponent implements OnInit {
         console.log('📊 Integration metrics:', metrics.integrationMetrics);
         this.metrics = metrics;
         this.updateCharts(metrics);
+        this.loadResponseTimePerPartner();
         this.loading = false;
         console.log('📊 Charts updated, loading set to false');
       },
@@ -1155,6 +1210,54 @@ export class DashboardComponent implements OnInit {
         }
       }
     });
+  }
+
+  private loadResponseTimePerPartner() {
+    const today = new Date();
+    const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
+
+    this.dashboardService.getResponseTimePerPartner(startOfDay, endOfDay).subscribe({
+      next: (responseTimeData) => {
+        console.log('📊 Response time per partner data:', responseTimeData);
+        this.updateResponseTimeChart(responseTimeData);
+      },
+      error: (error) => {
+        console.error('❌ Error loading response time per partner:', error);
+        // Set default data on error
+        this.updateResponseTimeChart({
+          mtn: 0,
+          airtel: 0,
+          internal: 0,
+          other: 0
+        });
+      }
+    });
+  }
+
+  private updateResponseTimeChart(responseTimeData: { mtn: number; airtel: number; internal: number; other: number }) {
+    // Calculate percentages for the donut chart
+    const total = responseTimeData.mtn + responseTimeData.airtel + responseTimeData.internal + responseTimeData.other;
+    
+    if (total === 0) {
+      // If no data, show equal distribution
+      this.responseTimeChartOptions = {
+        ...this.responseTimeChartOptions,
+        series: [25, 25, 25, 25]
+      };
+    } else {
+      const mtnPercent = (responseTimeData.mtn / total) * 100;
+      const airtelPercent = (responseTimeData.airtel / total) * 100;
+      const internalPercent = (responseTimeData.internal / total) * 100;
+      const otherPercent = (responseTimeData.other / total) * 100;
+
+      this.responseTimeChartOptions = {
+        ...this.responseTimeChartOptions,
+        series: [mtnPercent, airtelPercent, internalPercent, otherPercent]
+      };
+    }
+
+    console.log('📊 Response time chart updated:', this.responseTimeChartOptions);
   }
 
   private updateCharts(metrics: DashboardMetrics) {
