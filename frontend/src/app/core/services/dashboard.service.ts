@@ -276,26 +276,17 @@ export class DashboardService {
       map(partners => {
         console.log('📊 Partners for response time chart:', partners);
         
+        // Define color palette
+        const colorPalette = ['#ffe8ec', '#e7edff', '#eee5ff', '#d7eee1'];
+        
         // Generate response time data for each partner
         const partnerData = partners.map((partner, index) => {
-          // Simulate different response times based on partner type
-          let responseTime: number;
-          let color: string;
+          // Simulate different response times (random for now)
+          const responseTime = Math.floor(Math.random() * 3000) + 500; // 500-3500ms
           
-          // Assign colors and response times based on partner characteristics
-          if (partner.partnerCode.toLowerCase().includes('mtn')) {
-            responseTime = Math.floor(Math.random() * 2000) + 500; // 500-2500ms
-            color = '#ffc700'; // Yellow
-          } else if (partner.partnerCode.toLowerCase().includes('airtel')) {
-            responseTime = Math.floor(Math.random() * 2000) + 500; // 500-2500ms
-            color = '#ff0000'; // Red
-          } else if (partner.partnerCode.toLowerCase().includes('internal')) {
-            responseTime = Math.floor(Math.random() * 1000) + 200; // 200-1200ms (usually faster)
-            color = '#3498db'; // Blue
-          } else {
-            responseTime = Math.floor(Math.random() * 3000) + 1000; // 1000-4000ms
-            color = '#6c757d'; // Gray
-          }
+          // Assign colors based on order (1st, 2nd, 3rd, 4th, then cycle)
+          const colorIndex = index % colorPalette.length;
+          const color = colorPalette[colorIndex];
           
           return {
             name: partner.partnerName,

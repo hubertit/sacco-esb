@@ -1125,7 +1125,7 @@ export class DashboardComponent implements OnInit {
     xaxis: {
       categories: ['Loading...']
     },
-    colors: ['#6c757d'],
+    colors: ['#ffe8ec'],
     dataLabels: {
       enabled: true,
       formatter: function (val: string) {
@@ -1238,7 +1238,7 @@ export class DashboardComponent implements OnInit {
         // Set default data on error
         this.updateResponseTimeChart({
           partners: [
-            { name: 'No Data', responseTime: 0, color: '#6c757d' }
+            { name: 'No Data', responseTime: 0, color: '#ffe8ec' }
           ]
         });
       }
@@ -1259,7 +1259,7 @@ export class DashboardComponent implements OnInit {
         xaxis: {
           categories: ['No Data']
         },
-        colors: ['#6c757d']
+        colors: ['#ffe8ec']
       };
       return;
     }
