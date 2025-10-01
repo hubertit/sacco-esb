@@ -763,16 +763,32 @@ export interface ChartOptions {
     
     /* Fixed height for Transaction Types and Status Distribution charts */
     .transaction-chart {
-      min-height: 330px !important;
-      height: 330px !important; /* Fixed height + 30px */
-      max-height: 330px !important; /* Prevent growing */
+      min-height: 280px !important;
+      height: 280px !important; /* Reduced height */
+      max-height: 280px !important; /* Prevent growing */
       overflow: hidden; /* Hide any overflow */
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     
     .transaction-chart apx-chart {
-      min-height: 330px !important;
-      height: 330px !important; /* Fixed height + 30px */
-      max-height: 330px !important; /* Prevent growing */
+      min-height: 280px !important;
+      height: 280px !important; /* Reduced height */
+      max-height: 280px !important; /* Prevent growing */
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+    
+    /* Ensure donut charts fit properly within containers */
+    .transaction-chart ::ng-deep .apexcharts-canvas {
+      max-width: 100% !important;
+      max-height: 100% !important;
+    }
+    
+    .transaction-chart ::ng-deep .apexcharts-svg {
+      max-width: 100% !important;
+      max-height: 100% !important;
     }
     
     /* Integration metrics chart container */
@@ -864,16 +880,32 @@ export interface ChartOptions {
       
       /* Fixed height for Transaction charts on mobile */
       .transaction-chart {
-        min-height: 330px !important;
-        height: 330px !important; /* Fixed height + 30px */
-        max-height: 330px !important; /* Prevent growing */
+        min-height: 280px !important;
+        height: 280px !important; /* Reduced height */
+        max-height: 280px !important; /* Prevent growing */
         overflow: hidden; /* Hide any overflow */
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
       
       .transaction-chart apx-chart {
-        min-height: 330px !important;
-        height: 330px !important; /* Fixed height + 30px */
-        max-height: 330px !important; /* Prevent growing */
+        min-height: 280px !important;
+        height: 280px !important; /* Reduced height */
+        max-height: 280px !important; /* Prevent growing */
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+      
+      /* Ensure donut charts fit properly on mobile */
+      .transaction-chart ::ng-deep .apexcharts-canvas {
+        max-width: 100% !important;
+        max-height: 100% !important;
+      }
+      
+      .transaction-chart ::ng-deep .apexcharts-svg {
+        max-width: 100% !important;
+        max-height: 100% !important;
       }
       
       .integration-stats-grid + .chart-container {
@@ -892,24 +924,25 @@ export class DashboardComponent implements OnInit {
     series: [0, 0, 0],
     chart: {
       type: 'donut',
-      height: 330
+      height: 280,
+      width: '100%'
     },
     labels: ['PUSH', 'PULL', 'INTERNAL'],
     colors: ['#1b2e4b', '#515365', '#6c757d'],
     legend: {
       position: 'right'
     },
+    plotOptions: {
+      pie: {
+        donut: {
+          size: '60%'
+        }
+      }
+    },
     dataLabels: {
       enabled: true,
       formatter: function (val: string) {
         return parseFloat(val).toFixed(2) + "%";
-      }
-    },
-    plotOptions: {
-      pie: {
-        donut: {
-          size: '75%'
-        }
       }
     }
   };
@@ -918,24 +951,25 @@ export class DashboardComponent implements OnInit {
     series: [0, 0, 0],
     chart: {
       type: 'donut',
-      height: 330
+      height: 280,
+      width: '100%'
     },
     labels: ['Successful', 'Failed', 'Pending'],
     colors: ['#1b2e4b', '#e74c3c', '#515365'],
     legend: {
       position: 'right'
     },
+    plotOptions: {
+      pie: {
+        donut: {
+          size: '60%'
+        }
+      }
+    },
     dataLabels: {
       enabled: true,
       formatter: function (val: string) {
         return parseFloat(val).toFixed(2) + "%";
-      }
-    },
-    plotOptions: {
-      pie: {
-        donut: {
-          size: '75%'
-        }
       }
     }
   };

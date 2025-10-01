@@ -246,6 +246,28 @@ import { CommonModule } from '@angular/common';
         <line x1="12" x2="12" y1="8" y2="12"/>
         <line x1="12" x2="12.01" y1="16" y2="16"/>
       </svg>
+      <svg *ngSwitchCase="'alert-octagon'" [attr.width]="size" [attr.height]="size" [attr.stroke]="color" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="7.86,2 16.14,2 22,7.86 22,16.14 16.14,22 7.86,22 2,16.14 2,7.86"/>
+        <line x1="12" x2="12" y1="8" y2="12"/>
+        <line x1="12" x2="12.01" y1="16" y2="16"/>
+      </svg>
+      <svg *ngSwitchCase="'wifi-off'" [attr.width]="size" [attr.height]="size" [attr.stroke]="color" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="2" x2="22" y1="2" y2="22"/>
+        <path d="M8.5 16.429a5 5 0 0 1 7 0"/>
+        <path d="M5 12.859a10 10 0 0 1 5.17-2.69"/>
+        <path d="M19 12.859a10 10 0 0 0-2.805-4.57"/>
+        <path d="M2 8.82a15 15 0 0 1 4.177-2.643"/>
+        <path d="M22 8.82a15 15 0 0 0-11.29-3.764"/>
+      </svg>
+      <svg *ngSwitchCase="'health-offline'" [attr.width]="size" [attr.height]="size" [attr.stroke]="color" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="4.93" x2="19.07" y1="4.93" y2="19.07"/>
+      </svg>
+      <svg *ngSwitchCase="'health-unknown'" [attr.width]="size" [attr.height]="size" [attr.stroke]="color" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+        <line x1="12" x2="12.01" y1="17" y2="17"/>
+      </svg>
       <!-- Fallback for unknown icons -->
       <div *ngSwitchDefault style="width: 16px; height: 16px; background: #ccc; border-radius: 2px; display: inline-block;" [title]="'Icon: ' + name"></div>
     </ng-container>
