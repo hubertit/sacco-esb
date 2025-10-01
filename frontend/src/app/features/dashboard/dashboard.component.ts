@@ -1113,14 +1113,14 @@ export class DashboardComponent implements OnInit {
   };
 
   responseTimeChartOptions: ChartOptions = {
-    series: [0, 0, 0, 0],
+    series: [100],
     chart: {
       type: 'donut',
       height: 280,
       width: '100%'
     },
-    labels: ['MTN', 'Airtel', 'Internal', 'Other'],
-    colors: ['#ffc700', '#ff0000', '#3498db', '#6c757d'],
+    labels: ['Loading...'],
+    colors: ['#6c757d'],
     legend: {
       position: 'right'
     },
@@ -1226,34 +1226,48 @@ export class DashboardComponent implements OnInit {
         console.error('❌ Error loading response time per partner:', error);
         // Set default data on error
         this.updateResponseTimeChart({
-          mtn: 0,
-          airtel: 0,
-          internal: 0,
-          other: 0
+          partners: [
+            { name: 'No Data', responseTime: 0, color: '#6c757d' }
+          ]
         });
       }
     });
   }
 
-  private updateResponseTimeChart(responseTimeData: { mtn: number; airtel: number; internal: number; other: number }) {
+  private updateResponseTimeChart(responseTimeData: { partners: { name: string; responseTime: number; color: string }[] }) {
+    const partners = responseTimeData.partners;
+    
+    if (partners.length === 0) {
+      // If no partners, show default
+      this.responseTimeChartOptions = {
+        ...this.responseTimeChartOptions,
+        series: [100],
+        labels: ['No Data'],
+        colors: ['#6c757d']
+      };
+      return;
+    }
+    
     // Calculate percentages for the donut chart
-    const total = responseTimeData.mtn + responseTimeData.airtel + responseTimeData.internal + responseTimeData.other;
+    const total = partners.reduce((sum, partner) => sum + partner.responseTime, 0);
     
     if (total === 0) {
-      // If no data, show equal distribution
+      // If no response time data, show equal distribution
+      const equalPercent = 100 / partners.length;
       this.responseTimeChartOptions = {
         ...this.responseTimeChartOptions,
-        series: [25, 25, 25, 25]
+        series: new Array(partners.length).fill(equalPercent),
+        labels: partners.map(p => p.name),
+        colors: partners.map(p => p.color)
       };
     } else {
-      const mtnPercent = (responseTimeData.mtn / total) * 100;
-      const airtelPercent = (responseTimeData.airtel / total) * 100;
-      const internalPercent = (responseTimeData.internal / total) * 100;
-      const otherPercent = (responseTimeData.other / total) * 100;
-
+      const percentages = partners.map(partner => (partner.responseTime / total) * 100);
+      
       this.responseTimeChartOptions = {
         ...this.responseTimeChartOptions,
-        series: [mtnPercent, airtelPercent, internalPercent, otherPercent]
+        series: percentages,
+        labels: partners.map(p => p.name),
+        colors: partners.map(p => p.color)
       };
     }
 

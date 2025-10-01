@@ -269,19 +269,53 @@ export class DashboardService {
    * Get response time data per partner
    */
   getResponseTimePerPartner(startDate: Date, endDate: Date): Observable<{
-    mtn: number;
-    airtel: number;
-    internal: number;
-    other: number;
+    partners: { name: string; responseTime: number; color: string }[];
   }> {
-    // For now, simulate response time data per partner
-    // In a real implementation, this would fetch integration logs and calculate actual response times per partner
-    return of({
-      mtn: Math.floor(Math.random() * 2000) + 500, // 500-2500ms
-      airtel: Math.floor(Math.random() * 2000) + 500, // 500-2500ms
-      internal: Math.floor(Math.random() * 1000) + 200, // 200-1200ms (usually faster)
-      other: Math.floor(Math.random() * 3000) + 1000 // 1000-4000ms
-    });
+    // Get all partners first, then simulate response time data for each
+    return this.partnerService.getPartners().pipe(
+      map(partners => {
+        console.log('📊 Partners for response time chart:', partners);
+        
+        // Generate response time data for each partner
+        const partnerData = partners.map((partner, index) => {
+          // Simulate different response times based on partner type
+          let responseTime: number;
+          let color: string;
+          
+          // Assign colors and response times based on partner characteristics
+          if (partner.partnerCode.toLowerCase().includes('mtn')) {
+            responseTime = Math.floor(Math.random() * 2000) + 500; // 500-2500ms
+            color = '#ffc700'; // Yellow
+          } else if (partner.partnerCode.toLowerCase().includes('airtel')) {
+            responseTime = Math.floor(Math.random() * 2000) + 500; // 500-2500ms
+            color = '#ff0000'; // Red
+          } else if (partner.partnerCode.toLowerCase().includes('internal')) {
+            responseTime = Math.floor(Math.random() * 1000) + 200; // 200-1200ms (usually faster)
+            color = '#3498db'; // Blue
+          } else {
+            responseTime = Math.floor(Math.random() * 3000) + 1000; // 1000-4000ms
+            color = '#6c757d'; // Gray
+          }
+          
+          return {
+            name: partner.partnerName,
+            responseTime: responseTime,
+            color: color
+          };
+        });
+        
+        return { partners: partnerData };
+      }),
+      catchError((error) => {
+        console.error('❌ Error fetching partners for response time chart:', error);
+        // Return default data on error
+        return of({
+          partners: [
+            { name: 'No Partners', responseTime: 0, color: '#6c757d' }
+          ]
+        });
+      })
+    );
   }
 
   /**
