@@ -5,6 +5,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { NotificationService, NotificationItem } from '../../core/services/notification.service';
 import { LucideIconComponent } from '../../shared/components/lucide-icon/lucide-icon.component';
 import { NotificationViewModalComponent } from '../../shared/components/notification-view-modal/notification-view-modal.component';
+import { NameUtil } from '../../core/utils/name.util';
 
 @Component({
   selector: 'app-navbar',
@@ -145,7 +146,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
     private notificationService: NotificationService
   ) {
     const user = this.authService.getCurrentUser();
-    this.userName = user?.name || 'User';
+    // Convert username to proper name format
+    this.userName = user?.name ? NameUtil.convertUsernameToName(user.name) : 'User';
     this.userRole = user?.role || 'Guest';
   }
 

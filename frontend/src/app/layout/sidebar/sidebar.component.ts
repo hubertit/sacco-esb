@@ -6,6 +6,7 @@ import { NavigationService, MenuItem } from '../../core/services/navigation.serv
 import { LucideIconComponent } from '../../shared/components/lucide-icon/lucide-icon.component';
 import { InactivityService } from '../../core/services/inactivity.service';
 import { AuthService } from '../../core/services/auth.service';
+import { NameUtil } from '../../core/utils/name.util';
 
 @Component({
   selector: 'app-sidebar',
@@ -116,7 +117,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
   ) {
     const user = this.authService.getCurrentUser();
     if (user) {
-      this.userName = user.name;
+      // Convert username to proper name format
+      this.userName = NameUtil.convertUsernameToName(user.name);
       this.userRole = user.role;
       if (user.avatar) {
         this.userAvatar = user.avatar;
