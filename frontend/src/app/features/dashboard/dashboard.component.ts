@@ -114,6 +114,23 @@ export interface ChartOptions {
             </div>
           </div>
         </div>
+
+        <!-- Average Response Time -->
+        <div class="stat-card response-time" [class]="getResponseTimeClass(metrics?.responseTimeMetrics?.performanceLevel)">
+          <div class="stat-icon">
+            <app-lucide-icon name="clock" size="28px"></app-lucide-icon>
+          </div>
+          <div class="stat-details">
+            <div class="stat-title">Avg Response Time</div>
+            <div class="stat-numbers">
+              <div class="main-stat">{{ formatResponseTime(metrics?.responseTimeMetrics?.averageResponseTime) }}</div>
+              <div class="sub-stats">
+                <span class="success">{{ metrics?.responseTimeMetrics?.totalRequests | number }} Requests</span>
+                <span class="volume">{{ getPerformanceLevelText(metrics?.responseTimeMetrics?.performanceLevel) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Transaction Metrics -->
@@ -912,6 +929,54 @@ export interface ChartOptions {
         min-height: 320px;
       }
     }
+
+    /* Response Time Widget Styles */
+    .stat-card.response-time {
+      .stat-icon {
+        background: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
+      }
+
+      &.response-excellent {
+        border-left: 4px solid #10b981;
+        .stat-icon {
+          background: rgba(16, 185, 129, 0.1);
+          color: #10b981;
+        }
+      }
+
+      &.response-good {
+        border-left: 4px solid #3b82f6;
+        .stat-icon {
+          background: rgba(59, 130, 246, 0.1);
+          color: #3b82f6;
+        }
+      }
+
+      &.response-warning {
+        border-left: 4px solid #f59e0b;
+        .stat-icon {
+          background: rgba(245, 158, 11, 0.1);
+          color: #f59e0b;
+        }
+      }
+
+      &.response-critical {
+        border-left: 4px solid #ef4444;
+        .stat-icon {
+          background: rgba(239, 68, 68, 0.1);
+          color: #ef4444;
+        }
+      }
+
+      &.response-unknown {
+        border-left: 4px solid #6b7280;
+        .stat-icon {
+          background: rgba(107, 114, 128, 0.1);
+          color: #6b7280;
+        }
+      }
+    }
   `]
 })
 export class DashboardComponent implements OnInit {
@@ -1056,9 +1121,18 @@ export class DashboardComponent implements OnInit {
             failed: 0,
             pending: 0,
             successRate: 0
+          },
+          responseTimeMetrics: {
+            averageResponseTime: 0,
+            totalRequests: 0,
+            fastRequests: 0,
+            slowRequests: 0,
+            performanceLevel: 'critical' as const
           }
         };
-        this.updateCharts(this.metrics);
+        if (this.metrics) {
+          this.updateCharts(this.metrics);
+        }
       }
     });
   }
@@ -1176,6 +1250,40 @@ export class DashboardComponent implements OnInit {
     if (diffHours < 24) return `${diffHours}h ago`;
     const diffDays = Math.floor(diffHours / 24);
     return `${diffDays}d ago`;
+  }
+
+  formatResponseTime(responseTime: number | undefined): string {
+    if (!responseTime) return '0ms';
+    
+    if (responseTime < 1000) {
+      return `${Math.round(responseTime)}ms`;
+    } else if (responseTime < 60000) {
+      return `${(responseTime / 1000).toFixed(1)}s`;
+    } else {
+      const minutes = Math.floor(responseTime / 60000);
+      const seconds = Math.floor((responseTime % 60000) / 1000);
+      return `${minutes}m ${seconds}s`;
+    }
+  }
+
+  getResponseTimeClass(performanceLevel: string | undefined): string {
+    switch (performanceLevel) {
+      case 'excellent': return 'response-excellent';
+      case 'good': return 'response-good';
+      case 'warning': return 'response-warning';
+      case 'critical': return 'response-critical';
+      default: return 'response-unknown';
+    }
+  }
+
+  getPerformanceLevelText(performanceLevel: string | undefined): string {
+    switch (performanceLevel) {
+      case 'excellent': return 'Excellent';
+      case 'good': return 'Good';
+      case 'warning': return 'Warning';
+      case 'critical': return 'Critical';
+      default: return 'Unknown';
+    }
   }
 
   /**

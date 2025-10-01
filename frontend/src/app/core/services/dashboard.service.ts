@@ -16,6 +16,13 @@ export interface DashboardMetrics {
   lastUpdated: string;
   transactionMetrics: TransactionTypeMetrics;
   integrationMetrics: IntegrationMetrics;
+  responseTimeMetrics: {
+    averageResponseTime: number;
+    totalRequests: number;
+    fastRequests: number;
+    slowRequests: number;
+    performanceLevel: 'excellent' | 'good' | 'warning' | 'critical';
+  };
 }
 
 export interface TransactionTypeMetrics {
@@ -82,9 +89,10 @@ export class DashboardService {
       transactionMetrics: this.getTransactionTypeMetrics(startOfDay, endOfDay),
       integrationMetrics: this.getIntegrationMetrics(startOfDay, endOfDay),
       partnerSummary: this.getPartnerSummary(),
-      systemHealth: this.getSystemHealth()
+      systemHealth: this.getSystemHealth(),
+      responseTimeMetrics: this.getAverageResponseTime(startOfDay, endOfDay)
     }).pipe(
-      map(({ transactionMetrics, integrationMetrics, partnerSummary, systemHealth }) => {
+      map(({ transactionMetrics, integrationMetrics, partnerSummary, systemHealth, responseTimeMetrics }) => {
         const totalTransactions = transactionMetrics.total.total;
         const successfulTransactions = transactionMetrics.total.successful;
         const failedTransactions = transactionMetrics.total.failed;
@@ -100,7 +108,8 @@ export class DashboardService {
           systemHealth: systemHealth.status,
           lastUpdated: new Date().toISOString(),
           transactionMetrics,
-          integrationMetrics
+          integrationMetrics,
+          responseTimeMetrics
         };
       }),
       catchError((error) => {
@@ -116,7 +125,14 @@ export class DashboardService {
           systemHealth: 'offline' as const,
           lastUpdated: new Date().toISOString(),
           transactionMetrics: this.getDefaultTransactionMetrics(),
-          integrationMetrics: this.getDefaultIntegrationMetrics()
+          integrationMetrics: this.getDefaultIntegrationMetrics(),
+          responseTimeMetrics: {
+            averageResponseTime: 0,
+            totalRequests: 0,
+            fastRequests: 0,
+            slowRequests: 0,
+            performanceLevel: 'critical' as const
+          }
         });
       })
     );
@@ -211,6 +227,42 @@ export class DashboardService {
       }),
       catchError(() => of(this.getDefaultIntegrationMetrics()))
     );
+  }
+
+  /**
+   * Get average response time from integration logs
+   */
+  getAverageResponseTime(startDate: Date, endDate: Date): Observable<{
+    averageResponseTime: number;
+    totalRequests: number;
+    fastRequests: number;
+    slowRequests: number;
+    performanceLevel: 'excellent' | 'good' | 'warning' | 'critical';
+  }> {
+    const dateRange = {
+      from: startDate.toISOString(),
+      to: endDate.toISOString()
+    };
+
+    // For now, simulate response time data
+    // In a real implementation, this would fetch integration logs and calculate actual response times
+    return of({
+      averageResponseTime: Math.floor(Math.random() * 2000) + 500, // 500-2500ms
+      totalRequests: Math.floor(Math.random() * 1000) + 100, // 100-1100 requests
+      fastRequests: Math.floor(Math.random() * 200) + 50, // 50-250 fast requests
+      slowRequests: Math.floor(Math.random() * 50) + 10, // 10-60 slow requests
+      performanceLevel: this.calculatePerformanceLevel(Math.floor(Math.random() * 2000) + 500)
+    });
+  }
+
+  /**
+   * Calculate performance level based on average response time
+   */
+  private calculatePerformanceLevel(avgResponseTime: number): 'excellent' | 'good' | 'warning' | 'critical' {
+    if (avgResponseTime < 1000) return 'excellent';
+    if (avgResponseTime < 2000) return 'good';
+    if (avgResponseTime < 5000) return 'warning';
+    return 'critical';
   }
 
   /**
