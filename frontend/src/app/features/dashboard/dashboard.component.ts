@@ -365,20 +365,39 @@ export interface ChartOptions {
 
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 1400px) {
+      .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
     .stat-card {
       background: white;
       border-radius: 4px;
-      padding: 24px;
+      padding: 20px;
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 12px;
       border: 1px solid #e5e7eb;
       box-shadow: 0 1px 2px rgba(0,0,0,0.02);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
+      min-height: 120px;
 
       &:hover {
         transform: translateY(-1px);
@@ -386,13 +405,14 @@ export interface ChartOptions {
       }
 
       .stat-icon {
-        width: 48px;
-        height: 48px;
+        width: 40px;
+        height: 40px;
         border-radius: 4px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 20px;
+        font-size: 18px;
+        flex-shrink: 0;
 
         ::ng-deep svg {
           stroke-width: 2;
@@ -426,14 +446,14 @@ export interface ChartOptions {
 
         .stat-title {
           color: #64748b;
-          font-size: 0.875rem;
+          font-size: 0.8rem;
           font-weight: 500;
-          margin-bottom: 8px;
+          margin-bottom: 6px;
         }
 
         .stat-numbers {
           .main-stat {
-            font-size: 1.75rem;
+            font-size: 1.5rem;
             font-weight: 600;
             margin-bottom: 4px;
           }
@@ -445,8 +465,8 @@ export interface ChartOptions {
 
           .sub-stats {
             display: flex;
-            gap: 12px;
-            font-size: 0.75rem;
+            gap: 8px;
+            font-size: 0.7rem;
 
             span {
               padding: 2px 8px;
