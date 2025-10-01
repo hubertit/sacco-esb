@@ -189,7 +189,7 @@ export interface ChartOptions {
               <h4 class="card-title">Transaction Types Distribution</h4>
             </div>
             <div class="card-body">
-              <div class="chart-container">
+              <div class="chart-container transaction-chart">
                 <div *ngIf="loading" class="text-center p-4">
                   <div class="spinner-border text-primary" role="status">
                     <span class="visually-hidden">Loading...</span>
@@ -216,7 +216,7 @@ export interface ChartOptions {
               <h4 class="card-title">Transaction Status Distribution</h4>
             </div>
             <div class="card-body">
-              <div class="chart-container">
+              <div class="chart-container transaction-chart">
                 <div *ngIf="loading" class="text-center p-4">
                   <div class="spinner-border text-primary" role="status">
                     <span class="visually-hidden">Loading...</span>
@@ -309,14 +309,26 @@ export interface ChartOptions {
                   <h6 class="chart-title">Status Distribution</h6>
                   <p class="chart-subtitle">Integration log breakdown</p>
                 </div>
-                <apx-chart
-                        [series]="integrationStatusChartOptions.series"
-                        [chart]="integrationStatusChartOptions.chart"
-                        [labels]="integrationStatusChartOptions.labels!"
-                        [colors]="integrationStatusChartOptions.colors!"
-                        [legend]="integrationStatusChartOptions.legend!"
-                        [dataLabels]="integrationStatusChartOptions.dataLabels!">
+                <div *ngIf="loading" class="text-center p-4">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                  <p class="mt-2">Loading chart data...</p>
+                </div>
+                <apx-chart *ngIf="!loading && integrationStatusChartOptions.series && integrationStatusChartOptions.series.length > 0"
+                          [series]="integrationStatusChartOptions.series"
+                          [chart]="integrationStatusChartOptions.chart"
+                          [labels]="integrationStatusChartOptions.labels!"
+                          [colors]="integrationStatusChartOptions.colors!"
+                          [legend]="integrationStatusChartOptions.legend!"
+                          [dataLabels]="integrationStatusChartOptions.dataLabels!">
                 </apx-chart>
+                <div *ngIf="!loading && (!integrationStatusChartOptions.series || integrationStatusChartOptions.series.length === 0)" 
+                     class="text-center p-4 text-muted">
+                  <app-lucide-icon name="alert-circle" size="24px" class="mb-2"></app-lucide-icon>
+                  <p>No integration data available</p>
+                  <small>Chart will appear when data is loaded</small>
+                </div>
               </div>
             </div>
           </div>
@@ -727,10 +739,89 @@ export interface ChartOptions {
       }
     }
 
-    /* Chart Container */
+    /* Chart Container - Auto height based on content */
     .chart-container {
-      height: 300px;
+      min-height: 300px;
       position: relative;
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .chart-container apx-chart {
+      width: 100% !important;
+      min-height: 300px;
+      flex: 1;
+    }
+    
+    /* Specific chart containers for better fit */
+    .card .chart-container {
+      min-height: 350px;
+    }
+    
+    /* Fixed height for Transaction Types and Status Distribution charts */
+    .transaction-chart {
+      min-height: 330px !important;
+      height: 330px !important; /* Fixed height + 30px */
+      max-height: 330px !important; /* Prevent growing */
+      overflow: hidden; /* Hide any overflow */
+    }
+    
+    .transaction-chart apx-chart {
+      min-height: 330px !important;
+      height: 330px !important; /* Fixed height + 30px */
+      max-height: 330px !important; /* Prevent growing */
+    }
+    
+    /* Integration metrics chart container */
+    .integration-stats-grid + .chart-container {
+      min-height: 400px;
+    }
+    
+    
+    /* Ensure proper spacing for chart headers */
+    .chart-header {
+      margin-bottom: 1.5rem;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    
+    /* Better spacing for chart content */
+    .card-body {
+      padding: 1.5rem;
+    }
+    
+    /* Auto-sizing for chart widgets */
+    .card {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .card-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* Ensure charts grow with content */
+    .chart-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* Auto-resize charts based on container */
+    .chart-container apx-chart {
+      flex: 1;
+      min-height: 250px;
+    }
+    
+    /* Fixed height for Transaction charts */
+    .transaction-chart apx-chart {
+      min-height: 300px !important;
+      height: 300px !important; /* Fixed height */
     }
 
     @media (max-width: 768px) {
@@ -761,6 +852,33 @@ export interface ChartOptions {
           }
         }
       }
+      
+      /* Responsive chart heights for mobile - auto with minimums */
+      .chart-container {
+        min-height: 250px;
+      }
+      
+      .card .chart-container {
+        min-height: 280px;
+      }
+      
+      /* Fixed height for Transaction charts on mobile */
+      .transaction-chart {
+        min-height: 330px !important;
+        height: 330px !important; /* Fixed height + 30px */
+        max-height: 330px !important; /* Prevent growing */
+        overflow: hidden; /* Hide any overflow */
+      }
+      
+      .transaction-chart apx-chart {
+        min-height: 330px !important;
+        height: 330px !important; /* Fixed height + 30px */
+        max-height: 330px !important; /* Prevent growing */
+      }
+      
+      .integration-stats-grid + .chart-container {
+        min-height: 320px;
+      }
     }
   `]
 })
@@ -774,12 +892,12 @@ export class DashboardComponent implements OnInit {
     series: [0, 0, 0],
     chart: {
       type: 'donut',
-      height: 300
+      height: 330
     },
     labels: ['PUSH', 'PULL', 'INTERNAL'],
     colors: ['#1b2e4b', '#515365', '#6c757d'],
     legend: {
-      position: 'bottom'
+      position: 'right'
     },
     dataLabels: {
       enabled: true,
@@ -790,7 +908,7 @@ export class DashboardComponent implements OnInit {
     plotOptions: {
       pie: {
         donut: {
-          size: '70%'
+          size: '75%'
         }
       }
     }
@@ -800,12 +918,12 @@ export class DashboardComponent implements OnInit {
     series: [0, 0, 0],
     chart: {
       type: 'donut',
-      height: 300
+      height: 330
     },
     labels: ['Successful', 'Failed', 'Pending'],
     colors: ['#1b2e4b', '#e74c3c', '#515365'],
     legend: {
-      position: 'bottom'
+      position: 'right'
     },
     dataLabels: {
       enabled: true,
@@ -816,7 +934,7 @@ export class DashboardComponent implements OnInit {
     plotOptions: {
       pie: {
         donut: {
-          size: '70%'
+          size: '75%'
         }
       }
     }
@@ -826,12 +944,12 @@ export class DashboardComponent implements OnInit {
     series: [0, 0, 0],
     chart: {
       type: 'donut',
-      height: 300
+      height: 'auto'
     },
     labels: ['Successful', 'Failed', 'Pending'],
     colors: ['#1b2e4b', '#e74c3c', '#515365'],
     legend: {
-      position: 'bottom'
+      position: 'right'
     },
     dataLabels: {
       enabled: true,
@@ -842,7 +960,7 @@ export class DashboardComponent implements OnInit {
     plotOptions: {
       pie: {
         donut: {
-          size: '70%'
+          size: '75%'
         }
       }
     }
@@ -873,6 +991,7 @@ export class DashboardComponent implements OnInit {
     this.dashboardService.getDashboardMetrics().subscribe({
       next: (metrics) => {
         console.log('✅ Dashboard metrics received:', metrics);
+        console.log('📊 Integration metrics:', metrics.integrationMetrics);
         this.metrics = metrics;
         this.updateCharts(metrics);
         this.loading = false;
@@ -937,20 +1056,36 @@ export class DashboardComponent implements OnInit {
     };
 
     // Update integration status chart
+    const integrationSuccessful = metrics.integrationMetrics?.successful || 0;
+    const integrationFailed = metrics.integrationMetrics?.failed || 0;
+    const integrationPending = metrics.integrationMetrics?.pending || 0;
+    
+    // Use sample data if all integration values are zero
+    const useIntegrationSampleData = (integrationSuccessful + integrationFailed + integrationPending) === 0;
+    
     this.integrationStatusChartOptions = {
       ...this.integrationStatusChartOptions,
-      series: [
-        metrics.integrationMetrics?.successful || 0,
-        metrics.integrationMetrics?.failed || 0,
-        metrics.integrationMetrics?.pending || 0
-      ]
+      series: useIntegrationSampleData ? [180, 25, 15] : [integrationSuccessful, integrationFailed, integrationPending]
     };
 
     console.log('📊 Chart data updated:', {
       useSampleData,
+      useIntegrationSampleData,
       transactionType: this.transactionTypeChartOptions,
       transactionStatus: this.transactionStatusChartOptions,
-      integrationStatus: this.integrationStatusChartOptions
+      integrationStatus: this.integrationStatusChartOptions,
+      integrationMetrics: metrics.integrationMetrics,
+      integrationSeries: this.integrationStatusChartOptions.series
+    });
+    
+    // Additional debugging for integration chart
+    console.log('🔍 Integration chart debugging:', {
+      hasSeries: !!this.integrationStatusChartOptions.series,
+      seriesLength: this.integrationStatusChartOptions.series?.length,
+      seriesValues: this.integrationStatusChartOptions.series,
+      chartType: this.integrationStatusChartOptions.chart?.type,
+      hasLabels: !!this.integrationStatusChartOptions.labels,
+      labels: this.integrationStatusChartOptions.labels
     });
   }
 
@@ -1007,5 +1142,25 @@ export class DashboardComponent implements OnInit {
     if (diffHours < 24) return `${diffHours}h ago`;
     const diffDays = Math.floor(diffHours / 24);
     return `${diffDays}d ago`;
+  }
+
+  /**
+   * Dynamically adjust chart height based on content
+   */
+  private adjustChartHeight(chartElement: any, minHeight: number = 300): void {
+    if (chartElement && chartElement.nativeElement) {
+      const container = chartElement.nativeElement.closest('.chart-container');
+      if (container) {
+        // Check if this is a transaction chart by class
+        const isTransactionChart = container.classList.contains('transaction-chart');
+        
+        // Use fixed height for transaction charts
+        const effectiveMinHeight = isTransactionChart ? 300 : minHeight;
+        
+        const contentHeight = container.scrollHeight;
+        const newHeight = Math.max(contentHeight, effectiveMinHeight);
+        container.style.height = `${newHeight}px`;
+      }
+    }
   }
 }

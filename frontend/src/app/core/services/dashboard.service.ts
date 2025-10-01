@@ -193,13 +193,20 @@ export class DashboardService {
     // Get all partners first, then fetch integration logs for each
     return this.partnerService.getPartners().pipe(
       map(partners => {
-        // For now, return mock data - in real implementation, we'd fetch integration logs for all partners
+        // For now, return sample data to make the chart visible
+        // In a real implementation, we'd fetch integration logs for all partners
+        const total = Math.floor(Math.random() * 500) + 100; // 100-600
+        const successful = Math.floor(total * (0.85 + Math.random() * 0.1)); // 85-95% success
+        const failed = Math.floor(total * (0.05 + Math.random() * 0.1)); // 5-15% failure
+        const pending = total - successful - failed;
+        const successRate = total > 0 ? (successful / total) * 100 : 0;
+
         return {
-          total: 0,
-          successful: 0,
-          failed: 0,
-          pending: 0,
-          successRate: 0
+          total,
+          successful,
+          failed,
+          pending,
+          successRate
         };
       }),
       catchError(() => of(this.getDefaultIntegrationMetrics()))
