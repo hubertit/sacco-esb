@@ -282,7 +282,9 @@ import { LogData, IntegrationLogData } from '../../../core/models/log-data.model
                   <app-lucide-icon name="code" size="14px" class="me-2"></app-lucide-icon>
                   Payload
                 </h6>
-                <div class="payload-container">
+                <div class="payload-container clickable-json" 
+                     (click)="copyToClipboard(formatPayload(integrationLog.payloadJson))"
+                     title="Click to copy JSON to clipboard">
                   <pre class="payload-content">{{ formatPayload(integrationLog.payloadJson) }}</pre>
                 </div>
               </div>
@@ -293,7 +295,9 @@ import { LogData, IntegrationLogData } from '../../../core/models/log-data.model
                   <app-lucide-icon name="info" size="14px" class="me-2"></app-lucide-icon>
                   Extra Information
                 </h6>
-                <div class="payload-container">
+                <div class="payload-container clickable-json" 
+                     (click)="copyToClipboard(formatPayload(integrationLog.extra))"
+                     title="Click to copy JSON to clipboard">
                   <pre class="payload-content">{{ formatPayload(integrationLog.extra) }}</pre>
                 </div>
               </div>
@@ -538,6 +542,43 @@ import { LogData, IntegrationLogData } from '../../../core/models/log-data.model
       color: #6b7280;
       border: 1px solid #d1d5db;
     }
+
+    .clickable-json {
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .clickable-json:hover {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .clickable-json:active {
+      transform: translateY(0);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .clickable-json::after {
+      content: "Click to copy";
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      pointer-events: none;
+    }
+
+    .clickable-json:hover::after {
+      opacity: 1;
+    }
   `]
 })
 export class LogViewModalComponent implements OnInit {
@@ -694,5 +735,64 @@ export class LogViewModalComponent implements OnInit {
     } catch (error) {
       return 'response-time-invalid';
     }
+  }
+
+  copyToClipboard(text: string): void {
+    navigator.clipboard.writeText(text).then(() => {
+      // Show success feedback
+      this.showCopySuccess();
+    }).catch(err => {
+      console.error('Failed to copy text: ', err);
+    });
+  }
+
+  showCopySuccess(): void {
+    // Create a temporary success indicator
+    const successElement = document.createElement('div');
+    successElement.className = 'copy-success-toast';
+    successElement.textContent = '✓ Copied to clipboard';
+    successElement.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #10b981;
+      color: white;
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      z-index: 9999;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      animation: slideInRight 0.3s ease;
+    `;
+    
+    // Add animation keyframes
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideInRight {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      @keyframes slideOutRight {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+    
+    document.body.appendChild(successElement);
+    
+    // Remove after 2 seconds
+    setTimeout(() => {
+      successElement.style.animation = 'slideOutRight 0.3s ease';
+      setTimeout(() => {
+        if (successElement.parentNode) {
+          successElement.parentNode.removeChild(successElement);
+        }
+        if (style.parentNode) {
+          style.parentNode.removeChild(style);
+        }
+      }, 300);
+    }, 2000);
   }
 }

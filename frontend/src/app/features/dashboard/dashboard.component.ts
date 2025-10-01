@@ -257,7 +257,7 @@ export interface ChartOptions {
         <div class="col-md-4">
           <div class="card">
             <div class="card-header">
-              <h4 class="card-title">Average Response Time per Partner</h4>
+              <h4 class="card-title">Average Response Time per App</h4>
             </div>
             <div class="card-body">
               <div class="chart-container transaction-chart">
@@ -1037,7 +1037,10 @@ export class DashboardComponent implements OnInit {
     chart: {
       type: 'donut',
       height: 280,
-      width: '100%'
+      width: '100%',
+      toolbar: {
+        show: false
+      }
     },
     labels: ['PUSH', 'PULL', 'INTERNAL'],
     colors: ['#1b2e4b', '#515365', '#6c757d'],
@@ -1064,7 +1067,10 @@ export class DashboardComponent implements OnInit {
     chart: {
       type: 'donut',
       height: 280,
-      width: '100%'
+      width: '100%',
+      toolbar: {
+        show: false
+      }
     },
     labels: ['Successful', 'Failed', 'Pending'],
     colors: ['#1b2e4b', '#e74c3c', '#515365'],
@@ -1090,7 +1096,10 @@ export class DashboardComponent implements OnInit {
     series: [0, 0, 0],
     chart: {
       type: 'donut',
-      height: 'auto'
+      height: 'auto',
+      toolbar: {
+        show: false
+      }
     },
     labels: ['Successful', 'Failed', 'Pending'],
     colors: ['#1b2e4b', '#e74c3c', '#515365'],
@@ -1120,7 +1129,10 @@ export class DashboardComponent implements OnInit {
     chart: {
       type: 'bar',
       height: 280,
-      width: '100%'
+      width: '100%',
+      toolbar: {
+        show: false
+      }
     },
     xaxis: {
       categories: ['Loading...']
@@ -1130,6 +1142,11 @@ export class DashboardComponent implements OnInit {
       enabled: true,
       formatter: function (val: string) {
         return Math.round(parseFloat(val)) + 'ms';
+      },
+      style: {
+        colors: ['#333333'],
+        fontSize: '12px',
+        fontWeight: '600'
       }
     },
     plotOptions: {
