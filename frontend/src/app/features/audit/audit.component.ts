@@ -63,6 +63,7 @@ import { AuditService, AuditTrail, AuditAction } from '../../core/services/audit
                 (onSort)="handleSort($event)"
                 (onPageChange)="handlePageChange($event)"
                 (onPageSizeChange)="handlePageSizeChange($event)"
+                (onRowClick)="viewAuditTrail($event)"
               ></app-data-table>
             </div>
           </div>
@@ -234,6 +235,11 @@ export class AuditComponent implements OnInit {
   exportAudit() {
     // TODO: Implement audit export
     console.log('Export audit trail');
+  }
+
+  viewAuditTrail(auditTrail: AuditTrail) {
+    // TODO: Implement view audit trail modal
+    console.log('Viewing audit trail:', auditTrail);
   }
 
   handleSort(event: { column: string; direction: 'asc' | 'desc' }) {

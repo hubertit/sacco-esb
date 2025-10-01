@@ -192,7 +192,8 @@ import { LogViewModalComponent } from '../../shared/components/log-view-modal/lo
             [totalItems]="totalItems"
             (onSort)="handleSort($event)"
             (onPageChange)="handlePageChange($event)"
-            (onPageSizeChange)="handlePageSizeChange($event)">
+            (onPageSizeChange)="handlePageSizeChange($event)"
+            (onRowClick)="viewLog($event)">
             
             <ng-template #rowActions let-log>
               <div class="d-flex justify-content-end">
@@ -221,7 +222,8 @@ import { LogViewModalComponent } from '../../shared/components/log-view-modal/lo
             [totalItems]="integrationTotalItems"
             (onSort)="handleSort($event)"
             (onPageChange)="handlePageChange($event)"
-            (onPageSizeChange)="handlePageSizeChange($event)">
+            (onPageSizeChange)="handlePageSizeChange($event)"
+            (onRowClick)="viewIntegrationLog($event)">
             
             <ng-template #rowActions let-log>
               <div class="d-flex justify-content-end">

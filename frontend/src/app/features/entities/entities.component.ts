@@ -79,6 +79,7 @@ declare var bootstrap: any;
                 (onSort)="handleSort($event)"
                 (onPageChange)="handlePageChange($event)"
                 (onPageSizeChange)="handlePageSizeChange($event)"
+                (onRowClick)="viewEntity($event)"
               >
                 <ng-template #rowActions let-entity>
                   <div class="d-flex justify-content-end">

@@ -54,7 +54,7 @@ export interface TableColumn {
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let item of data; let i = index">
+            <tr *ngFor="let item of data; let i = index" (click)="onRowClick.emit(item)" style="cursor: pointer;">
               <td *ngFor="let col of columns">
                 <ng-container [ngSwitch]="col.type">
                   <ng-container *ngSwitchCase="'date'">
@@ -154,6 +154,7 @@ export class DataTableComponent implements AfterContentInit {
   @Output() onSearch = new EventEmitter<string>();
   @Output() onPageChange = new EventEmitter<number>();
   @Output() onPageSizeChange = new EventEmitter<number>();
+  @Output() onRowClick = new EventEmitter<any>();
 
   searchTerm = '';
   sortColumn = '';

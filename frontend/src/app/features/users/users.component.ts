@@ -76,7 +76,8 @@ declare var bootstrap: any;
                 [totalItems]="totalItems"
                 (onSort)="handleSort($event)"
                 (onPageChange)="handlePageChange($event)"
-                (onPageSizeChange)="handlePageSizeChange($event)">
+                (onPageSizeChange)="handlePageSizeChange($event)"
+                (onRowClick)="viewUser($event)">
                 
                 <ng-template #rowActions let-user>
                   <div class="d-flex justify-content-end">

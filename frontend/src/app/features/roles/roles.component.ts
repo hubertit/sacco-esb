@@ -53,6 +53,7 @@ import { Role } from '../../core/models/role.models';
                 (onSort)="handleSort($event)"
                 (onPageChange)="handlePageChange($event)"
                 (onPageSizeChange)="handlePageSizeChange($event)"
+                (onRowClick)="viewRole($event)"
               ></app-data-table>
             </div>
           </div>
@@ -189,6 +190,11 @@ export class RolesComponent implements OnInit {
   openAddRoleModal(type: 'System' | 'Custom') {
     // TODO: Implement add role modal
     console.log('Open add role modal for type:', type);
+  }
+
+  viewRole(role: Role) {
+    // TODO: Implement view role modal
+    console.log('Viewing role:', role);
   }
 
   handleSort(event: { column: string; direction: 'asc' | 'desc' }) {
