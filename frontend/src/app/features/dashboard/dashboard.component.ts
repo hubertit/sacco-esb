@@ -541,43 +541,43 @@ export interface ChartOptions {
 
     /* Health Status Colors */
     .health-operational {
-      border-left: 4px solid #1b2e4b;
-      background: #f8f9fa;
+      border-left: 4px solid #10b981;
+      background: rgba(16, 185, 129, 0.08);
     }
 
     .health-degraded {
-      border-left: 4px solid #515365;
-      background: #f8f9fa;
+      border-left: 4px solid #f59e0b;
+      background: rgba(245, 158, 11, 0.08);
     }
 
     .health-critical {
-      border-left: 4px solid #e74c3c;
-      background: #f8f9fa;
+      border-left: 4px solid #ef4444;
+      background: rgba(239, 68, 68, 0.08);
     }
 
     .health-offline {
       border-left: 4px solid #6b7280;
-      background: #f8f9fa;
+      background: rgba(107, 114, 128, 0.08);
     }
 
     .health-unknown {
       border-left: 4px solid #6b7280;
-      background: #f8f9fa;
+      background: rgba(107, 114, 128, 0.08);
     }
 
     /* Dynamic Health Status Icon Styling */
     .health-operational .stat-icon {
-      background: #1b2e4b !important;
+      background: #10b981 !important;
       color: white !important;
     }
 
     .health-degraded .stat-icon {
-      background: #515365 !important;
+      background: #f59e0b !important;
       color: white !important;
     }
 
     .health-critical .stat-icon {
-      background: #e74c3c !important;
+      background: #ef4444 !important;
       color: white !important;
     }
 

@@ -82,16 +82,19 @@ export class DashboardService {
    * Get comprehensive dashboard metrics
    */
   getDashboardMetrics(): Observable<DashboardMetrics> {
-    const today = new Date();
-    const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
+    // Use last 7 days for better data availability
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 7); // Last 7 days
+
+    console.log('📊 Loading dashboard metrics from:', startDate.toISOString(), 'to:', endDate.toISOString());
 
     return forkJoin({
-      transactionMetrics: this.getTransactionTypeMetrics(startOfDay, endOfDay),
-      integrationMetrics: this.getIntegrationMetrics(startOfDay, endOfDay),
+      transactionMetrics: this.getTransactionTypeMetrics(startDate, endDate),
+      integrationMetrics: this.getIntegrationMetrics(startDate, endDate),
       partnerSummary: this.getPartnerSummary(),
       systemHealth: this.getSystemHealth(),
-      responseTimeMetrics: this.getAverageResponseTime(startOfDay, endOfDay)
+      responseTimeMetrics: this.getAverageResponseTime(startDate, endDate)
     }).pipe(
       map(({ transactionMetrics, integrationMetrics, partnerSummary, systemHealth, responseTimeMetrics }) => {
         const totalTransactions = transactionMetrics.total.total;
@@ -240,20 +243,118 @@ export class DashboardService {
     slowRequests: number;
     performanceLevel: 'excellent' | 'good' | 'warning' | 'critical';
   }> {
-    const dateRange = {
+    console.log('📊 Calculating real average response time from integration logs...');
+    
+    // Get all partners first, then fetch integration logs for each
+    return this.partnerService.getPartners().pipe(
+      switchMap(partners => {
+        if (partners.length === 0) {
+          return of({
+            averageResponseTime: 0,
+            totalRequests: 0,
+            fastRequests: 0,
+            slowRequests: 0,
+            performanceLevel: 'critical' as const
+          });
+        }
+        
+        // Fetch integration logs for all partners
+        const partnerLogObservables = partners.map(partner => 
+          this.getPartnerLogsForAverage(partner, startDate, endDate)
+        );
+        
+        return forkJoin(partnerLogObservables).pipe(
+          map(allPartnerLogs => {
+            // Flatten all logs from all partners
+            const allLogs = allPartnerLogs.flat();
+            console.log(`📊 Total integration logs found: ${allLogs.length}`);
+            
+            if (allLogs.length === 0) {
+              return {
+                averageResponseTime: 0,
+                totalRequests: 0,
+                fastRequests: 0,
+                slowRequests: 0,
+                performanceLevel: 'critical' as const
+              };
+            }
+            
+            // Calculate response times from receivedAt to processedAt
+            const responseTimes = allLogs
+              .filter(log => log.receivedAt && log.processedAt)
+              .map(log => {
+                const received = new Date(log.receivedAt).getTime();
+                const processed = new Date(log.processedAt!).getTime();
+                return processed - received; // Response time in milliseconds
+              })
+              .filter(time => time > 0 && time < 300000); // Filter out invalid times (0-5 minutes)
+            
+            if (responseTimes.length === 0) {
+              console.log('⚠️ No valid response times found');
+              return {
+                averageResponseTime: 0,
+                totalRequests: allLogs.length,
+                fastRequests: 0,
+                slowRequests: 0,
+                performanceLevel: 'critical' as const
+              };
+            }
+            
+            // Calculate statistics
+            const averageResponseTime = responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length;
+            const fastRequests = responseTimes.filter(time => time < 1000).length; // < 1 second
+            const slowRequests = responseTimes.filter(time => time > 5000).length; // > 5 seconds
+            const performanceLevel = this.calculatePerformanceLevel(averageResponseTime);
+            
+            console.log(`📊 Average response time: ${Math.round(averageResponseTime)}ms`);
+            console.log(`📊 Fast requests (<1s): ${fastRequests}`);
+            console.log(`📊 Slow requests (>5s): ${slowRequests}`);
+            console.log(`📊 Performance level: ${performanceLevel}`);
+            
+            return {
+              averageResponseTime: Math.round(averageResponseTime),
+              totalRequests: responseTimes.length,
+              fastRequests: fastRequests,
+              slowRequests: slowRequests,
+              performanceLevel: performanceLevel
+            };
+          })
+        );
+      }),
+      catchError((error) => {
+        console.error('❌ Error calculating average response time:', error);
+        return of({
+          averageResponseTime: 0,
+          totalRequests: 0,
+          fastRequests: 0,
+          slowRequests: 0,
+          performanceLevel: 'critical' as const
+        });
+      })
+    );
+  }
+
+  /**
+   * Get integration logs for a specific partner for average calculation
+   */
+  private getPartnerLogsForAverage(partner: Partner, startDate: Date, endDate: Date): Observable<any[]> {
+    const filters = {
+      page: 0,
+      size: 100, // Get more logs for better average calculation
       from: startDate.toISOString(),
       to: endDate.toISOString()
     };
 
-    // For now, simulate response time data
-    // In a real implementation, this would fetch integration logs and calculate actual response times
-    return of({
-      averageResponseTime: Math.floor(Math.random() * 2000) + 500, // 500-2500ms
-      totalRequests: Math.floor(Math.random() * 1000) + 100, // 100-1100 requests
-      fastRequests: Math.floor(Math.random() * 200) + 50, // 50-250 fast requests
-      slowRequests: Math.floor(Math.random() * 50) + 10, // 10-60 slow requests
-      performanceLevel: this.calculatePerformanceLevel(Math.floor(Math.random() * 2000) + 500)
-    });
+    return this.logService.getIntegrationLogs(partner.id, filters).pipe(
+      map((response) => {
+        console.log(`📊 Found ${response.content.length} logs for ${partner.partnerName}`);
+        return response.content;
+      }),
+      catchError((error) => {
+        console.error(`❌ Error fetching logs for ${partner.partnerName}:`, error);
+        return of([]);
+      })
+    );
   }
 
   /**

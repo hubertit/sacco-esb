@@ -99,6 +99,13 @@ export class EntityService {
   }
 
   /**
+   * Create new entity (alias for addEntity)
+   */
+  createEntity(entityData: Partial<Entity>): Observable<Entity> {
+    return this.addEntity(entityData);
+  }
+
+  /**
    * Update entity
    */
   updateEntity(id: string, entityData: Partial<Entity>): Observable<Entity> {

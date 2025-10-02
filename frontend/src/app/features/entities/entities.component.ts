@@ -9,13 +9,15 @@ import { TableColumn } from '../../shared/components/data-table/data-table.compo
 
 import { EntityService, Entity } from '../../core/services/entity.service';
 import { EntityViewModalComponent } from '../../shared/components/entity-view-modal/entity-view-modal.component';
+import { EntityFormModalComponent, EntityFormData } from '../../shared/components/entity-form-modal/entity-form-modal.component';
+import { CreateEntityModalComponent, CreateEntityData } from '../../shared/components/create-entity-modal/create-entity-modal.component';
 
 declare var bootstrap: any;
 
 @Component({
   selector: 'app-entities',
   standalone: true,
-  imports: [CommonModule, RouterModule, HttpClientModule, LucideIconComponent, DataTableComponent, EntityViewModalComponent],
+  imports: [CommonModule, RouterModule, HttpClientModule, LucideIconComponent, DataTableComponent, EntityViewModalComponent, EntityFormModalComponent, CreateEntityModalComponent],
   template: `
     <div class="dashboard-container">
           <div class="card">
@@ -79,15 +81,27 @@ declare var bootstrap: any;
                 (onSort)="handleSort($event)"
                 (onPageChange)="handlePageChange($event)"
                 (onPageSizeChange)="handlePageSizeChange($event)"
-                (onRowClick)="viewEntity($event)"
+                (onRowClick)="editEntity($event)"
               >
                 <ng-template #rowActions let-entity>
-                  <div class="d-flex justify-content-end">
+                  <div class="d-flex justify-content-end gap-2">
                     <button class="btn btn-sm btn-outline-primary view-btn-icon" 
                             type="button" 
                             title="View Entity Details"
                             (click)="viewEntity(entity)">
                       <app-lucide-icon name="eye" size="16px"></app-lucide-icon>
+                    </button>
+                    <button class="btn btn-sm btn-outline-warning edit-btn-icon" 
+                            type="button" 
+                            title="Edit Entity"
+                            (click)="editEntity(entity)">
+                      <app-lucide-icon name="edit" size="16px"></app-lucide-icon>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger delete-btn-icon" 
+                            type="button" 
+                            title="Delete Entity"
+                            (click)="deleteEntity(entity)">
+                      <app-lucide-icon name="trash-2" size="16px"></app-lucide-icon>
                     </button>
                   </div>
                 </ng-template>
@@ -114,6 +128,26 @@ declare var bootstrap: any;
             [hasError]="false"
             (close)="closeEntityModal()">
           </app-entity-view-modal>
+
+          <!-- Entity Form Modal -->
+          <app-entity-form-modal
+            [isVisible]="showFormModal"
+            [isLoading]="isFormLoading"
+            [hasError]="!!formError"
+            [entityData]="formEntityData"
+            [isEditMode]="isEditMode"
+            (close)="closeFormModal()"
+            (save)="saveEntity($event)">
+          </app-entity-form-modal>
+
+          <!-- Create Entity Modal -->
+          <app-create-entity-modal
+            [isVisible]="showCreateModal"
+            [isLoading]="isCreateLoading"
+            [hasError]="!!createError"
+            (close)="closeCreateModal()"
+            (create)="createEntity($event)">
+          </app-create-entity-modal>
     </div>
   `,
   styles: [`
@@ -161,7 +195,7 @@ declare var bootstrap: any;
       }
     }
 
-    .view-btn-icon {
+    .view-btn-icon, .edit-btn-icon, .delete-btn-icon {
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -174,19 +208,10 @@ declare var bootstrap: any;
       padding: 0 !important;
       margin: 0;
       border-radius: 50% !important;
-      border: 1px solid #3b82f6;
       background-color: transparent;
-      color: #3b82f6;
       transition: all 0.2s ease-in-out;
       box-sizing: border-box;
       
-      &:hover {
-        background-color: #1b2e4b;
-        border-color: #1b2e4b;
-        color: white;
-        transform: scale(1.05);
-      }
-
       &:focus {
         outline: none;
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
@@ -194,6 +219,42 @@ declare var bootstrap: any;
 
       &:active {
         transform: scale(0.95);
+      }
+    }
+
+    .view-btn-icon {
+      border: 1px solid #3b82f6;
+      color: #3b82f6;
+      
+      &:hover {
+        background-color: #1b2e4b;
+        border-color: #1b2e4b;
+        color: white;
+        transform: scale(1.05);
+      }
+    }
+
+    .edit-btn-icon {
+      border: 1px solid #f59e0b;
+      color: #f59e0b;
+      
+      &:hover {
+        background-color: #f59e0b;
+        border-color: #f59e0b;
+        color: white;
+        transform: scale(1.05);
+      }
+    }
+
+    .delete-btn-icon {
+      border: 1px solid #ef4444;
+      color: #ef4444;
+      
+      &:hover {
+        background-color: #ef4444;
+        border-color: #ef4444;
+        color: white;
+        transform: scale(1.05);
       }
     }
   `]
@@ -216,6 +277,18 @@ export class EntitiesComponent implements OnInit, OnDestroy, AfterViewInit {
   // Modal state
   showEntityModal = false;
   selectedEntity: Entity | null = null;
+  
+  // Form modal state
+  showFormModal = false;
+  isFormLoading = false;
+  formError: string | null = null;
+  formEntityData: EntityFormData | null = null;
+  isEditMode = false;
+  
+  // Create modal state
+  showCreateModal = false;
+  isCreateLoading = false;
+  createError: string | null = null;
 
   columns: TableColumn[] = [
     { key: 'index', title: '#', type: 'text', sortable: false },
@@ -318,8 +391,10 @@ export class EntitiesComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   openAddEntityModal(type: 'Financial' | 'Payment') {
-    // TODO: Implement add entity modal
-    console.log('Open add entity modal for type:', type);
+    console.log('🚀 Opening create entity modal for type:', type);
+    this.createError = null;
+    this.showCreateModal = true;
+    console.log('🚀 showCreateModal set to:', this.showCreateModal);
   }
 
   handleSort(event: { column: string; direction: 'asc' | 'desc' }) {
@@ -344,8 +419,19 @@ export class EntitiesComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   editEntity(entity: Entity) {
-    // TODO: Implement edit entity
-    console.log('Edit entity:', entity);
+    this.isEditMode = true;
+    this.formEntityData = {
+      id: entity.id,
+      version: entity.version,
+      entityState: entity.entityState,
+      code: entity.code,
+      legalCode: entity.legalCode,
+      entityId: entity.entityId,
+      entityName: entity.entityName,
+      district: entity.district
+    };
+    this.formError = null;
+    this.showFormModal = true;
   }
 
   deleteEntity(entity: Entity) {
@@ -373,5 +459,74 @@ export class EntitiesComponent implements OnInit, OnDestroy, AfterViewInit {
   closeEntityModal() {
     this.showEntityModal = false;
     this.selectedEntity = null;
+  }
+
+  // Form modal methods
+  closeFormModal() {
+    this.showFormModal = false;
+    this.formEntityData = null;
+    this.formError = null;
+    this.isFormLoading = false;
+  }
+
+  saveEntity(formData: EntityFormData) {
+    this.isFormLoading = true;
+    this.formError = null;
+
+    const entityOperation = this.isEditMode 
+      ? this.entityService.updateEntity(formData.id!, formData)
+      : this.entityService.createEntity(formData);
+
+    entityOperation
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => {
+          this.isFormLoading = false;
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: (response) => {
+          console.log('✅ Entity saved successfully:', response);
+          this.closeFormModal();
+          this.loadEntities(); // Reload the list
+        },
+        error: (error) => {
+          console.error('❌ Error saving entity:', error);
+          this.formError = error.error?.message || 'Failed to save entity. Please try again.';
+        }
+      });
+  }
+
+  // Create modal methods
+  closeCreateModal() {
+    this.showCreateModal = false;
+    this.createError = null;
+    this.isCreateLoading = false;
+  }
+
+  createEntity(formData: CreateEntityData) {
+    this.isCreateLoading = true;
+    this.createError = null;
+
+    this.entityService.createEntity(formData)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => {
+          this.isCreateLoading = false;
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: (response) => {
+          console.log('✅ Entity created successfully:', response);
+          this.closeCreateModal();
+          this.loadEntities(); // Reload the list
+        },
+        error: (error) => {
+          console.error('❌ Error creating entity:', error);
+          this.createError = error.error?.message || 'Failed to create entity. Please try again.';
+        }
+      });
   }
 }
