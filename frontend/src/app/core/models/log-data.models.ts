@@ -74,6 +74,7 @@ export interface IntegrationLogFilterRequest {
   size?: number;
   from?: string;
   to?: string;
+  search?: string;
 }
 
 export interface IntegrationLogApiResponse {

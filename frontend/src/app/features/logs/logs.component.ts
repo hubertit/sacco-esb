@@ -107,12 +107,29 @@ import { LogViewModalComponent } from '../../shared/components/log-view-modal/lo
 
           <!-- Integration Logs Filter Form -->
           <form *ngIf="currentLogType.includes('Integration')" (ngSubmit)="applyIntegrationFilters()" class="row g-3">
-            <!-- Date Range Filters -->
+            <!-- First Row: 4 inputs -->
+            <!-- Search Input -->
+            <div class="col-md-3">
+              <label for="integrationSearch" class="form-label">
+                <app-lucide-icon name="search" size="16px" class="me-1"></app-lucide-icon>
+                Search
+              </label>
+              <input 
+                type="text" 
+                id="integrationSearch" 
+                class="form-control" 
+                [(ngModel)]="integrationFilters.search" 
+                name="integrationSearch" 
+                placeholder="Search logs...">
+            </div>
+
+            <!-- From Date Filter -->
             <div class="col-md-3">
               <label for="integrationFromDate" class="form-label">From Date</label>
               <input type="datetime-local" id="integrationFromDate" class="form-control" [(ngModel)]="integrationFilters.from" name="integrationFromDate">
             </div>
 
+            <!-- To Date Filter -->
             <div class="col-md-3">
               <label for="integrationToDate" class="form-label">To Date</label>
               <input type="datetime-local" id="integrationToDate" class="form-control" [(ngModel)]="integrationFilters.to" name="integrationToDate">
@@ -130,8 +147,7 @@ import { LogViewModalComponent } from '../../shared/components/log-view-modal/lo
             </div>
 
             <!-- Action Buttons -->
-            <div class="col-md-3">
-              <label class="form-label">&nbsp;</label>
+            <div class="col-12">
               <div class="d-flex justify-content-end gap-2">
                 <button type="button" class="btn btn-outline-secondary" (click)="clearIntegrationFilters()">
                   <app-lucide-icon name="x" size="14px" class="me-1"></app-lucide-icon>
@@ -520,7 +536,8 @@ export class LogsComponent implements OnInit {
     page: 0,
     size: 10,
     from: undefined,
-    to: undefined
+    to: undefined,
+    search: ''
   };
 
   constructor(
@@ -919,7 +936,8 @@ export class LogsComponent implements OnInit {
       page: 0,
       size: 10,
       from: undefined,
-      to: undefined
+      to: undefined,
+      search: ''
     };
     console.log('🧹 Cleared integration filters');
     this.loadIntegrationLogs();

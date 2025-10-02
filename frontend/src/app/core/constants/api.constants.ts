@@ -33,7 +33,8 @@ export const API_ENDPOINTS = {
   },
   INTEGRATION_LOGS: {
     BASE: '/api/general-logs',
-    PARTNER_LOGS: '/api/general-logs/partner'
+    PARTNER_LOGS: '/api/general-logs/partner',
+    SEARCH: '/api/general-logs/search'
   },
   ENTITIES: {
     BASE: '/ent',

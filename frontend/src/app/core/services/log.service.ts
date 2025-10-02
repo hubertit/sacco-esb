@@ -219,7 +219,6 @@ export class LogService {
    */
   getIntegrationLogs(partnerId: string, filters: IntegrationLogFilterRequest = {}): Observable<IntegrationLogApiResponse> {
     console.log('🎯 LogService: Fetching integration logs for partner:', partnerId);
-    console.log('🔗 API Endpoint:', `${API_ENDPOINTS.INTEGRATION_LOGS.PARTNER_LOGS}/${partnerId}`);
     console.log('📋 Filters:', filters);
 
     const params = new URLSearchParams();
@@ -228,7 +227,18 @@ export class LogService {
     if (filters.from) params.append('from', filters.from);
     if (filters.to) params.append('to', filters.to);
 
-    const endpoint = `${API_ENDPOINTS.INTEGRATION_LOGS.PARTNER_LOGS}/${partnerId}`;
+    // Use search endpoint if search query is provided
+    let endpoint: string;
+    if (filters.search && filters.search.trim()) {
+      console.log('🔍 Using search endpoint with query:', filters.search);
+      endpoint = `${API_ENDPOINTS.INTEGRATION_LOGS.SEARCH}/${partnerId}`;
+      params.append('query', filters.search.trim());
+    } else {
+      console.log('📋 Using regular logs endpoint');
+      endpoint = `${API_ENDPOINTS.INTEGRATION_LOGS.PARTNER_LOGS}/${partnerId}`;
+    }
+
+    console.log('🔗 API Endpoint:', endpoint);
 
     return this.apiService.get<IntegrationLogApiResponse>(endpoint, new HttpParams({ fromString: params.toString() }))
       .pipe(
