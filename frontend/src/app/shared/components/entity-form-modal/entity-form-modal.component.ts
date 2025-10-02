@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter, OnInit, OnChanges } from '@angu
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideIconComponent } from '../lucide-icon/lucide-icon.component';
+import { ContractModalComponent, ContractData } from '../contract-modal/contract-modal.component';
 
 export interface EntityFormData {
   id?: string;
@@ -17,7 +18,7 @@ export interface EntityFormData {
 @Component({
   selector: 'app-entity-form-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideIconComponent],
+  imports: [CommonModule, FormsModule, LucideIconComponent, ContractModalComponent],
   template: `
     <!-- Modal -->
     <div class="modal fade" [class.show]="isVisible" [style.display]="isVisible ? 'block' : 'none'" 
@@ -204,55 +205,33 @@ export interface EntityFormData {
         </div>
       </div>
     </div>
+
+    <!-- Modal Backdrop -->
+    <div class="modal-backdrop fade" [class.show]="isVisible" *ngIf="isVisible"></div>
+
+    <!-- Contract Modal -->
+    <app-contract-modal
+      [isVisible]="showContractModal"
+      [isLoading]="isContractLoading"
+      [hasError]="!!contractError"
+      [entityName]="formData.entityName"
+      (close)="closeContractModal()"
+      (save)="saveContract($event)">
+    </app-contract-modal>
   `,
   styles: [`
+    .modal {
+      z-index: 1055;
+    }
+
     .modal-backdrop {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.7);
-      z-index: 1040;
-    }
-
-    .modal-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
       z-index: 1050;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s ease;
-    }
-
-    .modal-container.show {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .modal-dialog {
-      max-width: 600px;
-      width: 90%;
-      margin: 0;
-      transform: translateY(-50px);
-      transition: transform 0.3s ease;
-    }
-
-    .modal-container.show .modal-dialog {
-      transform: translateY(0);
     }
 
     .modal-content {
       border: none;
-      border-radius: 12px;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
-      background-color: #ffffff;
+      border-radius: 0.75rem;
+      box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175);
     }
 
     .modal-header {
@@ -294,10 +273,10 @@ export interface EntityFormData {
     }
 
     .modal-footer {
-      border-top: 1px solid #e5e7eb;
+      border-top: 1px solid #e2e8f0;
       padding: 1.5rem;
-      background-color: #f8f9fa;
-      border-radius: 0 0 12px 12px;
+      background-color: #f8fafc;
+      border-radius: 0 0 0.75rem 0.75rem;
     }
 
     .form-label {
@@ -373,15 +352,15 @@ export interface EntityFormData {
       cursor: not-allowed;
     }
 
-    .btn-outline-secondary {
-      color: #6b7280;
-      border-color: #d1d5db;
+    .btn-outline-primary {
+      color: #1b2e4b;
+      border-color: #1b2e4b;
     }
 
-    .btn-outline-secondary:hover {
-      background-color: #f3f4f6;
-      border-color: #9ca3af;
-      color: #374151;
+    .btn-outline-primary:hover {
+      background-color: #1b2e4b;
+      border-color: #1b2e4b;
+      color: white;
     }
 
     .spinner-border-sm {
@@ -392,8 +371,7 @@ export interface EntityFormData {
     /* Responsive adjustments */
     @media (max-width: 768px) {
       .modal-dialog {
-        width: 95%;
-        max-width: none;
+        margin: 1rem;
       }
       
       .modal-body {
@@ -415,6 +393,12 @@ export class EntityFormModalComponent implements OnInit, OnChanges {
 
   @Output() close = new EventEmitter<void>();
   @Output() save = new EventEmitter<EntityFormData>();
+  @Output() contractCreated = new EventEmitter<ContractData>();
+
+  // Contract modal properties
+  showContractModal = false;
+  isContractLoading = false;
+  contractError: string | null = null;
 
   formData: EntityFormData = {
     entityState: 'ACTIVE',
@@ -492,9 +476,28 @@ export class EntityFormModalComponent implements OnInit, OnChanges {
   }
 
   onAddContract() {
-    // TODO: Implement add contract functionality
     console.log('📄 Add Contract clicked for entity:', this.formData.entityName);
-    // This could emit an event or navigate to a contract creation page
+    this.showContractModal = true;
+    this.contractError = null;
+  }
+
+  closeContractModal() {
+    this.showContractModal = false;
+    this.contractError = null;
+  }
+
+  saveContract(contractData: ContractData) {
+    console.log('📄 Contract data received:', contractData);
+    this.isContractLoading = true;
+    this.contractError = null;
+
+    // Simulate API call
+    setTimeout(() => {
+      this.isContractLoading = false;
+      this.showContractModal = false;
+      this.contractCreated.emit(contractData);
+      console.log('✅ Contract created successfully');
+    }, 1500);
   }
 
   onClose() {

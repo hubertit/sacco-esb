@@ -199,12 +199,13 @@ export class LoginComponent implements OnInit {
             } else if (error.error && error.error.message) {
               this.errorMessage = error.error.message;
             } else {
-              this.errorMessage = 'Login failed. Please check your credentials and try again.';
+              this.errorMessage = 'Login failed, try again.';
             }
           } else if (typeof error === 'string') {
             this.errorMessage = error;
           } else {
-            this.errorMessage = 'An unexpected error occurred. Please try again.';
+            // Catch-all for any undefined or unexpected errors
+            this.errorMessage = 'Login failed, try again.';
           }
         }
       });

@@ -124,7 +124,8 @@ declare var bootstrap: any;
             [entityData]="formEntityData"
             [isEditMode]="isEditMode"
             (close)="closeFormModal()"
-            (save)="saveEntity($event)">
+            (save)="saveEntity($event)"
+            (contractCreated)="onContractCreated($event)">
           </app-entity-form-modal>
 
           <!-- Create Entity Modal -->
@@ -509,6 +510,12 @@ export class EntitiesComponent implements OnInit, OnDestroy, AfterViewInit {
     this.formEntityData = null;
     this.formError = null;
     this.isFormLoading = false;
+  }
+
+  onContractCreated(contractData: any) {
+    console.log('📄 Contract created for entity:', contractData);
+    // You can add additional logic here, such as showing a success message
+    // or updating the UI to reflect the new contract
   }
 
   saveEntity(formData: EntityFormData) {
