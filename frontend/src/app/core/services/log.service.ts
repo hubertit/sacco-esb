@@ -231,7 +231,8 @@ export class LogService {
     let endpoint: string;
     if (filters.search && filters.search.trim()) {
       console.log('🔍 Using search endpoint with query:', filters.search);
-      endpoint = `${API_ENDPOINTS.INTEGRATION_LOGS.SEARCH}/${partnerId}`;
+      endpoint = API_ENDPOINTS.INTEGRATION_LOGS.SEARCH;
+      params.append('partnerId', partnerId);
       params.append('query', filters.search.trim());
     } else {
       console.log('📋 Using regular logs endpoint');
