@@ -55,13 +55,13 @@ import { LucideIconComponent } from '../../../shared/components/lucide-icon/luci
 
             <button type="submit" class="login-btn" [disabled]="loginForm.invalid || isLoading">
               <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
-              {{ isLoading ? 'Connecting to server...' : 'Log In' }}
+              {{ isLoading ? 'Signing you in...' : 'Log In' }}
             </button>
             
             <div class="mt-3" *ngIf="isLoading">
               <small class="text-muted">
                 <i class="fas fa-info-circle me-1"></i>
-                This may take a moment due to VPN connection...
+                Please wait while we verify your credentials...
               </small>
             </div>
           </form>

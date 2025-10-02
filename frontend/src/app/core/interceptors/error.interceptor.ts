@@ -15,7 +15,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         console.log('🚫 Token expired (403) - Logging out user');
         const authService = inject(AuthService);
         authService.logout();
-        return throwError(() => new Error('Session expired. Please login again.'));
+        return throwError(() => new Error('Your session has expired. Please sign in again to continue.'));
       }
       
       let apiError: ApiError;
@@ -48,17 +48,17 @@ function getErrorMessage(error: HttpErrorResponse): string {
     // Server-side error
     switch (error.status) {
       case HTTP_STATUS.BAD_REQUEST:
-        return 'Invalid request. Please check your input.';
+        return 'Please check your information and try again.';
       case HTTP_STATUS.UNAUTHORIZED:
-        return 'You are not authorized to perform this action.';
+        return 'You need to sign in to access this feature.';
       case HTTP_STATUS.FORBIDDEN:
-        return 'Access denied. You do not have permission.';
+        return 'You do not have permission to perform this action.';
       case HTTP_STATUS.NOT_FOUND:
-        return 'The requested resource was not found.';
+        return 'The information you requested could not be found.';
       case HTTP_STATUS.INTERNAL_SERVER_ERROR:
-        return 'Internal server error. Please try again later.';
+        return 'Something went wrong on our end. Please try again in a moment.';
       default:
-        return error.error?.message || error.message || 'An unexpected error occurred.';
+        return error.error?.message || error.message || 'Something unexpected happened. Please try again.';
     }
   }
 }

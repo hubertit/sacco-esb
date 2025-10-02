@@ -23,7 +23,7 @@ import { LucideIconComponent } from '../../../shared/components/lucide-icon/luci
               <img [src]="userAvatar" [alt]="userName" />
             </div>
             <h5>{{ userName }}</h5>
-            <p class="text-muted">Your session is locked</p>
+            <p class="text-muted">Your account is temporarily locked for security</p>
           </div>
           <form (ngSubmit)="unlock()" #lockForm="ngForm" class="login-form">
             <div class="form-group">
@@ -50,7 +50,7 @@ import { LucideIconComponent } from '../../../shared/components/lucide-icon/luci
             <div class="footer-text">
               <a routerLink="/login" class="switch-account">
                 <app-lucide-icon name="log-out" size="16px"></app-lucide-icon>
-                Sign in as a different user
+                Switch to a different account
               </a>
             </div>
           </form>
