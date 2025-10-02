@@ -17,8 +17,7 @@ import { NotificationItem } from '../../../core/services/notification.service';
         <div class="modal-content">
           <!-- Modal Header -->
           <div class="modal-header">
-            <h5 class="modal-title d-flex align-items-center">
-              <app-lucide-icon name="bell" size="20px" class="me-2"></app-lucide-icon>
+            <h5 class="modal-title">
               Notification Details
             </h5>
             <button type="button" class="btn-close-custom" (click)="closeModal()" aria-label="Close">

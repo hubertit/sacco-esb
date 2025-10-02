@@ -11,7 +11,8 @@ export const API_ENDPOINTS = {
     BY_ROLE: '/user/Role',
     BY_TYPE: '/user/roleType',
     SAVE: '/user/save',
-    UPDATE: '/user/update'
+    UPDATE: '/user/update',
+    DELETE: '/user/delete'
   },
   DASHBOARD: {
     BASE: '/dashboard',

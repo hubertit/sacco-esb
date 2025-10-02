@@ -27,9 +27,8 @@ export interface EntityFormData {
         <div class="modal-content">
           <!-- Modal Header -->
           <div class="modal-header">
-            <h5 class="modal-title d-flex align-items-center gap-2">
-              <app-lucide-icon name="building" size="20px" class="text-primary"></app-lucide-icon>
-              <span>{{ isEditMode ? 'Edit Entity' : 'Add New Entity' }}</span>
+            <h5 class="modal-title">
+              {{ isEditMode ? 'Edit Entity' : 'Add New Entity' }}
             </h5>
             <button type="button" class="btn-close-custom" (click)="onClose()" aria-label="Close">
               <app-lucide-icon name="x" size="18px"></app-lucide-icon>

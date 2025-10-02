@@ -724,13 +724,11 @@ export class LogViewModalComponent implements OnInit {
       const diffInSeconds = diffInMs / 1000;
       
       if (diffInSeconds < 1) {
-        return 'response-time-excellent'; // < 1 second
-      } else if (diffInSeconds < 5) {
-        return 'response-time-good'; // 1-5 seconds
-      } else if (diffInSeconds < 30) {
-        return 'response-time-warning'; // 5-30 seconds
+        return 'response-time-excellent'; // < 1 second (green)
+      } else if (diffInSeconds < 2) {
+        return 'response-time-warning'; // 1-2 seconds (orange)
       } else {
-        return 'response-time-slow'; // > 30 seconds
+        return 'response-time-slow'; // > 2 seconds (red)
       }
     } catch (error) {
       return 'response-time-invalid';

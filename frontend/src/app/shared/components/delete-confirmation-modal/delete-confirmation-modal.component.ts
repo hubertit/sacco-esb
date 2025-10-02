@@ -14,9 +14,8 @@ import { LucideIconComponent } from '../lucide-icon/lucide-icon.component';
         <div class="modal-content">
           <!-- Modal Header -->
           <div class="modal-header">
-            <h5 class="modal-title d-flex align-items-center gap-2">
-              <app-lucide-icon name="alert-triangle" size="20px" class="text-warning"></app-lucide-icon>
-              <span>Confirm Deletion</span>
+            <h5 class="modal-title">
+              Confirm Deletion
             </h5>
             <button type="button" class="btn-close-custom" (click)="onCancel()" aria-label="Close">
               <app-lucide-icon name="x" size="18px"></app-lucide-icon>

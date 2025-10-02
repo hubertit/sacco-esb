@@ -56,9 +56,9 @@ declare var bootstrap: any;
               <app-data-table
                 *ngIf="!isLoading && !error"
                 [columns]="columns"
-                [data]="entities"
+                [data]="filteredEntities"
                 [striped]="true"
-                [showSearch]="false"
+                [showSearch]="true"
                 [showActions]="true"
                 [showPagination]="true"
                 [currentPage]="currentPage"
@@ -68,6 +68,7 @@ declare var bootstrap: any;
                 (onSort)="handleSort($event)"
                 (onPageChange)="handlePageChange($event)"
                 (onPageSizeChange)="handlePageSizeChange($event)"
+                (onSearch)="handleSearch($event)"
                 (onRowClick)="viewEntity($event)"
               >
                 <ng-template #rowActions let-entity>
@@ -265,6 +266,8 @@ export class EntitiesComponent implements OnInit, OnDestroy, AfterViewInit {
   error: string | null = null;
   entities: Entity[] = [];
   allEntities: Entity[] = []; // Store all entities for client-side operations
+  filteredEntities: Entity[] = []; // Filtered entities for display
+  searchTerm = '';
   currentPage = 1;
   pageSize = 10;
   totalItems = 0;
@@ -345,7 +348,10 @@ export class EntitiesComponent implements OnInit, OnDestroy, AfterViewInit {
             index: index + 1
           }));
           
-          this.totalItems = this.allEntities.length;
+          // Initialize filtered entities with all entities
+          this.filteredEntities = [...this.allEntities];
+          
+          this.totalItems = this.filteredEntities.length;
           this.totalPages = Math.ceil(this.totalItems / this.pageSize);
           
           // Apply pagination to display entities
@@ -362,7 +368,7 @@ export class EntitiesComponent implements OnInit, OnDestroy, AfterViewInit {
    * Update displayed entities with sorting and pagination
    */
   updateDisplayedEntities(): void {
-    let sortedEntities = [...this.allEntities];
+    let sortedEntities = [...this.filteredEntities];
     
     // Apply sorting if specified
     if (this.sortColumn) {
@@ -421,6 +427,40 @@ export class EntitiesComponent implements OnInit, OnDestroy, AfterViewInit {
     this.pageSize = size;
     this.currentPage = 1; // Reset to first page when changing page size
     this.totalPages = Math.ceil(this.totalItems / this.pageSize);
+    this.updateDisplayedEntities();
+  }
+
+  handleSearch(searchTerm: string) {
+    console.log('🔍 Searching entities with term:', searchTerm);
+    this.searchTerm = searchTerm;
+    this.currentPage = 1; // Reset to first page when searching
+    this.filterEntities();
+  }
+
+  /**
+   * Filter entities based on search term
+   */
+  filterEntities(): void {
+    if (!this.searchTerm || this.searchTerm.trim() === '') {
+      this.filteredEntities = [...this.allEntities];
+    } else {
+      const searchLower = this.searchTerm.toLowerCase().trim();
+      this.filteredEntities = this.allEntities.filter(entity => {
+        return (
+          entity.entityName?.toLowerCase().includes(searchLower) ||
+          entity.code?.toLowerCase().includes(searchLower) ||
+          entity.legalCode?.toLowerCase().includes(searchLower) ||
+          entity.district?.toLowerCase().includes(searchLower) ||
+          entity.entityState?.toLowerCase().includes(searchLower)
+        );
+      });
+    }
+    
+    // Update total items and pages based on filtered results
+    this.totalItems = this.filteredEntities.length;
+    this.totalPages = Math.ceil(this.totalItems / this.pageSize);
+    
+    // Update displayed entities
     this.updateDisplayedEntities();
   }
 

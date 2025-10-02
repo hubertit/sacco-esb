@@ -26,7 +26,6 @@ export interface CreateEntityData {
           <!-- Modal Header -->
           <div class="modal-header">
             <h5 class="modal-title">
-              <app-lucide-icon name="plus-circle" size="20px" class="me-2"></app-lucide-icon>
               Create New Entity
             </h5>
             <button type="button" class="btn-close-custom" (click)="onClose()" aria-label="Close">

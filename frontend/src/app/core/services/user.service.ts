@@ -131,4 +131,11 @@ export class UserService {
       );
   }
 
+  /**
+   * Delete a user
+   */
+  deleteUser(id: string): Observable<any> {
+    return this.apiService.delete(`${API_ENDPOINTS.USERS.DELETE}/${id}`);
+  }
+
 }

@@ -11,12 +11,11 @@ import { User } from '../../../core/services/user.service';
     <!-- Modal -->
     <div class="modal fade" [class.show]="isVisible" [style.display]="isVisible ? 'block' : 'none'" 
          tabindex="-1" role="dialog" [attr.aria-hidden]="!isVisible">
-      <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+      <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
           <!-- Modal Header -->
           <div class="modal-header">
-            <h5 class="modal-title d-flex align-items-center gap-2">
-              <app-lucide-icon name="user" size="20px" class="text-primary"></app-lucide-icon>
+            <h5 class="modal-title">
               User Information
             </h5>
             <button type="button" class="btn-close-custom" (click)="closeModal()" aria-label="Close">
@@ -46,13 +45,13 @@ import { User } from '../../../core/services/user.service';
             <!-- User Information -->
             <div *ngIf="user && !isLoading && !hasError" class="user-info">
               <!-- User Avatar and Basic Info -->
-              <div class="row mb-4">
-                <div class="col-md-3 text-center">
+              <div class="row mb-3">
+                <div class="col-md-4 text-center">
                   <div class="user-avatar">
-                    <app-lucide-icon name="user" size="48px" class="text-primary"></app-lucide-icon>
+                    <app-lucide-icon name="user" size="40px" class="text-primary"></app-lucide-icon>
                   </div>
                 </div>
-                <div class="col-md-9">
+                <div class="col-md-8">
                   <h4 class="user-name">{{ user.firstName }} {{ user.lastName }}</h4>
                   <p class="user-username text-muted">@{{ user.username }}</p>
                   <div class="user-badges">
@@ -71,7 +70,7 @@ import { User } from '../../../core/services/user.service';
                 <div class="col-md-6">
                   <div class="info-item">
                     <label class="info-label">
-                      <app-lucide-icon name="mail" size="16px" class="me-2"></app-lucide-icon>
+                      <app-lucide-icon name="mail" size="14px" class="me-2"></app-lucide-icon>
                       Email Address
                     </label>
                     <p class="info-value">{{ user.email || 'Not provided' }}</p>
@@ -80,7 +79,7 @@ import { User } from '../../../core/services/user.service';
                 <div class="col-md-6">
                   <div class="info-item">
                     <label class="info-label">
-                      <app-lucide-icon name="smartphone" size="16px" class="me-2"></app-lucide-icon>
+                      <app-lucide-icon name="smartphone" size="14px" class="me-2"></app-lucide-icon>
                       Phone Number
                     </label>
                     <p class="info-value">{{ user.phoneNumber || 'Not provided' }}</p>
@@ -89,7 +88,7 @@ import { User } from '../../../core/services/user.service';
                 <div class="col-md-6">
                   <div class="info-item">
                     <label class="info-label">
-                      <app-lucide-icon name="shield" size="16px" class="me-2"></app-lucide-icon>
+                      <app-lucide-icon name="shield" size="14px" class="me-2"></app-lucide-icon>
                       Role
                     </label>
                     <p class="info-value">{{ user.roleName || 'No role assigned' }}</p>
@@ -98,7 +97,7 @@ import { User } from '../../../core/services/user.service';
                 <div class="col-md-6">
                   <div class="info-item">
                     <label class="info-label">
-                      <app-lucide-icon name="database" size="16px" class="me-2"></app-lucide-icon>
+                      <app-lucide-icon name="database" size="14px" class="me-2"></app-lucide-icon>
                       User ID
                     </label>
                     <p class="info-value text-muted small">{{ maskUserId(user.id) }}</p>
@@ -108,19 +107,6 @@ import { User } from '../../../core/services/user.service';
             </div>
           </div>
 
-          <!-- Modal Footer -->
-          <div class="modal-footer">
-            <div class="d-flex gap-2 w-100">
-              <button type="button" class="btn btn-outline-warning btn-soft" (click)="editUser()" [disabled]="!user">
-                <app-lucide-icon name="pencil" size="16px" class="me-2"></app-lucide-icon>
-                Edit User
-              </button>
-              <button type="button" class="btn btn-outline-danger btn-soft" (click)="deleteUser()" [disabled]="!user">
-                <app-lucide-icon name="trash" size="16px" class="me-2"></app-lucide-icon>
-                Delete User
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -178,20 +164,20 @@ import { User } from '../../../core/services/user.service';
     }
 
     .modal-body {
-      padding: 2rem;
+      padding: 1.5rem;
     }
 
     .user-info {
       .user-avatar {
-        width: 80px;
-        height: 80px;
+        width: 60px;
+        height: 60px;
         background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         margin: 0 auto;
-        border: 3px solid #1b2e4b;
+        border: 2px solid #1b2e4b;
       }
 
       .user-name {
@@ -266,40 +252,6 @@ import { User } from '../../../core/services/user.service';
           }
         }
 
-        &.btn-soft {
-          background-color: transparent;
-          border-width: 1px;
-          font-weight: 400;
-          opacity: 0.8;
-          
-          &:hover {
-            opacity: 1;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-          }
-
-          &:active {
-            transform: translateY(0);
-          }
-
-          &:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-          }
-
-          // Specific hover styles for outlined buttons
-          &.btn-outline-warning:hover {
-            background-color: #ffc107;
-            border-color: #ffc107;
-            color: #000;
-          }
-
-          &.btn-outline-danger:hover {
-            background-color: #dc3545;
-            border-color: #dc3545;
-            color: #fff;
-          }
-        }
       }
     }
 
@@ -356,8 +308,6 @@ export class UserViewModalComponent implements OnInit {
   @Input() errorMessage = '';
 
   @Output() close = new EventEmitter<void>();
-  @Output() edit = new EventEmitter<User>();
-  @Output() delete = new EventEmitter<User>();
 
   ngOnInit() {
     // Close modal on escape key
@@ -370,18 +320,6 @@ export class UserViewModalComponent implements OnInit {
 
   closeModal() {
     this.close.emit();
-  }
-
-  editUser() {
-    if (this.user) {
-      this.edit.emit(this.user);
-    }
-  }
-
-  deleteUser() {
-    if (this.user) {
-      this.delete.emit(this.user);
-    }
   }
 
   getUserTypeBadgeClass(userType: string): string {

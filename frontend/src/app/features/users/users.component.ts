@@ -7,6 +7,8 @@ import { LucideIconComponent } from '../../shared/components/lucide-icon/lucide-
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { TableColumn } from '../../shared/components/data-table/data-table.component';
 import { UserViewModalComponent } from '../../shared/components/user-view-modal/user-view-modal.component';
+import { UserFormModalComponent } from '../../shared/components/user-form-modal/user-form-modal.component';
+import { DeleteConfirmationModalComponent } from '../../shared/components/delete-confirmation-modal/delete-confirmation-modal.component';
 
 import { UserService, User, UserType } from '../../core/services/user.service';
 
@@ -15,32 +17,16 @@ declare var bootstrap: any;
 @Component({
   selector: 'app-users',
   standalone: true,
-  imports: [CommonModule, RouterModule, HttpClientModule, LucideIconComponent, DataTableComponent, UserViewModalComponent],
+  imports: [CommonModule, RouterModule, HttpClientModule, LucideIconComponent, DataTableComponent, UserViewModalComponent, UserFormModalComponent, DeleteConfirmationModalComponent],
   template: `
     <div class="dashboard-container">
           <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
               <h4 class="card-title mb-0">Users</h4>
-              <div class="dropdown">
-                <button class="btn btn-primary btn-sm d-flex align-items-center gap-2" type="button" id="addUserDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                  <app-lucide-icon name="plus" size="14px"></app-lucide-icon>
-                  Add User
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="addUserDropdown">
-                  <li>
-                    <a class="dropdown-item d-flex align-items-center gap-3" (click)="openAddUserModal('HUMAN')">
-                      <app-lucide-icon name="user" size="16px" class="text-primary"></app-lucide-icon>
-                      <span>Add Human User</span>
-                    </a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item d-flex align-items-center gap-3" (click)="openAddUserModal('APPLICATION')">
-                      <app-lucide-icon name="box" size="16px" class="text-info"></app-lucide-icon>
-                      <span>Add Application</span>
-                    </a>
-                  </li>
-                </ul>
-              </div>
+              <button class="btn btn-primary btn-sm d-flex align-items-center gap-2" type="button" (click)="openAddUserModal()">
+                <app-lucide-icon name="plus" size="14px"></app-lucide-icon>
+                Add User
+              </button>
             </div>
             <div class="card-body">
               <!-- Loading State -->
@@ -80,12 +66,24 @@ declare var bootstrap: any;
                 (onRowClick)="viewUser($event)">
                 
                 <ng-template #rowActions let-user>
-                  <div class="d-flex justify-content-end">
-                    <button class="btn btn-sm btn-outline-secondary view-btn" 
+                  <div class="d-flex justify-content-end gap-2">
+                    <button class="btn btn-sm btn-outline-primary view-btn-icon" 
                             type="button" 
                             title="View User Details"
-                            (click)="viewUser(user)">
-                      <app-lucide-icon name="eye" size="12px"></app-lucide-icon>
+                            (click)="viewUser(user); $event.stopPropagation()">
+                      <app-lucide-icon name="eye" size="16px"></app-lucide-icon>
+                    </button>
+                    <button class="btn btn-sm btn-outline-warning edit-btn-icon" 
+                            type="button" 
+                            title="Edit User"
+                            (click)="editUser(user); $event.stopPropagation()">
+                      <app-lucide-icon name="edit" size="16px"></app-lucide-icon>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger delete-btn-icon" 
+                            type="button" 
+                            title="Delete User"
+                            (click)="deleteUser(user); $event.stopPropagation()">
+                      <app-lucide-icon name="trash-2" size="16px"></app-lucide-icon>
                     </button>
                   </div>
                 </ng-template>
@@ -100,10 +98,29 @@ declare var bootstrap: any;
             [isLoading]="isLoadingUser"
             [hasError]="hasUserError"
             [errorMessage]="userErrorMessage"
-            (close)="closeViewModal()"
-            (edit)="editUser($event)"
-            (delete)="deleteUser($event)">
+            (close)="closeViewModal()">
           </app-user-view-modal>
+
+          <!-- User Form Modal -->
+          <app-user-form-modal
+            [isVisible]="showFormModal"
+            [isLoading]="isFormLoading"
+            [hasError]="!!formError"
+            [userData]="formUserData"
+            [isEditMode]="isEditMode"
+            (close)="closeFormModal()"
+            (save)="saveUser($event)">
+          </app-user-form-modal>
+
+          <!-- Delete Confirmation Modal -->
+          <app-delete-confirmation-modal
+            [isVisible]="showDeleteModal"
+            [itemName]="deleteUserName"
+            [itemType]="'User'"
+            [isLoading]="isDeleteLoading"
+            (confirm)="confirmDelete()"
+            (cancel)="cancelDelete()">
+          </app-delete-confirmation-modal>
     </div>
   `,
   styles: [`
@@ -227,31 +244,66 @@ declare var bootstrap: any;
         background-color: #dc3545;
       }
 
-      // View button styles
-      .view-btn {
-        cursor: pointer;
-        user-select: none;
-        border-color: #6c757d !important; // Grayish border
-        color: #6c757d !important; // Grayish text
-        transition: all 0.2s ease;
-        padding: 0.25rem 0.5rem !important; // Smaller padding for compact width
-        min-width: auto !important; // Remove minimum width constraint
-        
-        &:hover {
-          background-color: #6c757d !important;
-          border-color: #6c757d !important;
-          color: white !important;
-          transform: translateY(-1px);
-          box-shadow: 0 2px 4px rgba(108, 117, 125, 0.2);
-        }
+      .view-btn-icon, .edit-btn-icon, .delete-btn-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px;
+        min-height: 32px;
+        max-width: 32px;
+        max-height: 32px;
+        padding: 0 !important;
+        margin: 0;
+        border-radius: 50% !important;
+        background-color: transparent;
+        transition: all 0.2s ease-in-out;
+        box-sizing: border-box;
         
         &:focus {
-          box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25) !important;
-          border-color: #6c757d !important;
+          outline: none;
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
         }
-        
+
         &:active {
-          transform: translateY(0);
+          transform: scale(0.95);
+        }
+      }
+
+      .view-btn-icon {
+        border: 1px solid #3b82f6;
+        color: #3b82f6;
+        
+        &:hover {
+          background-color: #1b2e4b;
+          border-color: #1b2e4b;
+          color: white;
+          transform: scale(1.05);
+        }
+      }
+
+      .edit-btn-icon {
+        border: 1px solid #f59e0b;
+        color: #f59e0b;
+        
+        &:hover {
+          background-color: #f59e0b;
+          border-color: #f59e0b;
+          color: white;
+          transform: scale(1.05);
+        }
+      }
+
+      .delete-btn-icon {
+        border: 1px solid #ef4444;
+        color: #ef4444;
+        
+        &:hover {
+          background-color: #ef4444;
+          border-color: #ef4444;
+          color: white;
+          transform: scale(1.05);
         }
       }
 
@@ -335,6 +387,19 @@ export class UsersComponent implements OnInit, OnDestroy, AfterViewInit {
   hasUserError = false;
   userErrorMessage = '';
 
+  // Form modal properties
+  showFormModal = false;
+  isFormLoading = false;
+  formError: string | null = null;
+  formUserData: User | null = null;
+  isEditMode = false;
+
+  // Delete modal properties
+  showDeleteModal = false;
+  userToDelete: User | null = null;
+  deleteUserName = '';
+  isDeleteLoading = false;
+
   userTypeBadgeTemplate = (item: User) => {
     const badgeClass = item.userType === 'HUMAN' ? 'bg-primary' : 'bg-info';
     return `<span class="badge ${badgeClass}">${item.userType}</span>`;
@@ -384,9 +449,6 @@ export class UsersComponent implements OnInit, OnDestroy, AfterViewInit {
     console.log('🔍 UsersComponent - Columns:', this.columns);
     console.log('🔍 UsersComponent - Show actions enabled');
     
-    // Check Bootstrap availability
-    this.checkBootstrapAvailability();
-    
     this.loadUsers();
   }
 
@@ -399,80 +461,6 @@ export class UsersComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngAfterViewInit() {
     // Component initialization complete
-  }
-
-  private initializeBootstrapDropdowns() {
-    // Wait for the DOM to be ready and ensure Bootstrap is loaded
-    setTimeout(() => {
-      if (typeof bootstrap === 'undefined') {
-        console.error('❌ Bootstrap is not available!');
-        return;
-      }
-
-      // Find all dropdown elements in the current component
-      const dropdownElements = document.querySelectorAll('[data-bs-toggle="dropdown"]');
-      console.log('🔍 Found dropdown elements:', dropdownElements.length);
-      
-      dropdownElements.forEach((element, index) => {
-        console.log(`🔍 Initializing dropdown ${index}:`, element);
-        try {
-          // Dispose existing dropdown if any
-          const existingDropdown = bootstrap.Dropdown.getInstance(element);
-          if (existingDropdown) {
-            existingDropdown.dispose();
-          }
-          
-          // Create new dropdown with proper configuration
-          const dropdown = new bootstrap.Dropdown(element, {
-            autoClose: true,
-            boundary: 'viewport'
-          });
-          
-          console.log(`✅ Dropdown ${index} initialized successfully`);
-        } catch (error) {
-          console.error(`❌ Error initializing dropdown ${index}:`, error);
-        }
-      });
-    }, 300);
-  }
-
-  private checkBootstrapAvailability() {
-    // Check if Bootstrap is available
-    if (typeof bootstrap !== 'undefined') {
-      console.log('✅ Bootstrap is available');
-      console.log('🔍 Bootstrap version:', bootstrap.Tooltip.VERSION || 'Unknown');
-    } else {
-      console.error('❌ Bootstrap is not available!');
-      console.log('🔍 Available global objects:', Object.keys(window));
-    }
-  }
-
-  private setupDropdownEventDelegation() {
-    // Use Renderer2 for better event handling
-    this.renderer.listen('document', 'click', this.handleDropdownClick);
-  }
-
-  private handleDropdownClick = (event: Event) => {
-    const target = event.target as HTMLElement;
-    const dropdownToggle = target.closest('[data-bs-toggle="dropdown"]');
-    
-    if (dropdownToggle) {
-      event.preventDefault();
-      event.stopPropagation();
-      
-      // Manually toggle the dropdown
-      if (typeof bootstrap !== 'undefined') {
-        const dropdown = bootstrap.Dropdown.getOrCreateInstance(dropdownToggle);
-        dropdown.toggle();
-      }
-    }
-    
-    // Handle dropdown menu item clicks
-    const dropdownItem = target.closest('.dropdown-item');
-    if (dropdownItem) {
-      // Let the click event propagate to handle the action
-      // Don't prevent default here as we want the click handlers to work
-    }
   }
 
   private loadUsers(): void {
@@ -517,11 +505,6 @@ export class UsersComponent implements OnInit, OnDestroy, AfterViewInit {
           // Trigger change detection to ensure DOM is updated
           this.cdr.detectChanges();
           
-          // Reinitialize Bootstrap dropdowns after data is loaded and DOM is updated
-          setTimeout(() => {
-            this.initializeBootstrapDropdowns();
-          }, 100);
-          
           if (!users || users.length === 0) {
             console.warn('⚠️ No users returned from API');
           }
@@ -549,10 +532,6 @@ export class UsersComponent implements OnInit, OnDestroy, AfterViewInit {
     this.loadUsers();
   }
 
-  openAddUserModal(type: UserType) {
-    // TODO: Implement add user modal
-    console.log('Open add user modal for type:', type);
-  }
 
   viewUser(user: User): void {
     console.log('Viewing user:', user);
@@ -582,7 +561,10 @@ export class UsersComponent implements OnInit, OnDestroy, AfterViewInit {
 
   editUser(user: User): void {
     console.log('Editing user:', user);
-    // TODO: Implement edit user functionality
+    this.formUserData = user;
+    this.isEditMode = true;
+    this.showFormModal = true;
+    this.formError = null;
   }
 
   closeViewModal(): void {
@@ -595,7 +577,107 @@ export class UsersComponent implements OnInit, OnDestroy, AfterViewInit {
 
   deleteUser(user: User): void {
     console.log('Deleting user:', user);
-    // TODO: Implement delete user functionality
+    this.userToDelete = user;
+    this.deleteUserName = `${user.firstName} ${user.lastName}`;
+    this.showDeleteModal = true;
+  }
+
+  // Form modal methods
+  openAddUserModal(): void {
+    console.log('🎯 openAddUserModal called - opening registration modal');
+    
+    this.formUserData = {
+      id: '',
+      version: 0,
+      entityState: 'ACTIVE',
+      firstName: '',
+      lastName: '',
+      email: '',
+      phoneNumber: '',
+      username: '',
+      userType: 'HUMAN', // Default to HUMAN user type
+      roleId: '',
+      roleName: ''
+    };
+    this.isEditMode = false;
+    this.showFormModal = true;
+    this.formError = null;
+    
+    console.log('🎯 Modal opened. showFormModal:', this.showFormModal);
+  }
+
+  closeFormModal(): void {
+    this.showFormModal = false;
+    this.formUserData = null;
+    this.isEditMode = false;
+    this.isFormLoading = false;
+    this.formError = null;
+  }
+
+  saveUser(userData: any): void {
+    console.log('Saving user:', userData);
+    this.isFormLoading = true;
+    this.formError = null;
+
+    const userPayload = {
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      email: userData.email || null,
+      phoneNumber: userData.phoneNumber || null,
+      username: userData.username,
+      userType: userData.userType,
+      roleId: userData.roleId || null,
+      entityState: userData.entityState
+    };
+
+    const operation = this.isEditMode 
+      ? this.userService.updateUser(this.formUserData!.id, userPayload)
+      : this.userService.createUser(userPayload);
+
+    operation
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (savedUser: User) => {
+          console.log('✅ User saved successfully:', savedUser);
+          this.isFormLoading = false;
+          this.closeFormModal();
+          this.loadUsers(); // Refresh the users list
+        },
+        error: (error) => {
+          console.error('❌ Error saving user:', error);
+          this.isFormLoading = false;
+          this.formError = error.message || 'Failed to save user. Please try again.';
+        }
+      });
+  }
+
+  // Delete modal methods
+  confirmDelete(): void {
+    if (!this.userToDelete) return;
+
+    this.isDeleteLoading = true;
+    this.userService.deleteUser(this.userToDelete.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          console.log('✅ User deleted successfully');
+          this.isDeleteLoading = false;
+          this.cancelDelete();
+          this.loadUsers(); // Refresh the users list
+        },
+        error: (error) => {
+          console.error('❌ Error deleting user:', error);
+          this.isDeleteLoading = false;
+          // You might want to show an error message here
+        }
+      });
+  }
+
+  cancelDelete(): void {
+    this.showDeleteModal = false;
+    this.userToDelete = null;
+    this.deleteUserName = '';
+    this.isDeleteLoading = false;
   }
 
 

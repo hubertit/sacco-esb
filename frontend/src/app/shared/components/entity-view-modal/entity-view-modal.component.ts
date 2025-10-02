@@ -15,9 +15,8 @@ import { Entity } from '../../../core/services/entity.service';
         <div class="modal-content">
           <!-- Modal Header -->
           <div class="modal-header">
-            <h5 class="modal-title d-flex align-items-center gap-2">
-              <app-lucide-icon name="building" size="20px" class="text-primary"></app-lucide-icon>
-              <span>Entity Details</span>
+            <h5 class="modal-title">
+              Entity Details
             </h5>
             <button type="button" class="btn-close-custom" (click)="closeModal()" aria-label="Close">
               <app-lucide-icon name="x" size="18px"></app-lucide-icon>
