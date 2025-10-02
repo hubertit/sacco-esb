@@ -144,46 +144,37 @@ import { User } from '../../../core/services/user.service';
     }
 
     .modal-header {
-      background: #1b2e4b;
-      color: white;
-      border-bottom: none;
-      border-radius: 0.75rem 0.75rem 0 0;
-      padding: 1.5rem;
+      background-color: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+    }
 
-      .modal-title {
-        font-weight: 600;
-        margin: 0;
-      }
+    .btn-close-custom {
+      background: #f8f9fa;
+      border: 2px solid #dee2e6;
+      color: #6c757d;
+      padding: 0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
 
-      .btn-close-custom {
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        color: white;
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s ease;
-        opacity: 0.8;
+    .btn-close-custom:hover {
+      color: #fff;
+      background-color: #dc3545;
+      border-color: #dc3545;
+      transform: scale(1.05);
+      box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+    }
 
-        &:hover {
-          background: rgba(255, 255, 255, 0.2);
-          border-color: rgba(255, 255, 255, 0.4);
-          opacity: 1;
-          transform: scale(1.05);
-        }
-
-        &:focus {
-          box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
-          outline: none;
-        }
-
-        &:active {
-          transform: scale(0.95);
-        }
-      }
+    .btn-close-custom:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25);
     }
 
     .modal-body {

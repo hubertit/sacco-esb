@@ -29,8 +29,8 @@ export interface CreateEntityData {
               <app-lucide-icon name="plus-circle" size="20px" class="me-2"></app-lucide-icon>
               Create New Entity
             </h5>
-            <button type="button" class="btn-close" (click)="onClose()" aria-label="Close">
-              <app-lucide-icon name="x" size="16px"></app-lucide-icon>
+            <button type="button" class="btn-close-custom" (click)="onClose()" aria-label="Close">
+              <app-lucide-icon name="x" size="18px"></app-lucide-icon>
             </button>
           </div>
 
@@ -122,22 +122,21 @@ export interface CreateEntityData {
                   <app-lucide-icon name="map-pin" size="16px" class="me-1"></app-lucide-icon>
                   District
                 </label>
-                <input 
-                  type="text" 
+                <select 
                   id="district" 
                   name="district"
-                  class="form-control" 
+                  class="form-select" 
                   [(ngModel)]="formData.district"
                   #districtInput="ngModel"
                   required
-                  minlength="2"
-                  maxlength="50"
-                  placeholder="Enter district"
                   [class.is-invalid]="districtInput.invalid && districtInput.touched">
+                  <option value="">Select a district</option>
+                  <option *ngFor="let district of rwandaDistricts" [value]="district">
+                    {{ district }}
+                  </option>
+                </select>
                 <div *ngIf="districtInput.invalid && districtInput.touched" class="invalid-feedback">
-                  <div *ngIf="districtInput.errors?.['required']">District is required</div>
-                  <div *ngIf="districtInput.errors?.['minlength']">District must be at least 2 characters</div>
-                  <div *ngIf="districtInput.errors?.['maxlength']">District must not exceed 50 characters</div>
+                  <div *ngIf="districtInput.errors?.['required']">Please select a district</div>
                 </div>
               </div>
 
@@ -237,33 +236,37 @@ export interface CreateEntityData {
     }
 
     .modal-header {
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-      color: white;
-      border-bottom: none;
-      border-radius: 12px 12px 0 0;
-      padding: 1.5rem;
+      background-color: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
     }
 
-    .modal-title {
-      font-weight: 600;
-      margin: 0;
+    .btn-close-custom {
+      background: #f8f9fa;
+      border: 2px solid #dee2e6;
+      color: #6c757d;
+      padding: 0;
+      cursor: pointer;
+      transition: all 0.2s ease;
       display: flex;
       align-items: center;
-    }
-
-    .btn-close {
-      background: none;
-      border: none;
-      color: white;
-      opacity: 0.8;
-      padding: 0.5rem;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
-      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
-    .btn-close:hover {
-      opacity: 1;
-      background-color: rgba(255, 255, 255, 0.1);
+    .btn-close-custom:hover {
+      color: #fff;
+      background-color: #dc3545;
+      border-color: #dc3545;
+      transform: scale(1.05);
+      box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+    }
+
+    .btn-close-custom:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25);
     }
 
     .modal-body {
@@ -392,6 +395,40 @@ export class CreateEntityModalComponent implements OnInit, OnChanges {
     entityName: '',
     district: ''
   };
+
+  // Rwanda's 30 districts
+  rwandaDistricts = [
+    'Bugesera',
+    'Gatsibo',
+    'Kayonza',
+    'Kirehe',
+    'Ngoma',
+    'Nyagatare',
+    'Rwamagana',
+    'Gasabo',
+    'Kicukiro',
+    'Nyarugenge',
+    'Burera',
+    'Gakenke',
+    'Gicumbi',
+    'Musanze',
+    'Rulindo',
+    'Gisagara',
+    'Huye',
+    'Kamonyi',
+    'Muhanga',
+    'Nyamagabe',
+    'Nyanza',
+    'Nyaruguru',
+    'Ruhango',
+    'Karongi',
+    'Ngororero',
+    'Nyabihu',
+    'Nyamasheke',
+    'Rubavu',
+    'Rusizi',
+    'Rutsiro'
+  ];
 
   ngOnInit() {
     this.resetForm();

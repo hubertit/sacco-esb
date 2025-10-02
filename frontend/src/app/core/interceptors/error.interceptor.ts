@@ -2,12 +2,22 @@ import { HttpInterceptorFn } from '@angular/common/http';
 import { catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
+import { inject } from '@angular/core';
 import { HTTP_STATUS } from '../constants/api.constants';
 import { ApiError } from '../models/auth.models';
+import { AuthService } from '../services/auth.service';
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
+      // Handle 403 Forbidden - Token expired
+      if (error.status === HTTP_STATUS.FORBIDDEN) {
+        console.log('🚫 Token expired (403) - Logging out user');
+        const authService = inject(AuthService);
+        authService.logout();
+        return throwError(() => new Error('Session expired. Please login again.'));
+      }
+      
       let apiError: ApiError;
       
       // Handle API error response format

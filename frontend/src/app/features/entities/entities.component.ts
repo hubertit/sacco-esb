@@ -11,38 +11,25 @@ import { EntityService, Entity } from '../../core/services/entity.service';
 import { EntityViewModalComponent } from '../../shared/components/entity-view-modal/entity-view-modal.component';
 import { EntityFormModalComponent, EntityFormData } from '../../shared/components/entity-form-modal/entity-form-modal.component';
 import { CreateEntityModalComponent, CreateEntityData } from '../../shared/components/create-entity-modal/create-entity-modal.component';
+import { DeleteConfirmationModalComponent } from '../../shared/components/delete-confirmation-modal/delete-confirmation-modal.component';
 
 declare var bootstrap: any;
 
 @Component({
   selector: 'app-entities',
   standalone: true,
-  imports: [CommonModule, RouterModule, HttpClientModule, LucideIconComponent, DataTableComponent, EntityViewModalComponent, EntityFormModalComponent, CreateEntityModalComponent],
+  imports: [CommonModule, RouterModule, HttpClientModule, LucideIconComponent, DataTableComponent, EntityViewModalComponent, EntityFormModalComponent, CreateEntityModalComponent, DeleteConfirmationModalComponent],
   template: `
     <div class="dashboard-container">
           <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
               <h4 class="card-title mb-0">Entities</h4>
-              <div class="dropdown">
-                <button class="btn btn-primary btn-sm d-flex align-items-center gap-2" type="button" id="addEntityDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                  <app-lucide-icon name="plus" size="14px"></app-lucide-icon>
-                  Add Entity
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="addEntityDropdown">
-                  <li>
-                    <a class="dropdown-item d-flex align-items-center gap-2" (click)="openAddEntityModal('Financial')">
-                      <app-lucide-icon name="briefcase" size="14px"></app-lucide-icon>
-                      Add Financial Institution
-                    </a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item d-flex align-items-center gap-2" (click)="openAddEntityModal('Payment')">
-                      <app-lucide-icon name="credit-card" size="14px"></app-lucide-icon>
-                      Add Payment Service
-                    </a>
-                  </li>
-                </ul>
-              </div>
+              <button class="btn btn-primary btn-sm d-flex align-items-center gap-2" 
+                      type="button" 
+                      (click)="openAddEntityModal('Financial')">
+                <app-lucide-icon name="plus" size="14px"></app-lucide-icon>
+                Add Entity
+              </button>
             </div>
             <div class="card-body">
               <!-- Loading State -->
@@ -81,26 +68,26 @@ declare var bootstrap: any;
                 (onSort)="handleSort($event)"
                 (onPageChange)="handlePageChange($event)"
                 (onPageSizeChange)="handlePageSizeChange($event)"
-                (onRowClick)="editEntity($event)"
+                (onRowClick)="viewEntity($event)"
               >
                 <ng-template #rowActions let-entity>
                   <div class="d-flex justify-content-end gap-2">
                     <button class="btn btn-sm btn-outline-primary view-btn-icon" 
                             type="button" 
                             title="View Entity Details"
-                            (click)="viewEntity(entity)">
+                            (click)="viewEntity(entity); $event.stopPropagation()">
                       <app-lucide-icon name="eye" size="16px"></app-lucide-icon>
                     </button>
                     <button class="btn btn-sm btn-outline-warning edit-btn-icon" 
                             type="button" 
                             title="Edit Entity"
-                            (click)="editEntity(entity)">
+                            (click)="editEntity(entity); $event.stopPropagation()">
                       <app-lucide-icon name="edit" size="16px"></app-lucide-icon>
                     </button>
                     <button class="btn btn-sm btn-outline-danger delete-btn-icon" 
                             type="button" 
                             title="Delete Entity"
-                            (click)="deleteEntity(entity)">
+                            (click)="deleteEntity(entity); $event.stopPropagation()">
                       <app-lucide-icon name="trash-2" size="16px"></app-lucide-icon>
                     </button>
                   </div>
@@ -148,6 +135,16 @@ declare var bootstrap: any;
             (close)="closeCreateModal()"
             (create)="createEntity($event)">
           </app-create-entity-modal>
+
+          <!-- Delete Confirmation Modal -->
+          <app-delete-confirmation-modal
+            [isVisible]="showDeleteModal"
+            [itemName]="deleteEntityName"
+            [itemType]="'Entity'"
+            [isLoading]="isDeleteLoading"
+            (confirm)="confirmDelete()"
+            (cancel)="cancelDelete()">
+          </app-delete-confirmation-modal>
     </div>
   `,
   styles: [`
@@ -290,6 +287,12 @@ export class EntitiesComponent implements OnInit, OnDestroy, AfterViewInit {
   isCreateLoading = false;
   createError: string | null = null;
 
+  // Delete modal state
+  showDeleteModal = false;
+  isDeleteLoading = false;
+  deleteEntityName = '';
+  entityToDelete: Entity | null = null;
+
   columns: TableColumn[] = [
     { key: 'index', title: '#', type: 'text', sortable: false },
     { key: 'entityName', title: 'Entity Name', type: 'text', sortable: true },
@@ -392,6 +395,8 @@ export class EntitiesComponent implements OnInit, OnDestroy, AfterViewInit {
 
   openAddEntityModal(type: 'Financial' | 'Payment') {
     console.log('🚀 Opening create entity modal for type:', type);
+    // Close any other modals first
+    this.closeAllModals();
     this.createError = null;
     this.showCreateModal = true;
     console.log('🚀 showCreateModal set to:', this.showCreateModal);
@@ -419,6 +424,9 @@ export class EntitiesComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   editEntity(entity: Entity) {
+    console.log('✏️ Editing entity:', entity);
+    // Close any other modals first
+    this.closeAllModals();
     this.isEditMode = true;
     this.formEntityData = {
       id: entity.id,
@@ -435,23 +443,44 @@ export class EntitiesComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   deleteEntity(entity: Entity) {
-    if (confirm(`Are you sure you want to delete ${entity.entityName}?`)) {
-      this.entityService.deleteEntity(entity.id)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.loadEntities(); // Reload the list
-          },
-          error: (error) => {
-            console.error('Error deleting entity:', error);
-            this.error = 'Failed to delete entity. Please try again.';
-          }
-        });
-    }
+    console.log('🗑️ Requesting to delete entity:', entity);
+    // Close any other modals first
+    this.closeAllModals();
+    this.entityToDelete = entity;
+    this.deleteEntityName = entity.entityName;
+    this.showDeleteModal = true;
+  }
+
+  confirmDelete() {
+    if (!this.entityToDelete) return;
+    
+    this.isDeleteLoading = true;
+    this.entityService.deleteEntity(this.entityToDelete.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          console.log('✅ Entity deleted successfully');
+          this.cancelDelete();
+          this.loadEntities(); // Reload the list
+        },
+        error: (error) => {
+          console.error('❌ Error deleting entity:', error);
+          this.isDeleteLoading = false;
+        }
+      });
+  }
+
+  cancelDelete() {
+    this.showDeleteModal = false;
+    this.isDeleteLoading = false;
+    this.deleteEntityName = '';
+    this.entityToDelete = null;
   }
 
   viewEntity(entity: Entity) {
     console.log('🔍 Viewing entity:', entity);
+    // Close any other modals first
+    this.closeAllModals();
     this.selectedEntity = entity;
     this.showEntityModal = true;
   }
@@ -459,6 +488,19 @@ export class EntitiesComponent implements OnInit, OnDestroy, AfterViewInit {
   closeEntityModal() {
     this.showEntityModal = false;
     this.selectedEntity = null;
+  }
+
+  // Close all modals to prevent conflicts
+  closeAllModals() {
+    this.showEntityModal = false;
+    this.showFormModal = false;
+    this.showCreateModal = false;
+    this.selectedEntity = null;
+    this.formEntityData = null;
+    this.formError = null;
+    this.createError = null;
+    this.isFormLoading = false;
+    this.isCreateLoading = false;
   }
 
   // Form modal methods
