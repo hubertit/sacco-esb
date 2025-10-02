@@ -59,13 +59,36 @@ import { LogViewModalComponent } from '../../shared/components/log-view-modal/lo
             <!-- Start Date Filter -->
             <div class="col-md-3">
               <label for="startDate" class="form-label">Start Date</label>
-              <input type="date" id="startDate" class="form-control" [(ngModel)]="filters.startDate" name="startDate">
+              <input 
+                type="datetime-local" 
+                id="startDate" 
+                class="form-control" 
+                [(ngModel)]="startDateTimeInput" 
+                name="startDate"
+                [max]="getMaxDateTime()"
+                (change)="onStartDateTimeChange($event)">
+              <div *ngIf="transactionDateValidationError" class="text-danger small mt-1">
+                <app-lucide-icon name="alert-circle" size="12px" class="me-1"></app-lucide-icon>
+                {{ transactionDateValidationError }}
+              </div>
             </div>
 
             <!-- End Date Filter -->
             <div class="col-md-3">
               <label for="endDate" class="form-label">End Date</label>
-              <input type="date" id="endDate" class="form-control" [(ngModel)]="filters.endDate" name="endDate">
+              <input 
+                type="datetime-local" 
+                id="endDate" 
+                class="form-control" 
+                [(ngModel)]="endDateTimeInput" 
+                name="endDate"
+                [max]="getMaxDateTime()"
+                [min]="startDateTimeInput"
+                (change)="onEndDateTimeChange($event)">
+              <div *ngIf="transactionDateValidationError" class="text-danger small mt-1">
+                <app-lucide-icon name="alert-circle" size="12px" class="me-1"></app-lucide-icon>
+                {{ transactionDateValidationError }}
+              </div>
             </div>
 
             <!-- Table Filter -->
@@ -126,13 +149,36 @@ import { LogViewModalComponent } from '../../shared/components/log-view-modal/lo
             <!-- From Date Filter -->
             <div class="col-md-3">
               <label for="integrationFromDate" class="form-label">From Date</label>
-              <input type="datetime-local" id="integrationFromDate" class="form-control" [(ngModel)]="integrationFilters.from" name="integrationFromDate">
+              <input 
+                type="datetime-local" 
+                id="integrationFromDate" 
+                class="form-control" 
+                [(ngModel)]="fromDateTimeInput" 
+                name="integrationFromDate"
+                [max]="getMaxDateTime()"
+                (change)="onFromDateTimeChange($event)">
+              <div *ngIf="dateValidationError" class="text-danger small mt-1">
+                <app-lucide-icon name="alert-circle" size="12px" class="me-1"></app-lucide-icon>
+                {{ dateValidationError }}
+              </div>
             </div>
 
             <!-- To Date Filter -->
             <div class="col-md-3">
               <label for="integrationToDate" class="form-label">To Date</label>
-              <input type="datetime-local" id="integrationToDate" class="form-control" [(ngModel)]="integrationFilters.to" name="integrationToDate">
+              <input 
+                type="datetime-local" 
+                id="integrationToDate" 
+                class="form-control" 
+                [(ngModel)]="toDateTimeInput" 
+                name="integrationToDate"
+                [max]="getMaxDateTime()"
+                [min]="fromDateTimeInput"
+                (change)="onToDateTimeChange($event)">
+              <div *ngIf="dateValidationError" class="text-danger small mt-1">
+                <app-lucide-icon name="alert-circle" size="12px" class="me-1"></app-lucide-icon>
+                {{ dateValidationError }}
+              </div>
             </div>
 
             <!-- Page Size Filter -->
@@ -540,6 +586,20 @@ export class LogsComponent implements OnInit {
     search: ''
   };
 
+  // Date validation error message
+  dateValidationError: string | null = null;
+
+  // Separate properties for datetime-local inputs (YYYY-MM-DDTHH:MM format)
+  fromDateTimeInput: string = '';  // YYYY-MM-DDTHH:MM format
+  toDateTimeInput: string = '';    // YYYY-MM-DDTHH:MM format
+  
+  // Transaction logs datetime inputs
+  startDateTimeInput: string = '';  // YYYY-MM-DDTHH:MM format
+  endDateTimeInput: string = '';    // YYYY-MM-DDTHH:MM format
+  
+  // Transaction logs date validation error
+  transactionDateValidationError: string | null = null;
+
   constructor(
     private logService: LogService,
     private partnerService: PartnerService,
@@ -731,6 +791,9 @@ export class LogsComponent implements OnInit {
       pageSize: '10',
       referenceNumber: ''
     };
+    this.startDateTimeInput = '';
+    this.endDateTimeInput = '';
+    this.transactionDateValidationError = null; // Clear validation errors
     this.applyFilters();
   }
 
@@ -928,6 +991,15 @@ export class LogsComponent implements OnInit {
 
   applyIntegrationFilters() {
     console.log('🔍 Applying integration filters:', this.integrationFilters);
+    
+    // Format dates to ISO string format before sending to API
+    const formattedFilters = {
+      ...this.integrationFilters,
+      from: this.integrationFilters.from ? this.formatDateToISO(new Date(this.integrationFilters.from)) : undefined,
+      to: this.integrationFilters.to ? this.formatDateToISO(new Date(this.integrationFilters.to)) : undefined
+    };
+    
+    console.log('📅 Formatted filters for API:', formattedFilters);
     this.loadIntegrationLogs();
   }
 
@@ -939,7 +1011,208 @@ export class LogsComponent implements OnInit {
       to: undefined,
       search: ''
     };
+    this.fromDateTimeInput = '';
+    this.toDateTimeInput = '';
+    this.dateValidationError = null; // Clear validation errors
     console.log('🧹 Cleared integration filters');
     this.loadIntegrationLogs();
+  }
+
+  /**
+   * Get the maximum date-time for input validation (current date-time)
+   */
+  getMaxDateTime(): string {
+    const now = new Date();
+    // Format as YYYY-MM-DDTHH:MM for datetime-local input
+    return now.toISOString().slice(0, 16);
+  }
+
+  /**
+   * Handle from datetime change and format to ISO string
+   */
+  onFromDateTimeChange(event: any): void {
+    const selectedDateTime = event.target.value;
+    this.dateValidationError = null; // Clear previous errors
+    
+    if (selectedDateTime) {
+      const dateTime = new Date(selectedDateTime);
+      
+      // Validate that date is not in the future
+      if (!this.validateDateNotFuture(dateTime)) {
+        this.dateValidationError = 'Cannot select future date and time';
+        this.fromDateTimeInput = '';
+        this.integrationFilters.from = undefined;
+        return;
+      }
+      
+      // Convert to ISO format: 2025-10-02T23:59:00.00Z
+      this.integrationFilters.from = this.formatDateToISO(dateTime);
+      console.log('📅 From date/time set to:', this.integrationFilters.from);
+      
+      // If to date is before from date, clear it
+      if (this.toDateTimeInput && new Date(this.toDateTimeInput) < dateTime) {
+        this.toDateTimeInput = '';
+        this.integrationFilters.to = undefined;
+        console.log('⚠️ To date cleared as it was before from date');
+      }
+    } else {
+      this.integrationFilters.from = undefined;
+    }
+  }
+
+  /**
+   * Handle to datetime change and format to ISO string
+   */
+  onToDateTimeChange(event: any): void {
+    const selectedDateTime = event.target.value;
+    this.dateValidationError = null; // Clear previous errors
+    
+    if (selectedDateTime) {
+      const dateTime = new Date(selectedDateTime);
+      
+      // Validate that date is not in the future
+      if (!this.validateDateNotFuture(dateTime)) {
+        this.dateValidationError = 'Cannot select future date and time';
+        this.toDateTimeInput = '';
+        this.integrationFilters.to = undefined;
+        return;
+      }
+      
+      // Validate that to date is not before from date
+      if (this.fromDateTimeInput && dateTime < new Date(this.fromDateTimeInput)) {
+        this.dateValidationError = 'To date cannot be before from date';
+        this.toDateTimeInput = '';
+        this.integrationFilters.to = undefined;
+        return;
+      }
+      
+      // Convert to ISO format: 2025-10-02T23:59:00.00Z
+      this.integrationFilters.to = this.formatDateToISO(dateTime);
+      console.log('📅 To date/time set to:', this.integrationFilters.to);
+    } else {
+      this.integrationFilters.to = undefined;
+    }
+  }
+
+  /**
+   * Format date to ISO string format: 2025-10-02T23:59:00.00Z
+   */
+  private formatDateToISO(date: Date): string {
+    // Ensure we have a valid date
+    if (!date || isNaN(date.getTime())) {
+      return '';
+    }
+    
+    // Format to ISO string with milliseconds: 2025-10-02T23:59:00.00Z
+    return date.toISOString();
+  }
+
+  /**
+   * Validate that selected date is not in the future
+   */
+  private validateDateNotFuture(date: Date): boolean {
+    const now = new Date();
+    return date <= now;
+  }
+
+  /**
+   * Convert ISO string to datetime-local format (YYYY-MM-DDTHH:MM)
+   */
+  private formatISOToDateTimeLocal(isoString: string): string {
+    if (!isoString) return '';
+    const date = new Date(isoString);
+    // Use local time instead of UTC
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  }
+
+  /**
+   * Initialize date input fields from filter values
+   */
+  private initializeDateInputs(): void {
+    if (this.integrationFilters.from) {
+      const date = new Date(this.integrationFilters.from);
+      this.fromDateTimeInput = date.toISOString().slice(0, 16);
+    } else {
+      this.fromDateTimeInput = '';
+    }
+    
+    if (this.integrationFilters.to) {
+      const date = new Date(this.integrationFilters.to);
+      this.toDateTimeInput = date.toISOString().slice(0, 16);
+    } else {
+      this.toDateTimeInput = '';
+    }
+  }
+
+  /**
+   * Handle start datetime change for transaction logs
+   */
+  onStartDateTimeChange(event: any): void {
+    const selectedDateTime = event.target.value;
+    this.transactionDateValidationError = null; // Clear previous errors
+    
+    if (selectedDateTime) {
+      const dateTime = new Date(selectedDateTime);
+      
+      // Validate that date is not in the future
+      if (!this.validateDateNotFuture(dateTime)) {
+        this.transactionDateValidationError = 'Cannot select future date and time';
+        this.startDateTimeInput = '';
+        this.filters.startDate = '';
+        return;
+      }
+      
+      // Convert to ISO format: 2025-10-02T23:59:00.00Z
+      this.filters.startDate = this.formatDateToISO(dateTime);
+      console.log('📅 Start date set to:', this.filters.startDate);
+      
+      // If end date is before start date, clear it
+      if (this.endDateTimeInput && new Date(this.endDateTimeInput) < dateTime) {
+        this.endDateTimeInput = '';
+        this.filters.endDate = '';
+        console.log('⚠️ End date cleared as it was before start date');
+      }
+    } else {
+      this.filters.startDate = '';
+    }
+  }
+
+  /**
+   * Handle end datetime change for transaction logs
+   */
+  onEndDateTimeChange(event: any): void {
+    const selectedDateTime = event.target.value;
+    this.transactionDateValidationError = null; // Clear previous errors
+    
+    if (selectedDateTime) {
+      const dateTime = new Date(selectedDateTime);
+      
+      // Validate that date is not in the future
+      if (!this.validateDateNotFuture(dateTime)) {
+        this.transactionDateValidationError = 'Cannot select future date and time';
+        this.endDateTimeInput = '';
+        this.filters.endDate = '';
+        return;
+      }
+      
+      // Validate that end date is not before start date
+      if (this.startDateTimeInput && dateTime < new Date(this.startDateTimeInput)) {
+        this.transactionDateValidationError = 'End date cannot be before start date';
+        this.endDateTimeInput = '';
+        this.filters.endDate = '';
+        return;
+      }
+      
+      // Convert to ISO format: 2025-10-02T23:59:00.00Z
+      this.filters.endDate = this.formatDateToISO(dateTime);
+      console.log('📅 End date set to:', this.filters.endDate);
+    } else {
+      this.filters.endDate = '';
+    }
   }
 }
