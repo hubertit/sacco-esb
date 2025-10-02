@@ -303,6 +303,56 @@ import { CommonModule } from '@angular/common';
         <polyline points="15,3 21,3 21,9"/>
         <line x1="10" x2="21" y1="14" y2="3"/>
       </svg>
+      <svg *ngSwitchCase="'save'" [attr.width]="size" [attr.height]="size" [attr.stroke]="color" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+        <polyline points="17,21 17,13 7,13 7,21"/>
+        <polyline points="7,3 7,8 15,8"/>
+      </svg>
+      <svg *ngSwitchCase="'check-circle'" [attr.width]="size" [attr.height]="size" [attr.stroke]="color" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+        <polyline points="22,4 12,14.01 9,11.01"/>
+      </svg>
+      <svg *ngSwitchCase="'info'" [attr.width]="size" [attr.height]="size" [attr.stroke]="color" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" x2="12" y1="16" y2="12"/>
+        <line x1="12" x2="12.01" y1="8" y2="8"/>
+      </svg>
+      <svg *ngSwitchCase="'building'" [attr.width]="size" [attr.height]="size" [attr.stroke]="color" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="3" width="20" height="21" rx="2" ry="2"/>
+        <line x1="9" x2="9" y1="9" y2="21"/>
+        <line x1="15" x2="15" y1="9" y2="21"/>
+        <line x1="3" x2="21" y1="9" y2="9"/>
+      </svg>
+      <svg *ngSwitchCase="'copy'" [attr.width]="size" [attr.height]="size" [attr.stroke]="color" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+      </svg>
+      <svg *ngSwitchCase="'hash'" [attr.width]="size" [attr.height]="size" [attr.stroke]="color" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="4" x2="20" y1="9" y2="9"/>
+        <line x1="4" x2="20" y1="15" y2="15"/>
+        <line x1="10" x2="8" y1="3" y2="21"/>
+        <line x1="16" x2="14" y1="3" y2="21"/>
+      </svg>
+      <svg *ngSwitchCase="'key'" [attr.width]="size" [attr.height]="size" [attr.stroke]="color" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="7.5" cy="15.5" r="5.5"/>
+        <path d="M21 2l-9.6 9.6"/>
+        <path d="M15.5 7.5l3 3L22 7l-3-3"/>
+      </svg>
+      <svg *ngSwitchCase="'toggle-left'" [attr.width]="size" [attr.height]="size" [attr.stroke]="color" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="1" y="5" width="22" height="14" rx="7" ry="7"/>
+        <circle cx="8" cy="12" r="3"/>
+      </svg>
+      <svg *ngSwitchCase="'file-plus'" [attr.width]="size" [attr.height]="size" [attr.stroke]="color" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14,2 14,8 20,8"/>
+        <line x1="12" x2="12" y1="18" y2="12"/>
+        <line x1="9" x2="15" y1="15" y2="15"/>
+      </svg>
+      <svg *ngSwitchCase="'plus-circle'" [attr.width]="size" [attr.height]="size" [attr.stroke]="color" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" x2="12" y1="8" y2="16"/>
+        <line x1="8" x2="16" y1="12" y2="12"/>
+      </svg>
       <!-- Fallback for unknown icons -->
       <div *ngSwitchDefault style="width: 16px; height: 16px; background: #ccc; border-radius: 2px; display: inline-block;" [title]="'Icon: ' + name"></div>
     </ng-container>
