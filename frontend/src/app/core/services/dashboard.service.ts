@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Observable, forkJoin, of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { map, catchError, switchMap } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { LogService } from './log.service';
 import { PartnerService } from './partner.service';
+import { Partner } from '../models/partner.models';
 
 export interface DashboardMetrics {
   totalTransactions: number;
@@ -271,31 +272,39 @@ export class DashboardService {
   getResponseTimePerPartner(startDate: Date, endDate: Date): Observable<{
     partners: { name: string; responseTime: number; color: string }[];
   }> {
-    // Get all partners first, then simulate response time data for each
+    // Get all partners first, then fetch real integration logs for each
     return this.partnerService.getPartners().pipe(
-      map(partners => {
+      switchMap(partners => {
         console.log('📊 Partners for response time chart:', partners);
         
-        // Define color palette
-        const colorPalette = ['#ffe8ec', '#e7edff', '#eee5ff', '#d7eee1'];
+        if (partners.length === 0) {
+          return of({ partners: [] });
+        }
         
-        // Generate response time data for each partner
-        const partnerData = partners.map((partner, index) => {
-          // Simulate different response times (random for now)
-          const responseTime = Math.floor(Math.random() * 3000) + 500; // 500-3500ms
-          
-          // Assign colors based on order (1st, 2nd, 3rd, 4th, then cycle)
-          const colorIndex = index % colorPalette.length;
-          const color = colorPalette[colorIndex];
-          
-          return {
-            name: partner.partnerName,
-            responseTime: responseTime,
-            color: color
-          };
-        });
+        // Fetch integration logs for all partners
+        const partnerLogObservables = partners.map(partner => 
+          this.getPartnerResponseTime(partner, startDate, endDate)
+        );
         
-        return { partners: partnerData };
+        return forkJoin(partnerLogObservables).pipe(
+          map(partnerResponseTimes => {
+            // Filter out partners with no data
+            const validPartners = partnerResponseTimes.filter(p => p.responseTime > 0);
+            
+            // Define color palette
+            const colorPalette = ['#ffe8ec', '#e7edff', '#eee5ff', '#d7eee1'];
+            
+            // Assign colors based on order
+            const partnerData = validPartners.map((partner, index) => ({
+              name: partner.name,
+              responseTime: partner.responseTime,
+              color: colorPalette[index % colorPalette.length]
+            }));
+            
+            console.log('📊 Calculated response times:', partnerData);
+            return { partners: partnerData };
+          })
+        );
       }),
       catchError((error) => {
         console.error('❌ Error fetching partners for response time chart:', error);
@@ -305,6 +314,77 @@ export class DashboardService {
             { name: 'No Partners', responseTime: 0, color: '#6c757d' }
           ]
         });
+      })
+    );
+  }
+
+  /**
+   * Get response time for a specific partner from integration logs
+   */
+  private getPartnerResponseTime(partner: Partner, startDate: Date, endDate: Date): Observable<{
+    name: string;
+    responseTime: number;
+  }> {
+    const filters = {
+      page: 0,
+      size: 100, // Get more logs for better average calculation
+      from: startDate.toISOString(),
+      to: endDate.toISOString()
+    };
+
+    return this.logService.getIntegrationLogs(partner.id, filters).pipe(
+      map((response) => {
+        const logs = response.content;
+        console.log(`📊 Found ${logs.length} integration logs for ${partner.partnerName}`);
+        
+        if (logs.length === 0) {
+          return { name: partner.partnerName, responseTime: 0 };
+        }
+        
+        // Debug: Log all statuses to see what we have
+        const statusCounts = logs.reduce((acc, log) => {
+          acc[log.status] = (acc[log.status] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
+        console.log(`📊 ${partner.partnerName} log statuses:`, statusCounts);
+        
+        // Calculate response times from receivedAt to processedAt
+        let validLogs = logs.filter(log => log.receivedAt && log.processedAt && log.status === 'COMPLETED');
+        console.log(`📊 ${partner.partnerName} completed logs:`, validLogs.length);
+        
+        // If no COMPLETED logs, try with any status that has both timestamps
+        if (validLogs.length === 0) {
+          validLogs = logs.filter(log => log.receivedAt && log.processedAt);
+          console.log(`📊 ${partner.partnerName} fallback - any status logs:`, validLogs.length);
+        }
+        
+        const responseTimes = validLogs
+          .map(log => {
+            const received = new Date(log.receivedAt).getTime();
+            const processed = new Date(log.processedAt!).getTime(); // Non-null assertion since we filtered above
+            return processed - received; // Response time in milliseconds
+          })
+          .filter(time => time > 0 && time < 300000); // Filter out invalid times (0-5 minutes)
+        
+        if (responseTimes.length === 0) {
+          console.log(`⚠️ No valid response times found for ${partner.partnerName}`);
+          return { name: partner.partnerName, responseTime: 0 };
+        }
+        
+        // Calculate average response time
+        const averageResponseTime = responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length;
+        const roundedAverage = Math.round(averageResponseTime);
+        
+        console.log(`📊 ${partner.partnerName}: ${responseTimes.length} valid logs, avg response time: ${roundedAverage}ms`);
+        
+        return { 
+          name: partner.partnerName, 
+          responseTime: roundedAverage 
+        };
+      }),
+      catchError((error) => {
+        console.error(`❌ Error fetching integration logs for ${partner.partnerName}:`, error);
+        return of({ name: partner.partnerName, responseTime: 0 });
       })
     );
   }

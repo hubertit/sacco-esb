@@ -1145,7 +1145,7 @@ export class DashboardComponent implements OnInit {
       },
       style: {
         colors: ['#333333'],
-        fontSize: '12px',
+        fontSize: '10px',
         fontWeight: '600'
       }
     },
@@ -1241,11 +1241,14 @@ export class DashboardComponent implements OnInit {
   }
 
   private loadResponseTimePerPartner() {
-    const today = new Date();
-    const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
+    // Look at the last 7 days to get more data
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 7); // Last 7 days
 
-    this.dashboardService.getResponseTimePerPartner(startOfDay, endOfDay).subscribe({
+    console.log('📊 Loading response time data from:', startDate.toISOString(), 'to:', endDate.toISOString());
+
+    this.dashboardService.getResponseTimePerPartner(startDate, endDate).subscribe({
       next: (responseTimeData) => {
         console.log('📊 Response time per partner data:', responseTimeData);
         this.updateResponseTimeChart(responseTimeData);
@@ -1284,23 +1287,35 @@ export class DashboardComponent implements OnInit {
     // Sort partners by response time (fastest to slowest)
     const sortedPartners = [...partners].sort((a, b) => a.responseTime - b.responseTime);
     
+    // Helper function to trim partner names by removing "Service" suffix
+    const trimPartnerName = (name: string): string => {
+      return name.replace(/\s+Service$/i, '').trim();
+    };
+    
     this.responseTimeChartOptions = {
       ...this.responseTimeChartOptions,
       series: [{
         name: 'Response Time (ms)',
         data: sortedPartners.map(p => ({
-          x: p.name,
+          x: trimPartnerName(p.name),
           y: p.responseTime,
           fillColor: p.color
         }))
       }],
       xaxis: {
-        categories: sortedPartners.map(p => p.name)
+        categories: sortedPartners.map(p => trimPartnerName(p.name)),
+        labels: {
+          style: {
+            fontSize: '10px',
+            fontWeight: '500'
+          }
+        }
       },
       colors: sortedPartners.map(p => p.color)
     };
 
     console.log('📊 Response time chart updated:', this.responseTimeChartOptions);
+    console.log('📊 Partner names after trimming:', sortedPartners.map(p => trimPartnerName(p.name)));
   }
 
   private updateCharts(metrics: DashboardMetrics) {
