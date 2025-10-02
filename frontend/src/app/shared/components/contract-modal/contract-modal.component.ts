@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideIconComponent } from '../lucide-icon/lucide-icon.component';
@@ -339,7 +339,7 @@ export interface ContractData {
     }
   `]
 })
-export class ContractModalComponent implements OnInit {
+export class ContractModalComponent implements OnInit, OnChanges {
   @Input() isVisible = false;
   @Input() isLoading = false;
   @Input() hasError = false;
@@ -357,7 +357,14 @@ export class ContractModalComponent implements OnInit {
 
   ngOnInit() {
     this.resetForm();
-    this.generatePassword();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['isVisible'] && changes['isVisible'].currentValue === true) {
+      // Modal is now visible, generate password and reset form
+      this.resetForm();
+      this.generatePassword();
+    }
   }
 
   private resetForm() {
