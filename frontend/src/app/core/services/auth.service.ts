@@ -122,15 +122,22 @@ export class AuthService {
    * Initialize authentication system
    */
   private initializeAuth(): void {
-    // Load user from cache if available
-    const cachedUser = this.cacheService.getCachedUser();
-    if (cachedUser) {
-      this.currentUserSubject.next(cachedUser);
+    // Check if we have valid authentication
+    if (this.isAuthenticated()) {
+      // Load user from cache if available
+      const cachedUser = this.cacheService.getCachedUser();
+      if (cachedUser) {
+        this.currentUserSubject.next(cachedUser);
+      }
+    } else {
+      // Clear any invalid authentication data
+      this.cacheService.clearCache();
+      this.currentUserSubject.next(null);
     }
 
     // Subscribe to cache changes
     this.cacheService.userInfo$.subscribe(cachedInfo => {
-      if (cachedInfo) {
+      if (cachedInfo && this.isAuthenticated()) {
         this.currentUserSubject.next(cachedInfo.user);
       } else {
         this.currentUserSubject.next(null);
