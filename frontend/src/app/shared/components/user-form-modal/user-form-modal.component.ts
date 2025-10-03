@@ -184,20 +184,43 @@ export interface UserFormData {
                 </div>
               </div>
 
-              <!-- Role ID -->
+              <!-- Role Selection -->
               <div class="mb-3">
                 <label for="roleId" class="form-label">
                   <app-lucide-icon name="shield" size="16px" class="me-1"></app-lucide-icon>
-                  Role ID
+                  Role
                 </label>
-                <input 
-                  type="text" 
+                
+                <!-- Loading state -->
+                <div *ngIf="isLoadingRoles" class="d-flex align-items-center">
+                  <div class="spinner-border spinner-border-sm me-2" role="status">
+                    <span class="visually-hidden">Loading roles...</span>
+                  </div>
+                  <span class="text-muted">Loading roles...</span>
+                </div>
+                
+                <!-- Error state -->
+                <div *ngIf="rolesError" class="alert alert-warning" role="alert">
+                  <small>{{ rolesError }}</small>
+                  <button type="button" class="btn btn-sm btn-outline-warning ms-2" (click)="loadRoles()">
+                    Retry
+                  </button>
+                </div>
+                
+                <!-- Role selection dropdown -->
+                <select 
+                  *ngIf="!isLoadingRoles && !rolesError"
                   id="roleId" 
                   name="roleId"
-                  class="form-control" 
+                  class="form-select" 
                   [(ngModel)]="formData.roleId"
-                  #roleIdInput="ngModel"
-                  placeholder="Enter role ID">
+                  #roleIdInput="ngModel">
+                  <option value="">Select a role (optional)</option>
+                  <option *ngFor="let role of roles" [value]="role.id">
+                    {{ role.name }} ({{ role.roleType }})
+                  </option>
+                </select>
+                
                 <div class="form-text">Optional: Associate user with a specific role</div>
               </div>
 
@@ -439,10 +462,24 @@ export class UserFormModalComponent implements OnInit, OnChanges {
     entityState: 'ACTIVE'
   };
 
+  // Role-related properties
+  roles: Role[] = [];
+  isLoadingRoles = false;
+  rolesError: string | null = null;
+  private destroy$ = new Subject<void>();
+
+  constructor(private roleService: RoleService) {}
+
   ngOnInit() {
     console.log('🎯 UserFormModalComponent - ngOnInit called');
     console.log('🎯 isVisible:', this.isVisible);
     this.initializeForm();
+    this.loadRoles();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   ngOnChanges() {
@@ -493,5 +530,25 @@ export class UserFormModalComponent implements OnInit, OnChanges {
   onClose() {
     this.resetForm();
     this.close.emit();
+  }
+
+  loadRoles() {
+    this.isLoadingRoles = true;
+    this.rolesError = null;
+    
+    this.roleService.getRoles()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (roles) => {
+          console.log('🎯 Roles loaded successfully:', roles);
+          this.roles = roles;
+          this.isLoadingRoles = false;
+        },
+        error: (error) => {
+          console.error('❌ Error loading roles:', error);
+          this.rolesError = 'Failed to load roles. Please try again.';
+          this.isLoadingRoles = false;
+        }
+      });
   }
 }
