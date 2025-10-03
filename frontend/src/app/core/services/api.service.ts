@@ -151,10 +151,10 @@ export class ApiService {
   }
 
   /**
-   * GET request for user endpoints (without /api prefix)
+   * GET request for user endpoints
    */
   getUserEndpoint<T>(endpoint: string, params?: HttpParams): Observable<T> {
-    const url = this.apiConfig.getFullUrl(endpoint); // Use full URL with base URL
+    const url = this.apiConfig.getFullUrl(endpoint);
     console.log('🚀 ApiService GET user endpoint:');
     console.log('  📍 Endpoint:', endpoint);
     console.log('  🌐 Full URL:', url);
@@ -190,10 +190,10 @@ export class ApiService {
   }
 
   /**
-   * GET request for role endpoints (without /api prefix)
+   * GET request for role endpoints
    */
   getRoleEndpoint<T>(endpoint: string, params?: HttpParams): Observable<T> {
-    const url = this.apiConfig.getFullUrl(endpoint); // Use full URL with base URL
+    const url = this.apiConfig.getFullUrl(endpoint);
     console.log('🚀 ApiService GET role endpoint:');
     console.log('  📍 Endpoint:', endpoint);
     console.log('  🌐 Full URL:', url);
@@ -229,10 +229,10 @@ export class ApiService {
   }
 
   /**
-   * POST request for role endpoints (without /api prefix)
+   * POST request for role endpoints
    */
   postRoleEndpoint<T>(endpoint: string, data: any, params?: HttpParams): Observable<T> {
-    const url = this.apiConfig.getFullUrl(endpoint); // Use full URL with base URL
+    const url = this.apiConfig.getFullUrl(endpoint);
     console.log('🚀 ApiService POST role endpoint:');
     console.log('  📍 Endpoint:', endpoint);
     console.log('  🌐 Full URL:', url);
@@ -269,10 +269,10 @@ export class ApiService {
   }
 
   /**
-   * PUT request for role endpoints (without /api prefix)
+   * PUT request for role endpoints
    */
   putRoleEndpoint<T>(endpoint: string, data: any, params?: HttpParams): Observable<T> {
-    const url = endpoint; // Use endpoint directly without base URL
+    const url = this.apiConfig.getFullUrl(endpoint);
     console.log('🚀 ApiService PUT role endpoint:');
     console.log('  📍 Endpoint:', endpoint);
     console.log('  🌐 Full URL:', url);
@@ -309,10 +309,10 @@ export class ApiService {
   }
 
   /**
-   * GET request for partner endpoints (without /api prefix)
+   * GET request for partner endpoints
    */
   getPartnerEndpoint<T>(endpoint: string, params?: HttpParams): Observable<T> {
-    const url = endpoint; // Use endpoint directly without base URL
+    const url = this.apiConfig.getFullUrl(endpoint);
     console.log('🚀 ApiService GET partner endpoint:');
     console.log('  📍 Endpoint:', endpoint);
     console.log('  🌐 Full URL:', url);
@@ -348,10 +348,10 @@ export class ApiService {
   }
 
   /**
-   * POST request for logs endpoints (without /api prefix)
+   * POST request for logs endpoints
    */
   postLogsEndpoint<T>(endpoint: string, data: any, params?: HttpParams): Observable<T> {
-    const url = endpoint; // Use endpoint directly without base URL
+    const url = this.apiConfig.getFullUrl(endpoint);
     console.log('🚀 ApiService POST logs endpoint:');
     console.log('  📍 Endpoint:', endpoint);
     console.log('  🌐 Full URL:', url);

@@ -18,7 +18,7 @@ export class RoleService {
     console.log('🎯 RoleService: Fetching roles from API');
     console.log('🔗 API Endpoint:', API_ENDPOINTS.ROLES.ALL);
     
-    // Use getRoleEndpoint method which bypasses /api prefix and uses proxy
+    // Use getRoleEndpoint method which bypasses /api prefix
     return this.apiService.getRoleEndpoint<RoleApiResponse>(API_ENDPOINTS.ROLES.ALL)
       .pipe(
         map((response: RoleApiResponse) => {

@@ -18,7 +18,7 @@ export class PartnerService {
     console.log('🎯 PartnerService: Fetching partners from API');
     console.log('🔗 API Endpoint:', API_ENDPOINTS.PARTNERS.ALL);
     
-    // Use getPartnerEndpoint method which bypasses /api prefix and uses proxy
+    // Use getPartnerEndpoint method which bypasses /api prefix
     // Note: This API returns a direct array, not wrapped in a result object
     return this.apiService.getPartnerEndpoint<Partner[]>(API_ENDPOINTS.PARTNERS.ALL)
       .pipe(
